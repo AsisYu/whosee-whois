@@ -82,8 +82,7 @@ const nextConfig: NextConfig = {
         patterns.push(
           { protocol: 'http', hostname: 'localhost', port: '3000' },
           { protocol: 'http', hostname: 'localhost', port: '1337' },
-          { protocol: 'https', hostname: 'api.whosee.me' },
-          { protocol: 'https', hostname: '*.vercel.app' }
+          { protocol: 'https', hostname: 'api.whosee.me' }
         );
       }
       

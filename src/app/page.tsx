@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { SearchBox } from '@/components/ui/search-box';
 import { Globe, Server, Camera, Activity, Shield, Zap, Code } from 'lucide-react';
@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { getCurrentLocale, getLocalizedHref } from '@/lib/locale-utils';
+import { initDeveloperSignature } from '@/lib/developer-signature';
 
 export default function Home() {
   const t = useTranslations('home');
@@ -21,6 +22,21 @@ export default function Home() {
   const pathname = usePathname();
   const locale = getCurrentLocale(pathname);
   const [searchLoading, setSearchLoading] = useState(false);
+
+  // 初始化开发者签名（加密版本）
+  useEffect(() => {
+    // 初始化加密的开发者签名
+    initDeveloperSignature();
+    
+    // 欢迎信息
+    const timer = setTimeout(() => {
+      console.log('%c🎉 欢迎使用 Whosee WHOIS 工具！', 'color: #10b981; font-size: 14px; font-weight: bold;');
+      console.log('%c💡 按 Ctrl+Alt+Shift+D 可以切换开发者信息显示', 'color: #6b7280; font-size: 12px;');
+      console.log('%c🔒 开发者信息已加密保护', 'color: #8b5cf6; font-size: 12px;');
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+   }, []);
 
   const handleSearch = async (domain: string) => {
     setSearchLoading(true);

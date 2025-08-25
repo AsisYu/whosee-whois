@@ -34,7 +34,6 @@ export default [
       origin: [
         'http://localhost:3000', // Next.js 开发环境
         'https://whosee.io',     // 生产环境
-        'https://*.vercel.app',  // Vercel 预览环境
       ],
     },
   },

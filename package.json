@@ -7,7 +7,6 @@
     "dev:win": "next dev",
     "dev:secure": "cross-env NEXT_PUBLIC_API_KEY=secure-random-key NEXT_PUBLIC_API_SECRET=secure-random-secret next dev",
     "build": "next build",
-    "_build:vercel": "echo 'Vercel deployment disabled. Use build instead.'",
     "build:verbose": "cross-env NODE_ENV=production NEXT_WEBPACK_DEBUG=true next build",
     "build:analyze": "cross-env ANALYZE=true next build",
     "start": "next start",

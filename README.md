@@ -13,7 +13,6 @@
 ![GitHub Forks](https://img.shields.io/github/forks/AsisYu/whosee-whois?style=for-the-badge&logo=github)
 ![GitHub Issues](https://img.shields.io/github/issues/AsisYu/whosee-whois?style=for-the-badge&logo=github)
 
-![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen?style=for-the-badge&logo=vercel)
 ![Code Quality](https://img.shields.io/badge/Code_Quality-A+-brightgreen?style=for-the-badge&logo=eslint)
 ![Coverage](https://img.shields.io/badge/Coverage-90%25-green?style=for-the-badge&logo=codecov)
 
