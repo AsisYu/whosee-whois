@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://whosee.me'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || `https://${process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 'whosee.me'}`
   
   // 主要页面路径
   const pages = [
@@ -36,4 +36,4 @@ export default function sitemap(): MetadataRoute.Sitemap {
   })
 
   return sitemap
-} 
+}

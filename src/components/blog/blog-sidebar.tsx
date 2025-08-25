@@ -29,8 +29,8 @@ export default function BlogSidebar({ locale, recentPosts, categories }: BlogSid
     const coverImage = post.coverImage;
     if (!coverImage) return null;
     
-    const baseUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
-    return `${baseUrl}${coverImage.url}`;
+    const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
+     return `${STRAPI_URL}${coverImage.url}`;
   };
 
   // 从最新文章中取前5篇用于侧边栏显示
@@ -200,4 +200,4 @@ export default function BlogSidebar({ locale, recentPosts, categories }: BlogSid
       </section>
     </aside>
   );
-} 
+}

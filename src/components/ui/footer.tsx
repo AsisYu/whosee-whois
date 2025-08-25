@@ -21,7 +21,7 @@ export function Footer() {
             <h3 className="font-semibold text-lg mb-4">{t('openSource')}</h3>
             <div className="space-y-3">
               <Link
-                href="https://github.com/AsisYu/whosee-whois"
+                href={process.env.NEXT_PUBLIC_GITHUB_FRONTEND || 'https://github.com/AsisYu/whosee-whois'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
@@ -33,7 +33,7 @@ export function Footer() {
                 </span>
               </Link>
               <Link
-                href="https://github.com/AsisYu/whosee-server"
+                href={process.env.NEXT_PUBLIC_GITHUB_BACKEND || 'https://github.com/AsisYu/whosee-server'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
@@ -65,7 +65,7 @@ export function Footer() {
             </p>
             <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
               <Link 
-                href="https://github.com/AsisYu" 
+                href={process.env.NEXT_PUBLIC_GITHUB_AUTHOR || 'https://github.com/AsisYu'} 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
@@ -79,4 +79,4 @@ export function Footer() {
       </div>
     </footer>
   );
-} 
+}

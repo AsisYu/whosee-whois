@@ -325,6 +325,10 @@ NEXT_PUBLIC_STRAPI_API_TOKEN=your_strapi_api_token
 - [环境变量配置指南](./docs/ENVIRONMENT_CONFIG.md)
 - [Strapi 5 集成指南](./docs/Strapi%205%20CMS/STRAPI5_GUIDE.md)
 
+## AI 开发工具
+
+本项目采用 AI 辅助开发，使用 Trae 和 Cursor 等现代化 AI 工具进行代码生成、架构设计和开发优化，显著提升开发效率和代码质量。
+
 ## 贡献指南
 
 <div align="center">

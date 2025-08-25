@@ -12,17 +12,19 @@ import type {
 } from '@/types';
 import { toCMSLocale } from '@/i18n/config';
 
-// API 基础配置 - 参考原项目方案
-// 开发环境：使用相对路径，让Next.js代理转发请求
+// API 基础配置 - 修复端口配置问题
+// 开发环境：使用环境变量配置的API地址
 // 生产环境：使用完整API地址
 const isDevelopment = typeof window !== 'undefined' 
   ? window.location.hostname === 'localhost' 
   : process.env.NODE_ENV !== 'production';
 
-const API_BASE_URL = isDevelopment ? '' : 'http://localhost:3000';
+const API_BASE_URL = isDevelopment 
+  ? (process.env.NEXT_PUBLIC_API_URL || `http://localhost:${process.env.NEXT_PUBLIC_API_PORT || '3001'}`)
+  : (process.env.NEXT_PUBLIC_API_URL || `http://localhost:${process.env.NEXT_PUBLIC_API_PORT || '3000'}`);
 
 // CMS API 配置
-const CMS_BASE_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+const CMS_BASE_URL = process.env.NEXT_PUBLIC_STRAPI_URL || process.env.NEXT_PUBLIC_STRAPI_API_URL || `http://localhost:${process.env.NEXT_PUBLIC_STRAPI_PORT || '1337'}`;
 const CMS_API_TOKEN = process.env.NEXT_PUBLIC_STRAPI_API_TOKEN || process.env.STRAPI_API_TOKEN;
 
 // 仅在开发环境输出调试信息
@@ -871,11 +873,11 @@ export async function getBlogPostBySlugWithFallback(
       
       let localizations = [];
       try {
-        localizations = await getBlogPostLocalizations(post.id);
+        localizations = await getBlogPostLocalizations(post.documentId || post.id.toString());
       } catch (error) {
         console.warn('获取文章本地化版本失败:', error);
         // 如果获取本地化版本失败，仍然返回当前文章
-        localizations = [{ id: post.id, locale: requestedLocale, slug: post.slug }];
+        localizations = [{ id: post.id, documentId: post.documentId || post.id.toString(), locale: requestedLocale, slug: post.slug }];
       }
       
       return {
@@ -914,7 +916,7 @@ export async function getBlogPostBySlugWithFallback(
       
       let localizations = [];
       try {
-        localizations = await getBlogPostLocalizations(post.id);
+        localizations = await getBlogPostLocalizations(post.documentId || post.id.toString());
       } catch (error) {
         console.warn('获取文章本地化版本失败:', error);
         // 如果获取本地化版本失败，使用当前文章信息
@@ -1212,30 +1214,51 @@ export async function incrementBlogPostViews(id: number): Promise<void> {
 }
 
 // 获取博客文章的本地化版本信息
-export async function getBlogPostLocalizations(id: number): Promise<Array<{ id: number; locale: string; slug?: string }>> {
+// 获取所有可用的locales
+export async function getAvailableLocales(): Promise<string[]> {
   try {
-    const queryParams = buildQueryParams({
-      populate: '*',  // 使用简化格式
-      publicationState: 'live'
-    });
+    const response = await cmsRequest<{ data: Array<{ code: string }> }>('/api/i18n/locales');
+    if (response && response.data && Array.isArray(response.data)) {
+      return response.data.map(locale => locale.code);
+    }
+    throw new Error('Invalid response format');
+  } catch (error) {
+    console.error('获取可用locales失败:', error);
+    return ['en', 'zh']; // 返回默认locales
+  }
+}
+
+// 根据documentId获取所有locale版本的博客文章
+export async function getBlogPostLocalizations(documentId: string): Promise<Array<{ id: number; documentId: string; locale: string; slug?: string }>> {
+  try {
+    const availableLocales = await getAvailableLocales();
+    const localizations: Array<{ id: number; documentId: string; locale: string; slug?: string }> = [];
     
-    const response = await cmsRequest<StrapiResponse<BlogPost>>(`/api/blog-posts/${id}?${queryParams}`);
+    // 为每个locale查询文档
+    for (const locale of availableLocales) {
+      try {
+        const queryParams = buildQueryParams({
+          populate: '*',
+          publicationState: 'live'
+        });
+        
+        const response = await cmsRequest<StrapiResponse<BlogPost>>(`/api/blog-posts/${documentId}?locale=${locale}&${queryParams}`);
+        
+        if (response.data) {
+          localizations.push({
+            id: response.data.id,
+            documentId: response.data.documentId || documentId,
+            locale: response.data.locale || locale,
+            slug: response.data.slug
+          });
+        }
+      } catch (localeError) {
+        // 如果某个locale不存在，跳过
+        console.log(`Locale ${locale} not available for document ${documentId}`);
+      }
+    }
     
-    // 返回本地化版本的基本信息
-    const localizations = response.data.localizations || [];
-    const currentPost = {
-      id: response.data.id,
-      locale: response.data.locale || 'en',
-      slug: response.data.slug
-    };
-    
-    const localizationInfos = localizations.map((loc: any) => ({
-      id: loc.id,
-      locale: loc.locale,
-      slug: loc.slug
-    }));
-    
-    return [currentPost, ...localizationInfos];
+    return localizations;
   } catch (error) {
     console.error('获取文章本地化版本失败:', error);
     return [];
@@ -1262,6 +1285,9 @@ export const cmsApi = {
   getBlogCategoryBySlug,
   getBlogTags,
   getBlogTagBySlug,
+  
+  // 国际化
+  getAvailableLocales,
   
   // 工具函数
   getBlogPostPaths,

@@ -56,26 +56,39 @@ const nextConfig: NextConfig = {
     return [];
   },
 
-  // 🖼️ 图片域名配置 - 允许外部图片加载
+  // 🖼️ 图片域名配置 - 允许外部图片加载（从环境变量读取）
   images: {
-    remotePatterns: [
-      // 本地开发环境
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '3000',
-      },
-      // 生产环境 API
-      {
-        protocol: 'https',
-        hostname: 'api.whosee.me',
-      },
-      // CDN 和其他外部图片源
-      {
-        protocol: 'https',
-        hostname: '*.vercel.app',
-      },
-    ],
+    remotePatterns: (() => {
+      const patterns = [];
+      
+      // 从环境变量读取图片域名模式
+      const imagePatterns = process.env.NEXT_PUBLIC_IMAGE_PATTERNS;
+      if (imagePatterns) {
+        const patternList = imagePatterns.split(',');
+        patternList.forEach(pattern => {
+          const [protocol, hostname, port] = pattern.trim().split(':');
+          if (protocol && hostname) {
+            const config: any = { protocol, hostname };
+            if (port) {
+              config.port = port;
+            }
+            patterns.push(config);
+          }
+        });
+      }
+      
+      // 如果没有配置环境变量，使用默认配置
+      if (patterns.length === 0) {
+        patterns.push(
+          { protocol: 'http', hostname: 'localhost', port: '3000' },
+          { protocol: 'http', hostname: 'localhost', port: '1337' },
+          { protocol: 'https', hostname: 'api.whosee.me' },
+          { protocol: 'https', hostname: '*.vercel.app' }
+        );
+      }
+      
+      return patterns;
+    })(),
   },
 
   // 🛡️ 安全头部配置

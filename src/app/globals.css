@@ -1,3 +1,4 @@
+/* Google Fonts - 可通过环境变量 NEXT_PUBLIC_GOOGLE_FONTS_URL 自定义 */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;

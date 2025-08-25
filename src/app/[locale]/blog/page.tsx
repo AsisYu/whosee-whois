@@ -30,10 +30,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       locale,
     },
     alternates: {
-      canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://whosee.io'}/${locale}/blog`,
+      canonical: `${process.env.NEXT_PUBLIC_SITE_URL || `https://${process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 'whosee.me'}`}/${locale}/blog`,
       languages: {
-        'en': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://whosee.io'}/en/blog`,
-        'zh': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://whosee.io'}/zh/blog`,
+        'en': `${process.env.NEXT_PUBLIC_SITE_URL || `https://${process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 'whosee.me'}`}/en/blog`,
+        'zh': `${process.env.NEXT_PUBLIC_SITE_URL || `https://${process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 'whosee.me'}`}/zh/blog`,
       },
     },
   };
@@ -178,4 +178,4 @@ export default async function BlogPage({ params, searchParams }: BlogPageProps) 
 }
 
 // 启用 ISR，每小时重新生成
-export const revalidate = 3600; 
+export const revalidate = 3600;

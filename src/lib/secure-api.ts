@@ -168,14 +168,16 @@ class SecureTokenManager {
     }
   }
 
-  // 获取API基础URL
+  // 获取API基础URL（从环境变量读取，避免硬编码）
   private static getApiBaseUrl(): string {
     const isClient = typeof window !== 'undefined';
     
+    // 优先使用完整的API URL
     if (process.env.NEXT_PUBLIC_API_URL) {
       return process.env.NEXT_PUBLIC_API_URL.trim();
     }
     
+    // 客户端环境：动态构建URL
     if (isClient) {
       const protocol = window.location.protocol;
       const hostname = window.location.hostname;
@@ -183,7 +185,9 @@ class SecureTokenManager {
       return `${protocol}//${hostname}:${port}`;
     }
     
-    return 'http://localhost:8080';
+    // 服务端环境：使用环境变量配置的端口
+    const defaultPort = process.env.NEXT_PUBLIC_API_PORT || '8080';
+    return `http://localhost:${defaultPort}`;
   }
 
   // 清除token（用于登出或错误处理）
@@ -321,4 +325,4 @@ export class SecureApiClient {
 
 // 导出安全API（向后兼容）
 export const secureApi = SecureApiClient;
-export default SecureApiClient; 
+export default SecureApiClient;

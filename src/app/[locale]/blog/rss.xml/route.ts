@@ -18,9 +18,9 @@ export async function GET(
     const posts = postsResponse.data || [];
     
     // 站点信息
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://whosee.io';
-    const feedUrl = `${siteUrl}/${locale}/blog/rss.xml`;
-    const blogUrl = `${siteUrl}/${locale}/blog`;
+    const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || `https://${process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 'whosee.me'}`;
+     const feedUrl = `${SITE_URL}/${locale}/blog/rss.xml`;
+     const blogUrl = `${SITE_URL}/${locale}/blog`;
     
     const title = locale === 'zh' ? 'Whosee 技术博客' : 'Whosee Technical Blog';
     const description = locale === 'zh' 
@@ -40,7 +40,7 @@ export async function GET(
     <generator>Next.js RSS Generator</generator>
     
     ${posts.map(post => {
-      const postUrl = `${siteUrl}/${locale}/blog/${post.slug}`;
+      const postUrl = `${SITE_URL}/${locale}/blog/${post.slug}`;
       const pubDate = post.publishedAt ? new Date(post.publishedAt).toUTCString() : new Date().toUTCString();
       
       // 清理和转义HTML内容

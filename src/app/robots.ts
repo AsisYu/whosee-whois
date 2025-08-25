@@ -11,6 +11,6 @@ export default function robots(): MetadataRoute.Robots {
         '/_next/',
       ],
     },
-    sitemap: 'https://whosee.me/sitemap.xml',
+    sitemap: `${process.env.NEXT_PUBLIC_SITE_URL || `https://${process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 'whosee.me'}`}/sitemap.xml`,
   }
-} 
+}

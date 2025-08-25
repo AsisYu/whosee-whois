@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: "快速全面的域名信息查询服务。获取 WHOIS 信息、DNS 记录、健康检查和网站截图。",
   keywords: ["域名", "whois", "dns", "查询", "域名检查", "网站健康"],
   authors: [{ name: "Whosee Team" }],
-  metadataBase: new URL('https://whosee.me'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || `https://${process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 'whosee.me'}`),
   openGraph: {
     title: "Whosee - 专业域名查询工具",
     description: "快速全面的域名信息查询服务",
@@ -40,7 +40,7 @@ export default async function RootLayout({
     <html lang={locale} suppressHydrationWarning>
       <head>
         <link 
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" 
+          href={process.env.NEXT_PUBLIC_GOOGLE_FONTS_URL || "https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"} 
           rel="stylesheet" 
         />
       </head>
@@ -58,4 +58,4 @@ export default async function RootLayout({
       </body>
     </html>
   );
-} 
+}

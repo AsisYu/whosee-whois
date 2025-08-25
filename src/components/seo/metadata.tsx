@@ -20,7 +20,7 @@ export function SEOMetadata({
 }: SEOMetadataProps) {
   const t = useTranslations('metadata');
   
-  const baseUrl = 'https://whosee.me';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || `https://${process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 'whosee.me'}`;
   const fullTitle = title ? `${title} - ${t('title')}` : t('title');
   const fullDescription = description || t('description');
   const keywords = t('keywords');
@@ -79,4 +79,4 @@ export function SEOMetadata({
       )}
     </Head>
   );
-} 
+}

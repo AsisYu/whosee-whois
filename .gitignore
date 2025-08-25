@@ -30,6 +30,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# 排除后端服务器相关文件
+server/
+
 # env files (can opt-in for committing if needed)
 .env
 
@@ -39,13 +42,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# cursor editor configuration
-.cursor/
-*.cursor-workspace
-
-# trae ai configuration
-.trae
 
 # IDEs and editors
 .vscode/

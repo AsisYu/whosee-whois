@@ -109,7 +109,7 @@ export default function DebugPage() {
     });
     
     // 从环境变量获取 Strapi URL
-    const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+    const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
     
     // 测试 URL 生成
     const testParams1 = new URLSearchParams();
@@ -239,4 +239,4 @@ export default function DebugPage() {
       </div>
     </div>
   );
-} 
+}

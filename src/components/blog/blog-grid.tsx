@@ -39,8 +39,8 @@ export default function BlogGrid({ posts, pagination, locale, searchParams }: Bl
     const coverImage = post.coverImage;
     if (!coverImage) return null;
     
-    const baseUrl = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
-    return `${baseUrl}${coverImage.url}`;
+    const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
+     return `${STRAPI_URL}${coverImage.url}`;
   };
 
   /**
@@ -317,4 +317,4 @@ function BlogPagination({
       )}
     </div>
   );
-} 
+}

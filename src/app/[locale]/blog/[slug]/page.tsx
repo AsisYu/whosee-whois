@@ -71,10 +71,10 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
         description: seo?.metaDescription || excerpt,
       },
       alternates: {
-        canonical: seo?.canonicalURL || `${process.env.NEXT_PUBLIC_SITE_URL || 'https://whosee.io'}/${locale}/blog/${slug}`,
+        canonical: seo?.canonicalURL || `${process.env.NEXT_PUBLIC_SITE_URL || `https://${process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 'whosee.me'}`}/${locale}/blog/${slug}`,
         languages: {
-          'en': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://whosee.io'}/en/blog/${slug}`,
-          'zh': `${process.env.NEXT_PUBLIC_SITE_URL || 'https://whosee.io'}/zh/blog/${slug}`,
+          'en': `${process.env.NEXT_PUBLIC_SITE_URL || `https://${process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 'whosee.me'}`}/en/blog/${slug}`,
+          'zh': `${process.env.NEXT_PUBLIC_SITE_URL || `https://${process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 'whosee.me'}`}/zh/blog/${slug}`,
         },
       },
     };
@@ -196,10 +196,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             )}
 
             {/* 文章内容 */}
-            <div className="prose prose-lg dark:prose-invert max-w-none mb-12">
-              {/* 这里使用简单的HTML渲染，在实际应用中可能需要富文本渲染器 */}
-              <div dangerouslySetInnerHTML={{ __html: post.content }} />
-            </div>
+            <BlogPostContent post={post} locale={locale} />
 
             {/* 相关文章功能暂时禁用，等待API函数适配 Strapi 5 */}
             {/* {relatedPosts.length > 0 && (

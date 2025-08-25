@@ -12,7 +12,7 @@ export function StructuredData({
   type = 'WebApplication',
   name,
   description,
-  url = 'https://whosee.me',
+  url = process.env.NEXT_PUBLIC_SITE_URL || `https://${process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 'whosee.me'}`,
   locale = 'zh'
 }: StructuredDataProps) {
   const t = useTranslations('metadata');
@@ -35,10 +35,10 @@ export function StructuredData({
     provider: {
       '@type': 'Organization',
       name: 'Whosee',
-      url: 'https://whosee.me',
+      url: process.env.NEXT_PUBLIC_SITE_URL || `https://${process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 'whosee.me'}`,
       logo: {
         '@type': 'ImageObject',
-        url: 'https://whosee.me/logo.png'
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || `https://${process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 'whosee.me'}`}/logo.png`
       }
     },
     featureList: [
@@ -66,7 +66,7 @@ export function StructuredData({
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://whosee.me'
+        item: process.env.NEXT_PUBLIC_SITE_URL || `https://${process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 'whosee.me'}`
       }
     ]
   };
@@ -76,10 +76,10 @@ export function StructuredData({
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Whosee',
-    url: 'https://whosee.me',
+    url: process.env.NEXT_PUBLIC_SITE_URL || `https://${process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 'whosee.me'}`,
     logo: {
       '@type': 'ImageObject',
-      url: 'https://whosee.me/logo.png'
+      url: `${process.env.NEXT_PUBLIC_SITE_URL || `https://${process.env.NEXT_PUBLIC_PRODUCTION_DOMAIN || 'whosee.me'}`}/logo.png`
     },
     contactPoint: {
       '@type': 'ContactPoint',
@@ -87,7 +87,7 @@ export function StructuredData({
       availableLanguage: ['Chinese', 'English']
     },
     sameAs: [
-      'https://github.com/whosee-project'
+      process.env.NEXT_PUBLIC_GITHUB_FRONTEND || 'https://github.com/whosee-project'
     ]
   };
 
@@ -113,4 +113,4 @@ export function StructuredData({
       />
     </>
   );
-} 
+}
