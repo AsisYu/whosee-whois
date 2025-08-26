@@ -243,7 +243,7 @@ npm run lint -- --fix
 ├── next.config.ts             # ⚙️ Next.js 配置
 ├── tsconfig.json              # TypeScript 配置
 ├── package.json               #  项目依赖
-├── .env.local                 # 🔐 环境变量（需创建）
+├── .env.local                 # 环境变量（需创建）
 ├── .env.example               # 环境变量示例
 └── README.md                  # 📖 项目说明
 ```
@@ -313,7 +313,7 @@ try {
 配置后端 API 和 Strapi CMS 地址：
 ```env
 # 后端 API 配置
-NEXT_PUBLIC_API_URL=http://localhost:8080
+NEXT_PUBLIC_API_URL=http://localhost:3001
 
 # Strapi CMS 配置（必需）
 NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
