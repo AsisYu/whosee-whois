@@ -181,12 +181,12 @@ class SecureTokenManager {
     if (isClient) {
       const protocol = window.location.protocol;
       const hostname = window.location.hostname;
-      const port = process.env.NEXT_PUBLIC_API_PORT || '8080';
+      const port = process.env.NEXT_PUBLIC_API_PORT || '3001';
       return `${protocol}//${hostname}:${port}`;
     }
     
     // 服务端环境：使用环境变量配置的端口
-    const defaultPort = process.env.NEXT_PUBLIC_API_PORT || '8080';
+    const defaultPort = process.env.NEXT_PUBLIC_API_PORT || '3001';
     return `http://localhost:${defaultPort}`;
   }
 

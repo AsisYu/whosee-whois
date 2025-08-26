@@ -119,7 +119,7 @@ const _decrypt = (() => {
         }
       } catch {}
       
-      console.error('🔐 数据解密失败:', error instanceof Error ? error.message : '未知错误');
+      console.error('数据解密失败:', error instanceof Error ? error.message : '未知错误');
       return { error: '解密失败' };
     }
   };

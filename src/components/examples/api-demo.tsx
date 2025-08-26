@@ -274,7 +274,7 @@ export function ApiDemo() {
           
           <div>
             <h4 className="font-semibold text-gray-900 dark:text-white">环境变量</h4>
-            <p>在.env.local中设置NEXT_PUBLIC_API_URL来配置后端地址（默认端口：{process.env.NEXT_PUBLIC_API_PORT || '8080'}）</p>
+            <p>在.env.local中设置NEXT_PUBLIC_API_URL来配置后端地址（默认端口：{process.env.NEXT_PUBLIC_API_PORT || '3001'}）</p>
           </div>
         </div>
       </div>
