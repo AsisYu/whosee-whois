@@ -34,7 +34,14 @@
     "yes": "是",
     "no": "否",
     "ok": "确定",
-    "placeholder": "请输入域名 (例如: example.com)"
+    "placeholder": "请输入域名 (例如: example.com)",
+    "tryNow": "立即尝试",
+    "allRightsReserved": "版权所有",
+    "switchLanguage": "切换语言",
+    "toggleTheme": "切换主题",
+    "lightTheme": "浅色主题",
+    "darkTheme": "深色主题",
+    "systemTheme": "系统主题"
   },
   "navigation": {
     "home": "首页",
@@ -65,25 +72,30 @@
     "description": "专业的域名分析工具，提供WHOIS查询、DNS记录查找、健康监控和网站截图功能。",
     "placeholder": "请输入域名 (例如: example.com)",
     "search": "搜索",
-    "features": {
-      "title": "核心功能",
-      "domain": {
-        "title": "域名信息",
-        "description": "获取详细的WHOIS信息，包括注册详情、联系信息和域名状态"
-      },
-      "dns": {
-        "title": "DNS记录",
-        "description": "从多个DNS服务器查询DNS记录 (A, AAAA, MX, TXT, NS, CNAME, SOA)"
-      },
-      "screenshot": {
-        "title": "网站截图",
-        "description": "在不同设备视图下捕获网站截图 (桌面、移动、平板)"
-      },
-      "health": {
-        "title": "健康检查",
-        "description": "监控系统健康状态和服务状态，提供实时指标"
-      }
-    }
+    "features": "核心功能",
+    "featuresDesc": "专业的域名分析工具，提供全方位的域名信息服务",
+    "domainQuery": "域名查询",
+    "domainQueryDesc": "获取详细的WHOIS信息，包括注册详情、联系信息和域名状态",
+    "dnsQuery": "DNS查询",
+    "dnsQueryDesc": "从多个DNS服务器查询DNS记录 (A, AAAA, MX, TXT, NS, CNAME, SOA)",
+    "websiteScreenshot": "网站截图",
+    "websiteScreenshotDesc": "在不同设备视图下捕获网站截图 (桌面、移动、平板)",
+    "systemMonitoring": "系统监控",
+    "systemMonitoringDesc": "监控系统健康状态和服务状态，提供实时指标",
+    "whyChoose": "为什么选择我们",
+    "whyChooseDesc": "专业、快速、可靠的域名分析服务",
+    "fastResponse": "快速响应",
+    "fastResponseDesc": "优化的查询算法，亚秒级响应时间",
+    "secureReliable": "安全可靠",
+    "secureReliableDesc": "采用最新的安全协议，保障数据传输安全",
+    "responsiveDesign": "响应式设计",
+    "responsiveDesignDesc": "完美适配各种设备，随时随地查询域名信息",
+    "realTimeData": "实时数据",
+    "realTimeDataDesc": "直接从权威数据源获取最新的域名信息",
+    "getStarted": "开始使用",
+    "getStartedDesc": "立即开始查询域名信息，体验专业的域名分析服务",
+    "startQuery": "开始查询",
+    "viewStatus": "查看状态"
   },
   "domain": {
     "title": "域名WHOIS查询",

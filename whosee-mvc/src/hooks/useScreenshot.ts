@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { ScreenshotController } from '@/controllers/ScreenshotController';
 import { ScreenshotOptions, ScreenshotResult } from '@/types';
-import { logger } from '@/utils/logger';
+import { logger } from '@/lib/logger';
 
 // 设备预设
 export const DEVICE_PRESETS = [

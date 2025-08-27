@@ -271,6 +271,15 @@ class GlobalErrorHandler {
     }
   }
 
+  // 兼容别名：与现有调用保持一致
+  public handleError(
+    error: Error,
+    context: Partial<ErrorContext> = {},
+    immediate?: boolean
+  ): void {
+    this.reportError(error, context, immediate);
+  }
+
   // 将错误添加到队列
   private queueError(error: Error, context: Partial<ErrorContext>): void {
     this.errorQueue.push({ error, context });
@@ -446,14 +455,40 @@ export const errorRetryManager = new ErrorRetryManager();
 
 // 工具函数
 export function createErrorContext(
-  component?: string,
+  componentOrMetadata?: string | Partial<ErrorContext> | Record<string, unknown>,
   action?: string,
   metadata?: Record<string, unknown>
 ): Partial<ErrorContext> {
+  // 支持三种调用方式：
+  // 1) createErrorContext(component, action, metadata)
+  // 2) createErrorContext(component, metadataObject)
+  // 3) createErrorContext(metadataObject)
+  let component: string | undefined;
+  let finalAction: string | undefined = action;
+  let finalMetadata: Record<string, unknown> | undefined = metadata;
+
+  if (typeof componentOrMetadata === 'string') {
+    component = componentOrMetadata;
+    // 若第二个参数是对象，则视为 metadata 对象
+    if (action && typeof action !== 'string') {
+      finalMetadata = action as unknown as Record<string, unknown>;
+      finalAction = undefined;
+    }
+  } else if (typeof componentOrMetadata === 'object' && componentOrMetadata !== null) {
+    // 直接传入上下文/元数据对象
+    const ctx = componentOrMetadata as Partial<ErrorContext>;
+    return {
+      ...ctx,
+      timestamp: ctx.timestamp || new Date().toISOString(),
+      url: ctx.url || (typeof window !== 'undefined' ? window.location.href : 'unknown'),
+      userAgent: ctx.userAgent || (typeof window !== 'undefined' ? navigator.userAgent : 'unknown')
+    };
+  }
+
   return {
     component,
-    action,
-    metadata,
+    action: finalAction,
+    metadata: finalMetadata,
     timestamp: new Date().toISOString(),
     url: typeof window !== 'undefined' ? window.location.href : 'unknown',
     userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'unknown'

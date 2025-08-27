@@ -59,9 +59,9 @@ const DEFAULT_CONFIG: PerformanceConfig = {
   enabled: true,
   enableInDevelopment: true,
   enableInProduction: true,
-  monitoringInterval: 5000, // 5秒
+  monitoringInterval: 15000, // 15秒 - 减少监控频率
   enableAutoReporting: false,
-  reportingInterval: 60000, // 1分钟
+  reportingInterval: 120000, // 2分钟 - 减少报告频率
   enableAlerts: true,
   enableComponentMonitoring: true,
   enableCPUMonitoring: true,
@@ -80,6 +80,7 @@ export class PerformanceManager {
   private monitoringInterval: NodeJS.Timeout | null = null;
   private reportingInterval: NodeJS.Timeout | null = null;
   private isInitialized = false;
+  private errorCount = 0; // 错误计数器
 
   constructor(config: Partial<PerformanceConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -88,24 +89,22 @@ export class PerformanceManager {
   // 初始化性能监控
   public async initialize(): Promise<void> {
     if (this.isInitialized) {
-      console.warn('性能监控已经初始化');
       return;
     }
 
     // 检查是否应该启用监控
     if (!this.shouldEnableMonitoring()) {
-      console.log('性能监控在当前环境中被禁用');
       return;
     }
 
     try {
-      console.log('正在初始化性能监控...');
+      // quiet init
 
       // 初始化性能监控器
       if (this.config.enableWebVitalsMonitoring) {
         this.performanceMonitor = new PerformanceMonitor({
           interval: this.config.monitoringInterval,
-          enableConsoleLog: process.env.NODE_ENV === 'development'
+          enableConsoleLog: false
         });
         this.performanceMonitor.start();
       }
@@ -114,7 +113,7 @@ export class PerformanceManager {
       if (this.config.enableCPUMonitoring) {
         this.cpuMonitor = new CPUMonitor({
           interval: this.config.monitoringInterval,
-          enableConsoleLog: process.env.NODE_ENV === 'development'
+          enableConsoleLog: false
         });
         this.cpuMonitor.start();
       }
@@ -123,7 +122,7 @@ export class PerformanceManager {
       if (this.config.enableMemoryMonitoring) {
         this.memoryMonitor = new MemoryMonitor({
           interval: this.config.monitoringInterval,
-          enableConsoleLog: process.env.NODE_ENV === 'development'
+          enableConsoleLog: false
         });
         this.memoryMonitor.start();
       }
@@ -148,10 +147,9 @@ export class PerformanceManager {
       }
 
       this.isInitialized = true;
-      console.log('✅ 性能监控初始化完成');
 
     } catch (error) {
-      console.error('性能监控初始化失败:', error);
+      // swallow errors to reduce noise
       throw error;
     }
   }
@@ -193,62 +191,153 @@ export class PerformanceManager {
 
   // 收集性能指标
   private async collectMetrics() {
+    const startTime = performance.now();
+    
     try {
       const metrics: Record<string, unknown> = {
         timestamp: Date.now()
       };
 
-      // 收集CPU指标
-      if (this.cpuMonitor) {
-        const cpuData = this.cpuMonitor.getUsageData();
-        metrics.cpu = cpuData;
+      // 使用Promise.allSettled并发收集指标，避免阻塞
+      const results = await Promise.allSettled([
+        this.collectCPUMetrics(),
+        this.collectMemoryMetrics(),
+        this.collectComponentMetrics(),
+        this.collectWebVitalsMetrics()
+      ]);
 
-        // 检查CPU警报
-        if (this.alertSystem) {
-          checkCPUAlerts(cpuData, this.alertSystem);
-        }
+      // 处理收集结果
+      const [cpuResult, memoryResult, componentResult, vitalsResult] = results;
+      
+      if (cpuResult.status === 'fulfilled') {
+        metrics.cpu = cpuResult.value;
+      }
+      
+      if (memoryResult.status === 'fulfilled') {
+        metrics.memory = memoryResult.value;
+      }
+      
+      if (componentResult.status === 'fulfilled') {
+        metrics.components = componentResult.value;
+      }
+      
+      if (vitalsResult.status === 'fulfilled') {
+        metrics.webVitals = vitalsResult.value;
       }
 
-      // 收集内存指标
-      if (this.memoryMonitor) {
-        const memoryData = this.memoryMonitor.getMemoryData();
-        metrics.memory = memoryData;
-
-        // 检查内存警报
-        if (this.alertSystem) {
-          checkMemoryAlerts(memoryData, this.alertSystem);
-          checkMemoryLeakAlerts(memoryData, this.alertSystem);
-        }
-      }
-
-      // 收集组件性能指标
-      if (this.componentManager) {
-        const componentData = this.componentManager.getAllPerformanceData();
-        metrics.components = componentData;
-
-        // 检查组件性能警报
-        if (this.alertSystem) {
-          checkComponentAlerts(componentData, this.alertSystem);
-        }
-      }
-
-      // 收集Web Vitals指标
-      if (this.performanceMonitor) {
-        const vitalsData = this.performanceMonitor.getLatestMetrics();
-        metrics.webVitals = vitalsData;
-
-        // 检查Web Vitals警报
-        if (this.alertSystem && vitalsData) {
-          checkWebVitalsAlerts(vitalsData, this.alertSystem);
-        }
+      // 检查收集时间，如果超过阈值则降级
+      const collectionTime = performance.now() - startTime;
+      if (collectionTime > 100) { // 100ms阈值
+        // degrade silently
+        this.degradeMonitoring();
       }
 
       // 分发指标事件
       this.dispatchEvent('performance-metrics', metrics);
 
     } catch (error) {
-      console.error('收集性能指标失败:', error);
+      // swallow collect errors
+      this.handleCollectionError(error);
     }
+  }
+
+  // 收集CPU指标
+  private async collectCPUMetrics(): Promise<unknown> {
+    if (!this.cpuMonitor) return null;
+    
+    const cpuData = this.cpuMonitor.getLatestUsage();
+    
+    // 检查CPU警报
+    if (this.alertSystem && cpuData) {
+      try {
+        checkCPUAlerts(cpuData, this.alertSystem);
+      } catch (error) {
+        console.warn('CPU警报检查失败:', error);
+      }
+    }
+    
+    return cpuData;
+  }
+
+  // 收集内存指标
+  private async collectMemoryMetrics(): Promise<unknown> {
+    if (!this.memoryMonitor) return null;
+    
+    const memoryData = this.memoryMonitor.getCurrentMetrics();
+    
+    // 检查内存警报
+    if (this.alertSystem && memoryData) {
+      try {
+        checkMemoryAlerts(memoryData, this.alertSystem);
+        checkMemoryLeakAlerts(memoryData, this.alertSystem);
+      } catch (error) {
+        console.warn('内存警报检查失败:', error);
+      }
+    }
+    
+    return memoryData;
+  }
+
+  // 收集组件性能指标
+  private async collectComponentMetrics(): Promise<unknown> {
+    if (!this.componentManager) return null;
+    
+    const componentData = this.componentManager.getAllPerformanceData();
+    
+    // 检查组件性能警报
+    if (this.alertSystem) {
+      try {
+        checkComponentAlerts(componentData, this.alertSystem);
+      } catch (error) {
+        console.warn('组件性能警报检查失败:', error);
+      }
+    }
+    
+    return componentData;
+  }
+
+  // 收集Web Vitals指标
+  private async collectWebVitalsMetrics(): Promise<unknown> {
+    if (!this.performanceMonitor) return null;
+    
+    const vitalsData = this.performanceMonitor.getLatestMetrics();
+    
+    // 检查Web Vitals警报
+    if (this.alertSystem && vitalsData) {
+      try {
+        checkWebVitalsAlerts(vitalsData, this.alertSystem);
+      } catch (error) {
+        console.warn('Web Vitals警报检查失败:', error);
+      }
+    }
+    
+    return vitalsData;
+  }
+
+  // 处理收集错误
+  private handleCollectionError(error: unknown) {
+    // 记录错误次数
+    this.errorCount = (this.errorCount || 0) + 1;
+    
+    // 如果错误次数过多，降级监控
+    if (this.errorCount > 5) {
+      // silent degrade
+      this.degradeMonitoring();
+    }
+  }
+
+  // 降级监控
+  private degradeMonitoring() {
+    // 增加监控间隔
+    this.config.monitoringInterval = Math.min(this.config.monitoringInterval * 2, 60000);
+    
+    // 重启监控
+    if (this.monitoringInterval) {
+      clearInterval(this.monitoringInterval);
+      this.startMonitoring();
+    }
+    
+    // no-op log
   }
 
   // 生成性能报告
@@ -264,8 +353,8 @@ export class PerformanceManager {
     // 添加CPU指标
     if (this.cpuMonitor) {
       report.metrics.cpu = {
-        current: this.cpuMonitor.getUsageData(),
-        history: this.cpuMonitor.getHistoryData(),
+        current: this.cpuMonitor.getLatestUsage(),
+        history: this.cpuMonitor.getUsageHistory(),
         heavyFunctions: this.cpuMonitor.getHeavyFunctions()
       };
     }
@@ -273,9 +362,9 @@ export class PerformanceManager {
     // 添加内存指标
     if (this.memoryMonitor) {
       report.metrics.memory = {
-        current: this.memoryMonitor.getMemoryData(),
-        history: this.memoryMonitor.getHistoryData(),
-        leaks: this.memoryMonitor.getLeakDetection()
+        current: this.memoryMonitor.getCurrentMetrics(),
+        history: this.memoryMonitor.getMemoryHistory(),
+        stats: this.memoryMonitor.getMemoryStats()
       };
     }
 
@@ -308,8 +397,8 @@ export class PerformanceManager {
   // 获取实时数据
   public getRealTimeData(): Record<string, unknown> {
     return {
-      cpu: this.cpuMonitor?.getUsageData() || null,
-      memory: this.memoryMonitor?.getMemoryData() || null,
+      cpu: this.cpuMonitor?.getLatestUsage() || null,
+      memory: this.memoryMonitor?.getCurrentMetrics() || null,
       components: this.componentManager?.getAllPerformanceData() || null,
       webVitals: this.performanceMonitor?.getLatestMetrics() || null,
       alerts: this.alertSystem?.getActiveAlerts() || []
@@ -341,7 +430,7 @@ export class PerformanceManager {
 
   // 停止监控
   public stop() {
-    console.log('正在停止性能监控...');
+    // quiet stop
     
     // 停止定期监控
     if (this.monitoringInterval) {
@@ -361,7 +450,7 @@ export class PerformanceManager {
     this.performanceMonitor?.stop();
     
     this.isInitialized = false;
-    console.log('性能监控已停止');
+    // quiet
   }
 
   // 重启监控
@@ -388,7 +477,7 @@ export class PerformanceManager {
     this.memoryMonitor = null;
     this.alertSystem = null;
     
-    console.log('性能监控器已销毁');
+    // quiet
   }
 }
 
@@ -414,10 +503,10 @@ export async function initializePerformanceMonitoring(config?: Partial<Performan
 export async function startPerformanceMonitoring(): Promise<void> {
   try {
     const manager = await initializePerformanceMonitoring({
-      enabled: true,
+      enabled: true, // 重新启用性能监控
       enableInDevelopment: true,
-      enableInProduction: true,
-      monitoringInterval: 5000,
+      enableInProduction: false,
+      monitoringInterval: 10000, // 减少间隔
       enableAlerts: true,
       enableComponentMonitoring: true,
       enableCPUMonitoring: true,
@@ -425,12 +514,12 @@ export async function startPerformanceMonitoring(): Promise<void> {
       enableWebVitalsMonitoring: true
     });
     
-    console.log('🚀 性能监控已启动');
+    // quiet
     
     // 在开发环境中添加全局访问
     if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
-      (window as Window & { __performanceManager?: PerformanceIntegration }).___performanceManager = manager;
-      console.log('💡 开发模式：可通过 window.__performanceManager 访问性能管理器');
+      (window as Window & { __performanceManager?: PerformanceManager }).__performanceManager = manager;
+      // quiet
     }
     
   } catch (error) {

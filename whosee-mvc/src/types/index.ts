@@ -33,6 +33,7 @@ export interface DNSRecord {
   value: string;
   ttl?: number;
   priority?: number;
+  server?: string;
 }
 
 export interface HealthStatus {
@@ -68,6 +69,31 @@ export interface ScreenshotResult {
   timestamp: number;
   options?: ScreenshotOptions;
   metadata?: Record<string, unknown>;
+}
+
+// 补充用于 ApiService 的复合类型
+export interface DNSInfo {
+  domain: string;
+  records: DNSRecord[];
+  servers: string[];
+  timestamp?: string;
+}
+
+export interface HealthInfo {
+  status: 'healthy' | 'unhealthy' | 'degraded';
+  services?: Record<string, { status: 'healthy' | 'unhealthy' | 'degraded'; latency?: number }>;
+  metrics?: Record<string, number | string>;
+  version?: string;
+  time?: string;
+}
+
+export interface ScreenshotInfo {
+  domain: string;
+  device: 'desktop' | 'mobile' | 'tablet';
+  imageData: string;
+  timestamp: string;
+  size: { width: number; height: number };
+  title?: string;
 }
 
 // API 响应类型

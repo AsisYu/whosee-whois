@@ -61,13 +61,13 @@ export interface CPUMonitorConfig {
 
 // 默认配置
 const DEFAULT_CONFIG: CPUMonitorConfig = {
-  interval: 1000,
-  longTaskThreshold: 50,
-  heavyFunctionThreshold: 10,
+  interval: 5000, // 5秒 - 减少监控频率
+  longTaskThreshold: 100, // 提高长任务阈值到100ms
+  heavyFunctionThreshold: 50, // 提高重函数阈值到50ms
   enableFunctionMonitoring: true,
   enableStackTrace: false,
-  maxRecords: 100,
-  enableConsoleLog: true
+  maxRecords: 50, // 减少最大记录数
+  enableConsoleLog: false // 默认关闭控制台日志
 };
 
 // CPU监控类
@@ -211,7 +211,7 @@ export class CPUMonitor {
   private async estimateCPUUsage(): Promise<number> {
     return new Promise((resolve) => {
       const start = performance.now();
-      const iterations = 50000;
+      const iterations = 10000; // 减少迭代次数
       
       setTimeout(() => {
         for (let i = 0; i < iterations; i++) {
@@ -219,9 +219,15 @@ export class CPUMonitor {
         }
         const end = performance.now();
         const duration = end - start;
-        // 基于理想执行时间计算CPU使用率
-        const idealTime = 1; // 理想情况下应该很快完成
-        const cpuUsage = Math.min(100, (duration / idealTime) * 10);
+        
+        // 改进的CPU使用率计算
+        // 基于执行时间和长任务数量来估算
+        const baseUsage = Math.min(50, duration / 2); // 基础使用率，最高50%
+        const longTaskPenalty = this.longTasks.length * 5; // 长任务惩罚
+        const recentTasks = this.longTasks.filter(task => Date.now() - task.endTime < 10000);
+        const recentTaskPenalty = recentTasks.length * 10;
+        
+        const cpuUsage = Math.min(100, baseUsage + longTaskPenalty + recentTaskPenalty);
         resolve(cpuUsage);
       }, 0);
     });

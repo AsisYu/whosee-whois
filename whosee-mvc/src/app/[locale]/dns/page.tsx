@@ -13,7 +13,7 @@ import { DNSController } from '@/controllers/DNSController';
 import { useDNS, DNS_RECORD_TYPES, DEFAULT_DNS_TYPES } from '@/hooks/useDNS';
 import { cn } from '@/lib/utils';
 import { DNSRecord } from '@/types';
-import { logger } from '@/utils/logger';
+import { logger } from '@/lib/logger';
 
 export default function DNSPage() {
   const t = useTranslations('dns');

@@ -90,16 +90,15 @@ export class ApiErrorHandler {
     
     try {
       // 记录请求性能
-      logger.performance(
-        `API Request: ${this.method} ${this.endpoint}`,
-        'api-request',
+      logger.logPerformance(
+        `api-request-${this.method}-${this.endpoint.replace(/[^a-zA-Z0-9]/g, '-')}`,
+        duration,
+        response.ok,
         {
           requestId: this.requestId,
           method: this.method,
           endpoint: this.endpoint,
-          status: response.status,
-          duration,
-          success: response.ok
+          status: response.status
         }
       );
 

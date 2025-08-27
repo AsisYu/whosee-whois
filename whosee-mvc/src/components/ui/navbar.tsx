@@ -83,8 +83,9 @@ export function Navbar() {
               
               return (
                 <NavigationMenuItem key={item.href}>
-                  <Link href={item.href} legacyBehavior passHref>
-                    <NavigationMenuLink 
+                  <NavigationMenuLink asChild>
+                    <Link 
+                      href={item.href}
                       className={cn(
                         navigationMenuTriggerStyle(),
                         isActive && "bg-accent text-accent-foreground"
@@ -92,8 +93,8 @@ export function Navbar() {
                     >
                       <Icon className="mr-2 h-4 w-4" />
                       {t(item.title)}
-                    </NavigationMenuLink>
-                  </Link>
+                    </Link>
+                  </NavigationMenuLink>
                 </NavigationMenuItem>
               );
             })}

@@ -1,7 +1,7 @@
 import { BaseController } from './BaseController';
 import { ScreenshotModel } from '@/models/ScreenshotModel';
 import { ScreenshotOptions, ScreenshotResult } from '@/types';
-import { resourceManager } from '../utils/concurrencyManager';
+import { resourceManager } from '@/utils/concurrencyManager';
 
 /**
  * Screenshot Controller - 处理网站截图业务逻辑

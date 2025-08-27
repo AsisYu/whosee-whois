@@ -1,7 +1,7 @@
 import { SingletonModel } from './BaseModel';
 import { ApiService } from '@/services/ApiService';
 import { HealthStatus } from '@/types';
-import { logger } from '@/utils/logger';
+import { logger } from '@/lib/logger';
 
 /**
  * 健康监控数据模型 - 处理系统健康状态相关的数据操作

@@ -383,6 +383,22 @@ class Logger {
       localStorage.removeItem('app_user_action_logs');
     }
   }
+
+  // 兼容别名：userBehavior(action, componentOrMetadata?, maybeMetadata?)
+  // 允许以下用法：
+  // - logger.userBehavior('Action', 'Component', { ... })
+  // - logger.userBehavior('Action', { ... })  // component 省略
+  public userBehavior(
+    action: string,
+    componentOrMetadata?: string | Record<string, unknown>,
+    maybeMetadata?: Record<string, unknown>
+  ): void {
+    if (typeof componentOrMetadata === 'string') {
+      this.logUserAction(action, componentOrMetadata, maybeMetadata);
+    } else {
+      this.logUserAction(action, 'general', componentOrMetadata);
+    }
+  }
 }
 
 // 导出单例实例
@@ -404,6 +420,11 @@ export const log = {
     logger.logPerformance(operation, duration, success, metadata),
   userAction: (action: string, component: string, metadata?: Record<string, unknown>) => 
     logger.logUserAction(action, component, metadata),
+  userBehavior: (
+    action: string,
+    componentOrMetadata?: string | Record<string, unknown>,
+    maybeMetadata?: Record<string, unknown>
+  ) => logger.userBehavior(action, componentOrMetadata as any, maybeMetadata),
   timer: (operation: string) => logger.startTimer(operation),
   measureAsync: <T>(operation: string, asyncFn: () => Promise<T>, metadata?: Record<string, unknown>) => 
     logger.measureAsync(operation, asyncFn, metadata)

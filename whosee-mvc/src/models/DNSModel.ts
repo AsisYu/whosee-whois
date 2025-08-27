@@ -1,7 +1,7 @@
 import { SingletonModel } from './BaseModel';
 import { ApiService } from '@/services/ApiService';
 import { DNSRecord } from '@/types';
-import { logger } from '@/utils/logger';
+import { logger } from '@/lib/logger';
 
 /**
  * DNS数据模型 - 处理DNS查询相关的数据操作

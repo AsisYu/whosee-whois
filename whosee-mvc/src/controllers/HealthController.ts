@@ -1,7 +1,7 @@
 import { BaseController } from './BaseController';
 import { HealthModel, healthModel } from '@/models/HealthModel';
 import { HealthStatus } from '@/types';
-import { resourceManager } from '../utils/concurrencyManager';
+import { resourceManager } from '@/utils/concurrencyManager';
 
 /**
  * 健康监控控制器 - 处理系统健康状态相关的业务逻辑

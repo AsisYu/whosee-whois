@@ -2,7 +2,7 @@ import { BaseController, ValidationRules } from './BaseController';
 import { DomainModel, domainModel } from '@/models/DomainModel';
 import { ApiService } from '@/services/ApiService';
 import { DomainInfo } from '@/types';
-import { logger } from '@/utils/logger';
+import { logger } from '@/lib/logger';
 import { resourceManager } from '@/utils/concurrencyManager';
 
 /**
@@ -52,12 +52,16 @@ export class DomainController extends BaseController<DomainInfo> {
         (this.performanceMetrics.averageResponseTime * (this.performanceMetrics.searchCount - 1) + responseTime) / 
         this.performanceMetrics.searchCount;
         
-      logger.performance('域名搜索完成', {
-        domain,
+      logger.logPerformance(
+        'domain-search',
         responseTime,
-        searchCount: this.performanceMetrics.searchCount,
-        averageResponseTime: this.performanceMetrics.averageResponseTime
-      });
+        true,
+        {
+          domain,
+          searchCount: this.performanceMetrics.searchCount,
+          averageResponseTime: this.performanceMetrics.averageResponseTime
+        }
+      );
       
     } catch (error) {
       logger.error('域名搜索失败', { domain, error, searchCount: this.performanceMetrics.searchCount });

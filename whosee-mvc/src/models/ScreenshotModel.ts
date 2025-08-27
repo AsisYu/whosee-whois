@@ -1,6 +1,6 @@
 import { ScreenshotOptions, ScreenshotResult } from '@/types';
 import { ApiService } from '@/services/ApiService';
-import { logger } from '@/utils/logger';
+import { logger } from '@/lib/logger';
 
 /**
  * Screenshot Model - 处理截图数据逻辑

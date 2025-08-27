@@ -242,7 +242,11 @@ export class ConcurrencyManager {
 
   // 处理任务队列
   private async processQueue(): Promise<void> {
-    while (this.isRunning) {
+    const processNextBatch = () => {
+      if (!this.isRunning) {
+        return;
+      }
+
       // 检查是否可以启动新任务
       if (this.runningTasks.size < this.config.maxConcurrent && this.taskQueue.length > 0) {
         const task = this.taskQueue.shift()!;
@@ -253,9 +257,13 @@ export class ConcurrencyManager {
       this.metrics.currentConcurrency = this.runningTasks.size;
       this.metrics.queueSize = this.taskQueue.length;
 
-      // 短暂等待后继续
-      await new Promise(resolve => setTimeout(resolve, 10));
-    }
+      // 只有在有任务需要处理时才继续循环
+      if (this.taskQueue.length > 0 || this.runningTasks.size > 0) {
+        setTimeout(processNextBatch, 50); // 增加延迟，减少CPU占用
+      }
+    };
+
+    processNextBatch();
   }
 
   // 执行单个任务

@@ -78,12 +78,23 @@ export class RequestDeduplicator {
     const maxWaitTime = 5000; // 最多等待5秒
     const startTime = Date.now();
     
-    while (this.pendingRequests.size >= this.maxConcurrentRequests) {
-      if (Date.now() - startTime > maxWaitTime) {
-        throw new Error('等待请求槽位超时');
-      }
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
+    return new Promise((resolve, reject) => {
+      const checkSlot = () => {
+        if (this.pendingRequests.size < this.maxConcurrentRequests) {
+          resolve();
+          return;
+        }
+        
+        if (Date.now() - startTime > maxWaitTime) {
+          reject(new Error('等待请求槽位超时'));
+          return;
+        }
+        
+        setTimeout(checkSlot, 100);
+      };
+      
+      checkSlot();
+    });
   }
 
   /**
@@ -116,6 +127,11 @@ export class RequestDeduplicator {
     this.pendingRequests.clear();
     this.requestCounts.clear();
     logger.info('请求去重器已清理');
+  }
+
+  // 兼容方法：deduplicate(key, fn) -> executeRequest(key, fn)
+  deduplicate<T>(key: string, requestFn: () => Promise<T>): Promise<T> {
+    return this.executeRequest<T>(key, requestFn);
   }
 }
 
@@ -232,10 +248,15 @@ export class BatchProcessor<T, R> {
         }
       });
 
-      logger.performance('批处理完成', {
-        processedCount: currentBatch.length,
-        successCount: results.length
-      });
+      logger.logPerformance(
+        'batch-processing',
+        Date.now() - startTime,
+        true,
+        {
+          processedCount: currentBatch.length,
+          successCount: results.length
+        }
+      );
     } catch (error) {
       logger.error('批处理失败', { error: error instanceof Error ? error.message : '未知错误' });
       
@@ -353,11 +374,15 @@ export class ResourceManager {
       const memory = (window.performance as Performance & { memory?: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number } }).memory;
       const usedMemory = memory.usedJSHeapSize;
       
-      logger.performance('内存使用情况', {
-        usedMemory,
-        totalMemory: memory.totalJSHeapSize,
-        memoryLimit: memory.jsHeapSizeLimit,
-        usagePercentage: (usedMemory / memory.jsHeapSizeLimit * 100).toFixed(2)
+      logger.logPerformance(
+        'memory-usage-check',
+        0,
+        true,
+        {
+          usedMemory,
+          totalMemory: memory.totalJSHeapSize,
+          memoryLimit: memory.jsHeapSizeLimit,
+          usagePercentage: (usedMemory / memory.jsHeapSizeLimit * 100).toFixed(2)
       });
 
       if (usedMemory > this.memoryUsageThreshold) {
@@ -426,6 +451,15 @@ export class ResourceManager {
     }
 
     return status;
+  }
+
+  // 提供内存使用获取，供调用方度量
+  getMemoryUsage(): number {
+    if (typeof window !== 'undefined' && 'performance' in window && 'memory' in window.performance) {
+      const memory = (window.performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
+      return memory?.usedJSHeapSize || 0;
+    }
+    return 0;
   }
 }
 

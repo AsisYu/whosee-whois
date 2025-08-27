@@ -1,5 +1,5 @@
 import { ApiResponse } from '@/types';
-import { logger } from '@/utils/logger';
+import { logger } from '@/lib/logger';
 
 /**
  * 基础模型类 - 提供通用的数据操作方法

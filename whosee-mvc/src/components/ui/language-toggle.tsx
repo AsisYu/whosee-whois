@@ -20,21 +20,10 @@ export function LanguageToggle() {
   const pathname = usePathname();
 
   const switchLocale = (newLocale: string) => {
-    // 移除当前语言前缀并添加新的语言前缀
-    const segments = pathname.split('/').filter(Boolean);
-    const isCurrentLocaleInPath = locales.includes(segments[0] as 'en' | 'zh');
-    
-    let newPath;
-    if (isCurrentLocaleInPath) {
-      // 替换现有的语言前缀
-      segments[0] = newLocale;
-      newPath = '/' + segments.join('/');
-    } else {
-      // 添加语言前缀
-      newPath = `/${newLocale}${pathname}`;
-    }
-    
-    router.push(newPath);
+    // 构造带新前缀的路径，确保 localePrefix: 'always'
+    const withoutPrefix = pathname.replace(/^\/(en|zh)(?=\/|$)/, '');
+    const target = `/${newLocale}${withoutPrefix || '/'}`.replace(/\/\/$/, '/');
+    router.push(target);
   };
 
   return (

@@ -4,6 +4,9 @@ import { routing } from './src/i18n/routing';
 export default createMiddleware(routing);
 
 export const config = {
-  // Match only internationalized pathnames
-  matcher: ['/', '/(zh|en)/:path*']
+  // 匹配所有路径，除了API路由、静态文件等
+  matcher: [
+    '/((?!api|_next|_vercel|.*\\..*).*)',
+    '/'
+  ]
 };

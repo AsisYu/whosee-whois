@@ -23,12 +23,12 @@ export interface MemoryMonitorConfig {
 }
 
 const DEFAULT_CONFIG: MemoryMonitorConfig = {
-  interval: 5000, // 5秒
+  interval: 20000, // 20秒 - 进一步减少监控频率
   enableConsoleLog: false,
-  memoryThreshold: 80, // 80%
+  memoryThreshold: 95, // 95% - 进一步提高阈值
   leakDetectionEnabled: true,
-  leakDetectionSamples: 10,
-  maxHistorySize: 100
+  leakDetectionSamples: 12, // 增加样本数量，基于4分钟数据
+  maxHistorySize: 50 // 适当增加历史记录大小
 };
 
 export class MemoryMonitor {
@@ -103,10 +103,8 @@ export class MemoryMonitor {
     // 添加到历史记录
     this.memoryHistory.push(metrics);
     
-    // 保持历史记录大小在限制内
-    if (this.memoryHistory.length > this.config.maxHistorySize) {
-      this.memoryHistory.shift();
-    }
+    // 清理过期的历史记录
+    this.cleanupMemoryHistory();
 
     // 检查内存使用阈值
     this.checkMemoryThreshold(metrics);
@@ -116,18 +114,21 @@ export class MemoryMonitor {
       this.detectMemoryLeak();
     }
 
-    // 记录性能数据
-    logger.logPerformance(
-      'memory-usage',
-      metrics.memoryUsagePercentage,
-      metrics.memoryUsagePercentage < this.config.memoryThreshold,
-      {
-        usedJSHeapSize: this.formatBytes(metrics.usedJSHeapSize),
-        totalJSHeapSize: this.formatBytes(metrics.totalJSHeapSize),
-        jsHeapSizeLimit: this.formatBytes(metrics.jsHeapSizeLimit),
-        memoryUsagePercentage: metrics.memoryUsagePercentage.toFixed(2)
-      }
-    );
+    // 记录性能数据（降低日志频率）
+    if (this.memoryHistory.length % 3 === 0) { // 每3次收集记录一次日志
+      logger.logPerformance(
+        'memory-usage',
+        metrics.memoryUsagePercentage,
+        metrics.memoryUsagePercentage < this.config.memoryThreshold,
+        {
+          usedJSHeapSize: this.formatBytes(metrics.usedJSHeapSize),
+          totalJSHeapSize: this.formatBytes(metrics.totalJSHeapSize),
+          jsHeapSizeLimit: this.formatBytes(metrics.jsHeapSizeLimit),
+          memoryUsagePercentage: metrics.memoryUsagePercentage.toFixed(2),
+          historySize: this.memoryHistory.length
+        }
+      );
+    }
 
     if (this.config.enableConsoleLog) {
       console.log('Memory Metrics:', {
@@ -137,6 +138,19 @@ export class MemoryMonitor {
         usage: `${metrics.memoryUsagePercentage.toFixed(2)}%`
       });
     }
+  }
+
+  // 清理过期的内存历史记录
+  private cleanupMemoryHistory(): void {
+    // 保持历史记录在配置的最大大小内
+    if (this.memoryHistory.length > this.config.maxHistorySize) {
+      const excessCount = this.memoryHistory.length - this.config.maxHistorySize;
+      this.memoryHistory.splice(0, excessCount);
+    }
+    
+    // 清理超过1小时的旧记录
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
+    this.memoryHistory = this.memoryHistory.filter(metric => metric.timestamp > oneHourAgo);
   }
 
   private checkMemoryThreshold(metrics: MemoryMetrics): void {
@@ -173,20 +187,45 @@ export class MemoryMonitor {
     const timeSpan = lastSample.timestamp - firstSample.timestamp;
     const growthRate = memoryGrowth / timeSpan; // bytes per ms
 
-    // 如果内存持续增长且增长率超过阈值，可能存在内存泄漏
-    const leakThreshold = 1024; // 1KB per second
-    if (growthRate > leakThreshold / 1000) {
+    // 更严格的内存泄漏检测条件
+    const leakThreshold = 102400; // 100KB per second - 进一步提高阈值
+    const minGrowth = 10 * 1024 * 1024; // 至少10MB增长才考虑泄漏
+    const minTimeSpan = 120000; // 至少2分钟的观察时间
+    const maxGrowthRate = 2 * 1024 * 1024; // 最大2MB/s增长率，超过可能是正常的大数据加载
+    
+    // 检查是否所有样本都呈增长趋势
+    const isConsistentGrowth = this.checkConsistentGrowth(recentSamples);
+    
+    // 检查当前内存使用是否已经很高
+    const currentUsageHigh = lastSample.memoryUsagePercentage > 80;
+    
+    if (growthRate > leakThreshold / 1000 && 
+        growthRate < maxGrowthRate / 1000 && // 排除过快增长（可能是正常加载）
+        memoryGrowth > minGrowth && 
+        timeSpan > minTimeSpan &&
+        isConsistentGrowth &&
+        currentUsageHigh) { // 只有在内存使用率高时才报告泄漏
+      
       const leakMessage = `Potential memory leak detected: ${this.formatBytes(memoryGrowth)} growth in ${(timeSpan / 1000).toFixed(1)}s`;
       
-      logger.error(leakMessage, 'memory-monitor', {
+      logger.warn(leakMessage, 'memory-monitor', {
         memoryGrowth: this.formatBytes(memoryGrowth),
         timeSpan: `${(timeSpan / 1000).toFixed(1)}s`,
         growthRate: `${this.formatBytes(growthRate * 1000)}/s`,
-        samples: this.config.leakDetectionSamples
+        currentUsage: `${lastSample.memoryUsagePercentage.toFixed(1)}%`,
+        samples: this.config.leakDetectionSamples,
+        firstSample: {
+          usage: this.formatBytes(firstSample.usedJSHeapSize),
+          percentage: `${firstSample.memoryUsagePercentage.toFixed(1)}%`
+        },
+        lastSample: {
+          usage: this.formatBytes(lastSample.usedJSHeapSize),
+          percentage: `${lastSample.memoryUsagePercentage.toFixed(1)}%`
+        }
       });
 
       if (this.config.enableConsoleLog) {
-        console.error(leakMessage, {
+        console.warn(leakMessage, {
           firstSample,
           lastSample,
           growthRate: `${this.formatBytes(growthRate * 1000)}/s`
@@ -201,6 +240,31 @@ export class MemoryMonitor {
         samples: recentSamples
       });
     }
+  }
+
+  // 检查是否存在持续的内存增长趋势
+  private checkConsistentGrowth(samples: MemoryMetrics[]): boolean {
+    if (samples.length < 4) return false;
+    
+    let increasingCount = 0;
+    let significantIncreases = 0;
+    const minSignificantIncrease = 512 * 1024; // 512KB
+    
+    for (let i = 1; i < samples.length; i++) {
+      const growth = samples[i].usedJSHeapSize - samples[i - 1].usedJSHeapSize;
+      if (growth > 0) {
+        increasingCount++;
+        if (growth > minSignificantIncrease) {
+          significantIncreases++;
+        }
+      }
+    }
+    
+    // 至少70%的样本显示增长趋势，且至少有50%的显著增长
+    const growthRatio = increasingCount / (samples.length - 1);
+    const significantRatio = significantIncreases / (samples.length - 1);
+    
+    return growthRatio >= 0.7 && significantRatio >= 0.5;
   }
 
   private formatBytes(bytes: number): string {

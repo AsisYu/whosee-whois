@@ -121,10 +121,11 @@ export class WhoisApi {
             const response = await apiClient.get<WhoisResponse>(`/v1/whois/${encodeURIComponent(domain)}`);
             const duration = Date.now() - startTime;
             
-            logger.performance(
-              `WHOIS lookup completed for ${domain}`,
-              'whois-api',
-              { domain, duration, success: true }
+            logger.logPerformance(
+              'whois-lookup',
+              duration,
+              true,
+              { domain }
             );
             
             return response;
@@ -243,10 +244,11 @@ export class DnsApi {
             );
             const duration = Date.now() - startTime;
             
-            logger.performance(
-              `DNS lookup completed for ${domain}`,
-              'dns-api',
-              { domain, recordType, duration, recordCount: response.records?.length || 0 }
+            logger.logPerformance(
+              'dns-lookup',
+              duration,
+              true,
+              { domain, recordType, recordCount: response.records?.length || 0 }
             );
             
             return response;
@@ -400,12 +402,12 @@ export class ScreenshotApi {
         );
         const duration = Date.now() - startTime;
         
-        logger.performance(
-          `Screenshot capture completed for ${domain}`,
-          'screenshot-api',
+        logger.logPerformance(
+          'screenshot-capture',
+          duration,
+          true,
           { 
             domain, 
-            duration, 
             imageSize: response.metadata?.fileSize,
             loadTime: response.metadata?.loadTime
           }

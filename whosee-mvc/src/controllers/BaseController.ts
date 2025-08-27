@@ -1,12 +1,12 @@
 import { BaseModel } from '@/models/BaseModel';
-import { logger } from '@/utils/logger';
+import { logger } from '@/lib/logger';
 import { 
   errorRetryManager, 
   globalErrorHandler, 
   createErrorContext,
   BusinessLogicError,
   ValidationError
-} from '@/utils/errorHandling';
+} from '@/lib/error-handler';
 
 /**
  * 基础控制器类 - 提供通用的业务逻辑处理
@@ -111,11 +111,15 @@ export abstract class BaseController<T> {
       const result = await operation();
       const duration = Date.now() - startTime;
       
-      logger.performance(`操作完成: ${operationName}`, {
-        operationId,
+      logger.logPerformance(
+        `operation-${operationName}`,
         duration,
-        success: true
-      });
+        true,
+        {
+          operationId,
+          operationName
+        }
+      );
       
       logger.userBehavior(`用户操作成功: ${operationName}`, {
         operationId,
@@ -181,9 +185,13 @@ export abstract class BaseController<T> {
       
       const duration = Date.now() - startTime;
       
-      logger.performance(`带重试操作完成: ${operationName}`, {
-        operationId,
+      logger.logPerformance(
+        `retry-operation-${operationName}`,
         duration,
+        true,
+        {
+          operationId,
+          operationName,
         success: true
       });
       

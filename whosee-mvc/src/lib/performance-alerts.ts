@@ -73,24 +73,24 @@ export interface PerformanceAlertConfig {
 
 const DEFAULT_THRESHOLDS: AlertThresholds = {
   cpu: {
-    warning: 70,
-    critical: 90
+    warning: 85,  // 提高CPU警告阈值到85%
+    critical: 95  // 提高CPU严重阈值到95%
   },
   memory: {
-    warning: 70,
-    critical: 90
+    warning: 80,  // 提高内存警告阈值到80%
+    critical: 95  // 提高内存严重阈值到95%
   },
   fps: {
     warning: 30,
     critical: 15
   },
   taskDuration: {
-    warning: 100,
-    critical: 500
+    warning: 200,  // 提高长任务警告阈值到200ms
+    critical: 1000 // 提高长任务严重阈值到1000ms
   },
   networkLatency: {
-    warning: 1000,
-    critical: 3000
+    warning: 2000,  // 提高网络延迟警告阈值到2000ms
+    critical: 5000  // 提高网络延迟严重阈值到5000ms
   }
 };
 
@@ -98,7 +98,7 @@ const DEFAULT_CONFIG: PerformanceAlertConfig = {
   enabled: true,
   thresholds: DEFAULT_THRESHOLDS,
   maxAlerts: 50,
-  alertCooldown: 30000, // 30秒
+  alertCooldown: 60000, // 60秒 - 增加冷却时间
   autoResolve: true,
   autoResolveTimeout: 300000, // 5分钟
   enableNotifications: true,
@@ -114,6 +114,47 @@ export class PerformanceAlertSystem {
 
   constructor(config: Partial<PerformanceAlertConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
+  }
+
+  public initialize(): void {
+    if (!this.config.enabled) {
+      return;
+    }
+
+    // 请求通知权限
+    if (this.config.enableNotifications && typeof window !== 'undefined') {
+      requestNotificationPermission().catch(error => {
+        console.warn('Failed to request notification permission:', error);
+      });
+    }
+
+    // 设置全局错误处理
+    if (typeof window !== 'undefined') {
+      window.addEventListener('error', (event) => {
+        this.createAlert(
+          AlertType.MAIN_THREAD_BLOCKED,
+          `JavaScript error: ${event.message}`,
+          {
+            filename: event.filename,
+            lineno: event.lineno,
+            colno: event.colno,
+            error: event.error
+          },
+          AlertSeverity.HIGH
+        );
+      });
+
+      window.addEventListener('unhandledrejection', (event) => {
+        this.createAlert(
+          AlertType.MAIN_THREAD_BLOCKED,
+          `Unhandled promise rejection: ${event.reason}`,
+          { reason: event.reason },
+          AlertSeverity.HIGH
+        );
+      });
+    }
+
+    logger.info('Performance alert system initialized', 'performance-alerts', this.config);
   }
 
   public createAlert(
@@ -520,6 +561,86 @@ export async function requestNotificationPermission(): Promise<boolean> {
   
   const permission = await Notification.requestPermission();
   return permission === 'granted';
+}
+
+// 检查组件性能警报
+export function checkComponentAlerts(componentData: any): void {
+  const alertSystem = getAlertSystem();
+  const thresholds = alertSystem.getConfig().thresholds;
+  
+  if (componentData.renderTime >= thresholds.taskDuration.warning) {
+    alertSystem.createAlert(
+      AlertType.RENDER_SLOW,
+      `Component render time is ${componentData.renderTime}ms`,
+      componentData
+    );
+  }
+}
+
+// 检查Web Vitals警报
+export function checkWebVitalsAlerts(vitalsData: any): void {
+  const alertSystem = getAlertSystem();
+  
+  if (vitalsData.LCP && vitalsData.LCP > 2500) {
+    alertSystem.createAlert(
+      AlertType.RENDER_SLOW,
+      `Large Contentful Paint is ${vitalsData.LCP}ms`,
+      vitalsData
+    );
+  }
+  
+  if (vitalsData.FID && vitalsData.FID > 100) {
+    alertSystem.createAlert(
+      AlertType.MAIN_THREAD_BLOCKED,
+      `First Input Delay is ${vitalsData.FID}ms`,
+      vitalsData
+    );
+  }
+  
+  if (vitalsData.CLS && vitalsData.CLS > 0.1) {
+    alertSystem.createAlert(
+      AlertType.RENDER_SLOW,
+      `Cumulative Layout Shift is ${vitalsData.CLS}`,
+      vitalsData
+    );
+  }
+}
+
+// 检查长任务警报
+export function checkLongTaskAlerts(taskData: any): void {
+  const alertSystem = getAlertSystem();
+  const thresholds = alertSystem.getConfig().thresholds;
+  
+  if (taskData.duration >= thresholds.taskDuration.warning) {
+    alertSystem.createAlert(
+      AlertType.LONG_TASK,
+      `Long task detected: ${taskData.duration}ms`,
+      taskData
+    );
+  }
+}
+
+// 检查内存泄漏警报
+export function checkMemoryLeakAlerts(memoryData: any): void {
+  const alertSystem = getAlertSystem();
+  
+  // 检查内存增长趋势
+  if (memoryData.trend && memoryData.trend === 'increasing') {
+    alertSystem.createAlert(
+      AlertType.MEMORY_LEAK,
+      `Potential memory leak detected`,
+      memoryData
+    );
+  }
+  
+  // 检查DOM节点数量
+  if (memoryData.domNodes && memoryData.domNodes > 10000) {
+    alertSystem.createAlert(
+      AlertType.MEMORY_LEAK,
+      `High DOM node count: ${memoryData.domNodes}`,
+      memoryData
+    );
+  }
 }
 
 // 导出类型

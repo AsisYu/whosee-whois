@@ -11,17 +11,23 @@ import { Copy, Search, Globe, Calendar, User, Server, Shield, ExternalLink } fro
 import { DomainController } from '@/controllers/DomainController';
 import { useDomain } from '@/hooks/useDomain';
 import { cn } from '@/lib/utils';
-import { logger } from '@/utils/logger';
+import { logger } from '@/lib/logger';
 
 export default function DomainPage() {
   const t = useTranslations('domain');
   const [searchTerm, setSearchTerm] = useState('');
-  const { state, actions } = useDomain();
   const controller = new DomainController();
+  const {
+    data,
+    loading,
+    error,
+    searchHistory,
+    searchDomain
+  } = useDomain(controller);
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
-    await actions.searchDomain(searchTerm.trim());
+    await searchDomain(searchTerm.trim());
   };
 
   const handleCopy = async (text: string) => {
@@ -73,17 +79,17 @@ export default function DomainPage() {
             />
             <Button 
               onClick={handleSearch}
-              disabled={state.loading || !searchTerm.trim()}
+              disabled={loading || !searchTerm.trim()}
               className="min-w-[100px]"
             >
-              {state.loading ? t('search.searching') : t('search.button')}
+              {loading ? t('search.searching') : t('search.button')}
             </Button>
           </div>
         </CardContent>
       </Card>
 
       {/* Error Display */}
-      {state.error && (
+      {error && (
         <Card className="mb-8 border-destructive">
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-destructive">
@@ -91,14 +97,14 @@ export default function DomainPage() {
               <span className="font-medium">{t('error.title')}</span>
             </div>
             <p className="mt-2 text-sm text-muted-foreground">
-              {state.error}
+              {error}
             </p>
           </CardContent>
         </Card>
       )}
 
       {/* Results Display */}
-      {state.data && (
+      {data && (
         <div className="space-y-6">
           {/* Basic Information */}
           <Card>
@@ -114,29 +120,29 @@ export default function DomainPage() {
                   <label className="text-sm font-medium">{t('results.basic.domain')}</label>
                   <div className="flex items-center gap-2">
                     <code className="flex-1 p-2 bg-muted rounded text-sm">
-                      {state.data.domain}
+                      {data.domain}
                     </code>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleCopy(state.data!.domain)}
+                      onClick={() => handleCopy(data!.domain)}
                     >
                       <Copy className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
                 
-                {state.data.registrar && (
+                {data.registrar && (
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t('results.basic.registrar')}</label>
                     <div className="flex items-center gap-2">
                       <code className="flex-1 p-2 bg-muted rounded text-sm">
-                        {state.data.registrar}
+                        {data.registrar}
                       </code>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleCopy(state.data!.registrar!)}
+                        onClick={() => handleCopy(data!.registrar!)}
                       >
                         <Copy className="h-4 w-4" />
                       </Button>
@@ -146,11 +152,11 @@ export default function DomainPage() {
               </div>
 
               {/* Status */}
-              {state.data.status && state.data.status.length > 0 && (
+              {data.status && data.status.length > 0 && (
                 <div className="space-y-2">
                   <label className="text-sm font-medium">{t('results.basic.status')}</label>
                   <div className="flex flex-wrap gap-2">
-                    {state.data.status.map((status, index) => (
+                    {data.status.map((status, index) => (
                       <Badge key={index} variant="secondary">
                         {status}
                       </Badge>
@@ -171,29 +177,29 @@ export default function DomainPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {state.data.creationDate && (
+                {data.creationDate && (
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t('results.dates.created')}</label>
                     <div className="p-2 bg-muted rounded text-sm">
-                      {formatDate(state.data.creationDate)}
+                      {formatDate(data.creationDate)}
                     </div>
                   </div>
                 )}
                 
-                {state.data.expirationDate && (
+                {data.expirationDate && (
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t('results.dates.expires')}</label>
                     <div className="p-2 bg-muted rounded text-sm">
-                      {formatDate(state.data.expirationDate)}
+                      {formatDate(data.expirationDate)}
                     </div>
                   </div>
                 )}
                 
-                {state.data.updatedDate && (
+                {data.updatedDate && (
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t('results.dates.updated')}</label>
                     <div className="p-2 bg-muted rounded text-sm">
-                      {formatDate(state.data.updatedDate)}
+                      {formatDate(data.updatedDate)}
                     </div>
                   </div>
                 )}
@@ -202,7 +208,7 @@ export default function DomainPage() {
           </Card>
 
           {/* Contact Information */}
-          {state.data.contacts && state.data.contacts.length > 0 && (
+          {data.contacts && data.contacts.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -212,7 +218,7 @@ export default function DomainPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {state.data.contacts.map((contact, index) => (
+                  {data.contacts.map((contact, index) => (
                     <div key={index} className="border rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-3">
                         <Badge variant="outline">{contact.type}</Badge>
@@ -251,7 +257,7 @@ export default function DomainPage() {
           )}
 
           {/* Name Servers */}
-          {state.data.nameServers && state.data.nameServers.length > 0 && (
+          {data.nameServers && data.nameServers.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -261,7 +267,7 @@ export default function DomainPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {state.data.nameServers.map((ns, index) => (
+                  {data.nameServers.map((ns, index) => (
                     <div key={index} className="flex items-center gap-2">
                       <code className="flex-1 p-2 bg-muted rounded text-sm">
                         {ns}
@@ -291,7 +297,7 @@ export default function DomainPage() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Button variant="outline" className="justify-start" asChild>
-                  <a href={`/dns?domain=${state.data.domain}`}>
+                  <a href={`/dns?domain=${data.domain}`}>
                     <Globe className="h-4 w-4 mr-2" />
                     {t('results.tools.dns')}
                     <ExternalLink className="h-4 w-4 ml-auto" />
@@ -299,7 +305,7 @@ export default function DomainPage() {
                 </Button>
                 
                 <Button variant="outline" className="justify-start" asChild>
-                  <a href={`/screenshot?domain=${state.data.domain}`}>
+                  <a href={`/screenshot?domain=${data.domain}`}>
                     <Globe className="h-4 w-4 mr-2" />
                     {t('results.tools.screenshot')}
                     <ExternalLink className="h-4 w-4 ml-auto" />
@@ -307,7 +313,7 @@ export default function DomainPage() {
                 </Button>
                 
                 <Button variant="outline" className="justify-start" asChild>
-                  <a href={`/health?domain=${state.data.domain}`}>
+                  <a href={`/health?domain=${data.domain}`}>
                     <Shield className="h-4 w-4 mr-2" />
                     {t('results.tools.health')}
                     <ExternalLink className="h-4 w-4 ml-auto" />
@@ -320,7 +326,7 @@ export default function DomainPage() {
       )}
 
       {/* Search History */}
-      {state.searchHistory.length > 0 && (
+      {searchHistory.length > 0 && (
         <Card className="mt-8">
           <CardHeader>
             <CardTitle>{t('history.title')}</CardTitle>
@@ -330,14 +336,14 @@ export default function DomainPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {state.searchHistory.slice(0, 10).map((domain, index) => (
+              {searchHistory.slice(0, 10).map((domain, index) => (
                 <Button
                   key={index}
                   variant="outline"
                   size="sm"
                   onClick={() => {
                     setSearchTerm(domain);
-                    actions.searchDomain(domain);
+                    searchDomain(domain);
                   }}
                 >
                   {domain}

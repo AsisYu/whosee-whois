@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
+// i18n Provider is applied in src/app/[locale]/layout.tsx
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import ErrorBoundary from '@/components/providers/error-boundary';
-import { PerformanceManager } from '@/lib/performance-integration';
 import PerformancePanel from '@/components/performance/performance-panel';
 import SystemInitializer from '@/components/providers/system-initializer';
 import "./globals.css";
@@ -44,6 +42,9 @@ export const metadata: Metadata = {
   },
 };
 
+// Ensure layout renders per-request so locale/theme context updates immediately
+export const dynamic = 'force-dynamic';
+
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -52,24 +53,17 @@ export const viewport = {
 
 interface RootLayoutProps {
   children: React.ReactNode;
-  params: { locale: string };
 }
 
-export default async function RootLayout({
-  children,
-  params: { locale }
-}: RootLayoutProps) {
-  // 获取翻译消息 - 语言验证由 next-intl 中间件处理
-  const messages = await getMessages();
+export default async function RootLayout({ children }: RootLayoutProps) {
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body
         className="antialiased min-h-screen bg-background font-sans"
         suppressHydrationWarning
       >
         <ErrorBoundary>
-          <NextIntlClientProvider messages={messages}>
             <ThemeProvider
               attribute="class"
               defaultTheme="system"
@@ -84,7 +78,6 @@ export default async function RootLayout({
               </div>
               <SystemInitializer />
             </ThemeProvider>
-          </NextIntlClientProvider>
         </ErrorBoundary>
       </body>
     </html>

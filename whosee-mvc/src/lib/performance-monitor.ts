@@ -102,18 +102,18 @@ export interface PerformanceConfig {
 
 // 默认配置
 const DEFAULT_CONFIG: PerformanceConfig = {
-  interval: 5000, // 5秒
+  interval: 15000, // 15秒 - 减少监控频率
   cpuThreshold: {
-    warning: 70,
-    critical: 90
+    warning: 80, // 提高警告阈值
+    critical: 95 // 提高严重阈值
   },
   memoryThreshold: {
-    warning: 70,
-    critical: 90
+    warning: 80, // 提高警告阈值
+    critical: 95 // 提高严重阈值
   },
-  enableConsoleLog: true,
+  enableConsoleLog: false, // 默认关闭控制台日志
   enableLocalStorage: true,
-  maxRecords: 100
+  maxRecords: 50 // 减少最大记录数
 };
 
 // 性能监控类
@@ -269,9 +269,13 @@ export class PerformanceMonitor {
 
   // 更新指标
   private updateMetric(key: keyof PerformanceMetrics, value: number) {
-    const currentMetrics = this.getCurrentMetrics();
-    (currentMetrics as Record<string, unknown>)[key] = value;
-    this.addMetrics(currentMetrics);
+    // 避免循环调用，直接创建基础指标对象
+    const basicMetrics: PerformanceMetrics = {
+      timestamp: Date.now(),
+      memoryUsage: this.getMemoryUsage()
+    };
+    (basicMetrics as Record<string, unknown>)[key] = value;
+    this.addMetrics(basicMetrics);
   }
 
   // 获取当前指标
@@ -324,9 +328,10 @@ export class PerformanceMonitor {
     }
 
     // 记录性能数据
-    logger.performance(
-      'Performance metrics collected',
-      'performance-monitor',
+    logger.logPerformance(
+      'performance-metrics-collection',
+      Date.now() - metrics.timestamp,
+      true,
       {
         webVitals: {
           cls: metrics.cls,
@@ -492,13 +497,50 @@ export class PerformanceMonitor {
     }
 
     this.intervalId = setInterval(async () => {
-      const metrics: PerformanceMetrics = {
-        timestamp: Date.now(),
-        memoryUsage: this.getMemoryUsage(),
-        cpuUsage: await this.estimateCPUUsage()
-      };
+      try {
+        // 安全地获取指标数据，避免循环调用
+        const metrics: PerformanceMetrics = {
+          timestamp: Date.now(),
+          memoryUsage: this.getMemoryUsage(),
+          cpuUsage: await this.estimateCPUUsage()
+        };
 
-      this.addMetrics(metrics);
+        // 安全地获取并发和缓存指标
+        try {
+          const concurrencyMetrics = defaultConcurrencyManager.getMetrics();
+          metrics.concurrency = {
+            totalTasks: concurrencyMetrics.totalTasks,
+            completedTasks: concurrencyMetrics.completedTasks,
+            failedTasks: concurrencyMetrics.failedTasks,
+            currentConcurrency: concurrencyMetrics.currentConcurrency,
+            queueSize: concurrencyMetrics.queueSize,
+            throughput: concurrencyMetrics.throughput,
+            averageExecutionTime: concurrencyMetrics.averageExecutionTime,
+            errorRate: concurrencyMetrics.errorRate
+          };
+        } catch (error) {
+          console.warn('Failed to get concurrency metrics:', error);
+        }
+
+        try {
+          const cacheMetrics = defaultRequestManager.getMetrics();
+          metrics.cache = {
+            hits: cacheMetrics.hits,
+            misses: cacheMetrics.misses,
+            hitRate: cacheMetrics.hitRate,
+            totalRequests: cacheMetrics.totalRequests,
+            cacheSize: cacheMetrics.cacheSize,
+            memoryUsage: cacheMetrics.memoryUsage,
+            evictions: cacheMetrics.evictions
+          };
+        } catch (error) {
+          console.warn('Failed to get cache metrics:', error);
+        }
+
+        this.addMetrics(metrics);
+      } catch (error) {
+        console.error('Performance monitoring error:', error);
+      }
     }, this.config.interval);
 
     if (this.config.enableConsoleLog) {

@@ -31,6 +31,13 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System",
+    "tryNow": "Try Now",
+    "allRightsReserved": "All rights reserved",
+    "switchLanguage": "Switch Language",
+    "toggleTheme": "Toggle Theme",
+    "lightTheme": "Light Theme",
+    "darkTheme": "Dark Theme",
+    "systemTheme": "System Theme",
     "yes": "Yes",
     "no": "No",
     "ok": "OK",
@@ -65,25 +72,30 @@
     "description": "Professional domain analysis tool providing WHOIS queries, DNS record lookups, health monitoring, and website screenshots.",
     "placeholder": "Enter domain name (e.g., example.com)",
     "search": "Search",
-    "features": {
-      "title": "Core Features",
-      "domain": {
-        "title": "Domain Information",
-        "description": "Get detailed WHOIS information including registration details, contact information, and domain status"
-      },
-      "dns": {
-        "title": "DNS Records",
-        "description": "Query DNS records (A, AAAA, MX, TXT, NS, CNAME, SOA) from multiple DNS servers"
-      },
-      "screenshot": {
-        "title": "Website Screenshot",
-        "description": "Capture website screenshots in different device views (desktop, mobile, tablet)"
-      },
-      "health": {
-        "title": "Health Check",
-        "description": "Monitor system health and service status with real-time metrics"
-      }
-    }
+    "features": "Core Features",
+    "featuresDesc": "Professional domain analysis tool providing comprehensive services",
+    "domainQuery": "Domain Query",
+    "domainQueryDesc": "Get detailed WHOIS information including registration details, contact information and domain status",
+    "dnsQuery": "DNS Query",
+    "dnsQueryDesc": "Query DNS records (A, AAAA, MX, TXT, NS, CNAME, SOA) from multiple DNS servers",
+    "websiteScreenshot": "Website Screenshot",
+    "websiteScreenshotDesc": "Capture website screenshots in desktop, mobile and tablet views",
+    "systemMonitoring": "System Monitoring",
+    "systemMonitoringDesc": "Monitor system and service status with real-time metrics",
+    "whyChoose": "Why Choose Us",
+    "whyChooseDesc": "Professional, fast and reliable domain analysis services",
+    "fastResponse": "Fast Response",
+    "fastResponseDesc": "Optimized query algorithms with sub-second response time",
+    "secureReliable": "Secure & Reliable",
+    "secureReliableDesc": "Latest security protocols to protect data transmission",
+    "responsiveDesign": "Responsive Design",
+    "responsiveDesignDesc": "Perfectly adapts to all devices for on-the-go queries",
+    "realTimeData": "Real-time Data",
+    "realTimeDataDesc": "Data sourced directly from authoritative providers",
+    "getStarted": "Get Started",
+    "getStartedDesc": "Start querying domain information now and experience professional analysis",
+    "startQuery": "Start Query",
+    "viewStatus": "View Status"
   },
   "domain": {
     "title": "Domain WHOIS Lookup",

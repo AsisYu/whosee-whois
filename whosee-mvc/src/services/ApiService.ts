@@ -1,5 +1,5 @@
-import { DomainInfo, DNSInfo, HealthInfo, ScreenshotInfo, ApiResponse } from '@/types';
-import { logger } from '@/utils/logger';
+import { DomainInfo, DNSInfo, HealthInfo, ScreenshotInfo, ApiResponse, DNSRecord } from '@/types';
+import { logger } from '@/lib/logger';
 import { 
   AppError, 
   NetworkError, 
@@ -9,8 +9,18 @@ import {
   createErrorContext,
   globalErrorHandler,
   errorRetryManager
-} from '@/utils/errorHandling';
-import { requestDeduplicator, BatchProcessor, resourceManager } from '@/utils/concurrencyManager';
+} from '@/lib/error-handler';
+import { BatchProcessor } from '@/utils/concurrencyManager';
+import { defaultRequestManager } from '@/lib/request-deduplication';
+import { resourceManager } from '@/utils/concurrencyManager';
+
+// 内部类型：健康检查响应
+type HealthResponse = {
+  status: string;
+  services?: Record<string, any>;
+  time?: string;
+  version?: string;
+};
 
 /**
  * JWT Token 管理器
@@ -151,16 +161,15 @@ export class ApiService {
       const duration = Date.now() - startTime;
       
       // 记录性能指标
-      logger.performance(
-        `API Request completed: ${options.method || 'GET'} ${endpoint}`,
-        'api-request',
+      logger.logPerformance(
+        `api-request-${options.method || 'GET'}-${endpoint.replace(/[^a-zA-Z0-9]/g, '-')}`,
+        duration,
+        response.ok,
         {
           requestId,
           endpoint,
           method: options.method || 'GET',
-          status: response.status,
-          duration,
-          success: response.ok
+          status: response.status
         }
       );
 
@@ -407,7 +416,7 @@ export class ApiService {
     
     // 使用请求去重
     const requestKey = `getDomainInfo:${domain}`;
-    return requestDeduplicator.deduplicate(requestKey, async () => {
+    return defaultRequestManager.execute(requestKey, async () => {
       logger.info('开始获取域名WHOIS信息', { domain });
       
       const operation = async () => {
@@ -449,7 +458,7 @@ export class ApiService {
     
     // 使用请求去重
     const requestKey = `getDNSInfo:${domain}`;
-    return requestDeduplicator.deduplicate(requestKey, async () => {
+    return defaultRequestManager.execute(requestKey, async () => {
       logger.info('开始获取DNS记录信息', { domain });
       
       const operation = async () => {
@@ -573,7 +582,7 @@ export class ApiService {
     logger.info('开始获取所有域名信息', { domain, requestId });
     
     // 使用请求去重避免重复的getAllInfo调用
-    return requestDeduplicator.deduplicate(`getAllInfo:${domain}`, async () => {
+    return defaultRequestManager.execute(`getAllInfo:${domain}`, async () => {
       // 监控内存使用情况
       const memoryBefore = resourceManager.getMemoryUsage();
       
@@ -617,18 +626,21 @@ export class ApiService {
         const memoryAfter = resourceManager.getMemoryUsage();
         
         // 记录性能和用户行为
-        logger.performance('getAllInfo完成', {
-          domain,
-          requestId,
+        logger.logPerformance(
+          'get-all-info',
           duration,
-          successCount,
-          errorCount,
-          totalRequests: 3,
-          memoryUsage: {
-            before: memoryBefore,
-            after: memoryAfter,
-            delta: memoryAfter - memoryBefore
-          },
+          successCount > 0,
+          {
+            domain,
+            requestId,
+            successCount,
+            errorCount,
+            totalRequests: 3,
+            memoryUsage: {
+              before: memoryBefore,
+              after: memoryAfter,
+              delta: memoryAfter - memoryBefore
+            },
           cacheHits: this.requestCache.size,
           successRate: successCount / 3
         });
