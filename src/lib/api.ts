@@ -11,6 +11,17 @@ import type {
   StrapiResponse
 } from '@/types';
 import { toCMSLocale } from '@/i18n/config';
+import { logger } from './logger';
+import { 
+  AppError, 
+  NetworkError, 
+  ValidationError, 
+  AuthenticationError, 
+  BusinessLogicError,
+  createErrorContext,
+  globalErrorHandler
+} from './error-handler';
+import { errorRetryManager } from './error-handler';
 
 // API 基础配置 - 修复端口配置问题
 // 开发环境：使用环境变量配置的API地址
@@ -56,11 +67,15 @@ class TokenManager {
     // 检查token是否还有效（提前5秒过期）
     const now = Date.now();
     if (this.token && now < this.tokenExpiry - 5000) {
+      logger.debug('Using cached JWT token', 'token-manager');
       return this.token;
     }
 
     // 获取新token - 参考后端auth.go，获取token时不需要X-API-KEY
     try {
+      logger.info('Requesting new JWT token', 'token-manager');
+      const startTime = Date.now();
+      
       const response = await fetch(`${API_BASE_URL}/api/auth/token`, {
         method: 'POST',
         headers: {
@@ -70,8 +85,20 @@ class TokenManager {
         },
       });
 
+      const duration = Date.now() - startTime;
+      
       if (!response.ok) {
-        throw new Error(`Failed to get token: ${response.status}`);
+        const context = createErrorContext(
+          'token-manager',
+          'getToken',
+          { httpStatus: response.status, duration }
+        );
+        const error = new AuthenticationError(
+          `Failed to get token: ${response.status}`,
+          context
+        );
+        globalErrorHandler.reportError(error, context);
+        throw error;
       }
 
       const data = await response.json();
@@ -80,14 +107,34 @@ class TokenManager {
       // JWT token有效期30秒
       this.tokenExpiry = now + 30 * 1000;
       
+      logger.performance(
+        'JWT token obtained successfully',
+        'token-manager',
+        { duration, tokenExpiry: this.tokenExpiry }
+      );
+      
       return this.token!
     } catch (error) {
-      console.error('获取JWT token失败:', error);
-      throw new ApiError(401, '认证失败，无法获取访问令牌');
+      if (error instanceof AppError) {
+        throw error;
+      }
+      
+      const context = createErrorContext(
+        'token-manager',
+        'getToken',
+        { originalError: error instanceof Error ? error.message : 'Unknown error' }
+      );
+      const authError = new AuthenticationError(
+        '认证失败，无法获取访问令牌',
+        context
+      );
+      globalErrorHandler.reportError(authError, context);
+      throw authError;
     }
   }
 
   static clearToken(): void {
+    logger.debug('Clearing JWT token', 'token-manager');
     this.token = null;
     this.tokenExpiry = 0;
   }
@@ -105,6 +152,7 @@ interface ApiResponse<T> {
     cachedAt?: string;
     processingTimeMs?: number;
     processing?: number;
+    requestId?: string;
   };
 }
 
@@ -231,12 +279,31 @@ class ApiError extends Error {
   }
 }
 
+// 增强的API错误类，继承自新的错误处理系统
+class EnhancedApiError extends AppError {
+  constructor(
+    message: string,
+    public status: number,
+    context?: any,
+    public response?: unknown
+  ) {
+    super(message, context, status >= 500 || status === 408 || status === 429);
+    this.name = 'EnhancedApiError';
+  }
+}
+
 // 通用请求函数
 async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
+  const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const startTime = Date.now();
   
-  // 开发环境下仅在需要时输出URL（减少日志噪音）
-  // console.log('🌐 Full URL:', url);
+  // 记录请求开始
+  logger.debug(
+    `Starting API request: ${options.method || 'GET'} ${endpoint}`,
+    'api-client',
+    { requestId, url, method: options.method || 'GET' }
+  );
   
   // 为需要认证的接口添加JWT token
   const needsAuth = !endpoint.includes('/api/health') && !endpoint.includes('/api/auth/token');
@@ -255,9 +322,18 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
       // 添加X-API-KEY用于IP白名单验证（实际API调用时需要）
       headers['X-API-KEY'] = process.env.NEXT_PUBLIC_API_KEY || 'default-api-key-for-development';
     } catch (error) {
-      throw new ApiError(401, '认证失败');
+      const context = createErrorContext(
+        'api-client',
+        'authentication',
+        { requestId, endpoint }
+      );
+      const authError = new AuthenticationError('认证失败', context);
+      globalErrorHandler.reportError(authError, context);
+      throw authError;
     }
   }
+
+  headers['X-Request-ID'] = requestId;
 
   const config: RequestInit = {
     headers,
@@ -266,6 +342,21 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
 
   try {
     const response = await fetch(url, config);
+    const duration = Date.now() - startTime;
+    
+    // 记录请求性能
+    logger.performance(
+      `API Request completed: ${options.method || 'GET'} ${endpoint}`,
+      'api-client',
+      {
+        requestId,
+        method: options.method || 'GET',
+        endpoint,
+        status: response.status,
+        duration,
+        success: response.ok
+      }
+    );
     
     if (!response.ok) {
       // 尝试解析错误响应
@@ -281,42 +372,115 @@ async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promi
         TokenManager.clearToken();
       }
 
+      const context = createErrorContext(
+        'api-client',
+        endpoint,
+        {
+          requestId,
+          httpStatus: response.status,
+          httpStatusText: response.statusText,
+          duration,
+          errorData
+        }
+      );
+      
+      // 根据状态码选择错误类型
+      let ErrorClass = BusinessLogicError;
+      if (response.status >= 500) {
+        ErrorClass = NetworkError;
+      } else if (response.status === 400 || response.status === 422) {
+        ErrorClass = ValidationError;
+      } else if (response.status === 401) {
+        ErrorClass = AuthenticationError;
+      }
+      
       const errorMessage = errorData.message || errorData.error || 
                           `API请求失败: ${response.status} ${response.statusText}`;
       
-      throw new ApiError(response.status, errorMessage, errorData);
+      const error = new ErrorClass(errorMessage, context, response.status >= 500);
+      globalErrorHandler.reportError(error, context);
+      throw error;
     }
 
     const data = await response.json();
     
     // 检查API响应格式
     if (data.success === false) {
-      throw new ApiError(
-        response.status,
-        data.error || data.message || '请求失败',
-        data
+      const context = createErrorContext(
+        'api-client',
+        endpoint,
+        {
+          requestId,
+          businessError: true,
+          duration,
+          responseData: data
+        }
       );
+      
+      const error = new BusinessLogicError(
+        data.error || data.message || '请求失败',
+        context
+      );
+      
+      globalErrorHandler.reportError(error, context);
+      throw error;
     }
+
+    // 记录成功的用户行为
+    logger.userBehavior(
+      `API request successful: ${endpoint}`,
+      'api-success',
+      { requestId, endpoint, duration }
+    );
 
     return data;
   } catch (error) {
-    if (error instanceof ApiError) {
+    const duration = Date.now() - startTime;
+    
+    if (error instanceof AppError) {
       throw error;
     }
     
     // 网络错误或其他错误
-    throw new ApiError(0, `网络错误: ${error instanceof Error ? error.message : '未知错误'}`);
+    const context = createErrorContext(
+      'api-client',
+      endpoint,
+      {
+        requestId,
+        networkError: true,
+        duration,
+        originalError: error instanceof Error ? error.message : 'Unknown error'
+      }
+    );
+    
+    const networkError = new NetworkError(
+      `网络错误: ${error instanceof Error ? error.message : '未知错误'}`,
+      context,
+      true
+    );
+    
+    globalErrorHandler.reportError(networkError, context);
+    throw networkError;
   }
 }
 
 // CMS 请求函数
 async function cmsRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${CMS_BASE_URL}${endpoint}`;
+  const requestId = `cms_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const startTime = Date.now();
   
-  // 开发环境下仅在需要时输出CMS URL
-  // console.log('🎨 CMS URL:', url);
+  // 记录CMS请求开始
+  logger.debug(
+    `Starting CMS request: ${options.method || 'GET'} ${endpoint}`,
+    'cms-client',
+    { requestId, url, method: options.method || 'GET' }
+  );
   
-  const headers: Record<string, string> = { ...cmsHeaders };
+  const headers: Record<string, string> = {
+    ...cmsHeaders,
+    'X-Request-ID': requestId,
+  };
   
   // 合并用户提供的headers
   if (options.headers) {
@@ -330,6 +494,21 @@ async function cmsRequest<T>(endpoint: string, options: RequestInit = {}): Promi
 
   try {
     const response = await fetch(url, config);
+    const duration = Date.now() - startTime;
+    
+    // 记录CMS请求性能
+    logger.performance(
+      `CMS Request completed: ${options.method || 'GET'} ${endpoint}`,
+      'cms-client',
+      {
+        requestId,
+        method: options.method || 'GET',
+        endpoint,
+        status: response.status,
+        duration,
+        success: response.ok
+      }
+    );
     
     if (!response.ok) {
       // 尝试解析错误响应
@@ -378,29 +557,92 @@ async function cmsRequest<T>(endpoint: string, options: RequestInit = {}): Promi
         errorText: errorText.substring(0, 500) // 限制日志长度
       });
       
-      throw new CMSError(response.status, 'CMSError', errorMessage, errorData);
+      const context = createErrorContext(
+        'cms-client',
+        endpoint,
+        {
+          requestId,
+          httpStatus: response.status,
+          httpStatusText: response.statusText,
+          duration,
+          errorData
+        }
+      );
+      
+      // 根据状态码选择错误类型
+      let ErrorClass = BusinessLogicError;
+      if (response.status >= 500) {
+        ErrorClass = NetworkError;
+      } else if (response.status === 400 || response.status === 422) {
+        ErrorClass = ValidationError;
+      } else if (response.status === 401 || response.status === 403) {
+        ErrorClass = AuthenticationError;
+      }
+      
+      const error = new ErrorClass(errorMessage, context, response.status >= 500);
+      globalErrorHandler.reportError(error, context);
+      throw error;
     }
 
     const data = await response.json();
     
     // 检查CMS响应格式
     if (data.error) {
-      throw new CMSError(
-        response.status,
-        data.error.name || 'CMSError',
-        data.error.message || '请求失败',
-        data.error.details
+      const context = createErrorContext(
+        'cms-client',
+        endpoint,
+        {
+          requestId,
+          businessError: true,
+          duration,
+          responseData: data
+        }
       );
+      
+      const error = new BusinessLogicError(
+        data.error.message || data.error.name || '请求失败',
+        context
+      );
+      
+      globalErrorHandler.reportError(error, context);
+      throw error;
     }
+
+    // 记录成功的CMS请求
+    logger.userBehavior(
+      `CMS request successful: ${endpoint}`,
+      'cms-success',
+      { requestId, endpoint, duration }
+    );
 
     return data;
   } catch (error) {
-    if (error instanceof CMSError) {
+    const duration = Date.now() - startTime;
+    
+    if (error instanceof AppError) {
       throw error;
     }
     
     // 网络错误或其他错误
-    throw new CMSError(0, 'NetworkError', `网络错误: ${error instanceof Error ? error.message : '未知错误'}`);
+    const context = createErrorContext(
+      'cms-client',
+      endpoint,
+      {
+        requestId,
+        networkError: true,
+        duration,
+        originalError: error instanceof Error ? error.message : 'Unknown error'
+      }
+    );
+    
+    const networkError = new NetworkError(
+      `网络错误: ${error instanceof Error ? error.message : '未知错误'}`,
+      context,
+      true
+    );
+    
+    globalErrorHandler.reportError(networkError, context);
+    throw networkError;
   }
 }
 
@@ -419,28 +661,51 @@ class CMSError extends Error {
 
 // 域名 WHOIS 查询
 export async function queryDomainInfo(domain: string): Promise<DomainInfo> {
-  const response = await apiRequest<ApiResponse<ApiDomainResponse>>(`/api/v1/whois/${encodeURIComponent(domain)}`);
-  
-  const data = response.data;
-  if (!data) {
-    throw new ApiError(500, '未收到有效的响应数据');
-  }
+  const operation = async () => {
+    logger.info(`Querying domain info for: ${domain}`, 'domain-api');
+    
+    const response = await apiRequest<ApiResponse<ApiDomainResponse>>(`/api/v1/whois/${encodeURIComponent(domain)}`);
+    
+    const data = response.data;
+    if (!data) {
+      throw new BusinessLogicError('未收到有效的响应数据');
+    }
 
-  // 将后端响应转换为前端格式
-  return {
-    domain: data.domain,
-    available: data.available,
-    registrar: data.registrar || '未知',
-    status: data.status || [],
-    created: data.creationDate || '',
-    updated: data.updatedDate || '',
-    expires: data.expiryDate || '',
-    nameservers: data.nameServers || [],
-    sourceProvider: data.sourceProvider,
-    protocol: data.protocol,
-    // 简化联系人信息（后端暂未提供详细联系人信息）
-    contacts: {},
+    // 将后端响应转换为前端格式
+    const result: DomainInfo = {
+      domain: data.domain,
+      available: data.available,
+      registrar: data.registrar || '未知',
+      status: data.status || [],
+      created: data.creationDate || '',
+      updated: data.updatedDate || '',
+      expires: data.expiryDate || '',
+      nameservers: data.nameServers || [],
+      sourceProvider: data.sourceProvider,
+      protocol: data.protocol,
+      // 简化联系人信息（后端暂未提供详细联系人信息）
+      contacts: {},
+    };
+    
+    logger.userBehavior(
+      `Domain info retrieved successfully: ${domain}`,
+      'domain-lookup',
+      { domain, sourceProvider: result.sourceProvider, protocol: result.protocol }
+    );
+    
+    return result;
   };
+  
+  return errorRetryManager.executeWithRetry(
+    operation,
+    {
+      maxAttempts: 3,
+      baseDelay: 1000,
+      maxDelay: 5000,
+      backoffMultiplier: 2
+    },
+    `queryDomainInfo-${domain}`
+  );
 }
 
 // RDAP 查询（新增）
@@ -469,94 +734,177 @@ export async function queryRDAPInfo(domain: string): Promise<DomainInfo> {
 
 // DNS 记录查询
 export async function queryDNSInfo(domain: string): Promise<DNSInfo> {
-  const response = await apiRequest<ApiResponse<ApiDnsResponse>>(`/api/v1/dns/${encodeURIComponent(domain)}`);
-  
-  const data = response.data;
-  if (!data) {
-    throw new ApiError(500, '未收到有效的响应数据');
-  }
-
-  // 转换DNS服务器测试结果为标准DNS记录格式
-  const records: DNSInfo['records'] = {};
-  let overallStatus = 'success';
-  
-  // 从所有DNS服务器的测试结果中提取A记录
-  const aRecords: DNSRecord[] = [];
-  
-  Object.entries(data).forEach(([serverName, serverData]) => {
-    if (serverName === 'cacheTime' || serverName === 'isCached') return;
+  const operation = async () => {
+    logger.info(`Querying DNS info for: ${domain}`, 'dns-api');
     
-    // 类型保护：确保serverData是DNSServerResult类型
-    if (serverData && typeof serverData === 'object' && 'testSuccessful' in serverData) {
-      const dnsResult = serverData as DNSServerResult;
-      
-      if (dnsResult.testSuccessful && dnsResult.testResults) {
-        dnsResult.testResults.forEach((result: any) => {
-          if (result.success && result.ips) {
-            result.ips.forEach((ip: string) => {
-              // 避免重复IP
-              if (!aRecords.find(record => record.value === ip)) {
-                aRecords.push({
-                  type: 'A',
-                  value: ip,
-                  ttl: 300, // 默认TTL
-                });
-              }
-            });
-          }
-        });
-      } else {
-        overallStatus = 'partial';
-      }
+    const response = await apiRequest<ApiResponse<ApiDnsResponse>>(`/api/v1/dns/${encodeURIComponent(domain)}`);
+    
+    const data = response.data;
+    if (!data) {
+      throw new BusinessLogicError('未收到有效的响应数据');
     }
-  });
 
-  if (aRecords.length > 0) {
-    records.A = aRecords;
-  } else {
-    overallStatus = 'error';
-  }
+    // 转换DNS服务器测试结果为标准DNS记录格式
+    const records: DNSInfo['records'] = {};
+    let overallStatus = 'success';
+    
+    // 从所有DNS服务器的测试结果中提取A记录
+    const aRecords: DNSRecord[] = [];
+    
+    Object.entries(data).forEach(([serverName, serverData]) => {
+      if (serverName === 'cacheTime' || serverName === 'isCached') return;
+      
+      // 类型保护：确保serverData是DNSServerResult类型
+      if (serverData && typeof serverData === 'object' && 'testSuccessful' in serverData) {
+        const dnsResult = serverData as DNSServerResult;
+        
+        if (dnsResult.testSuccessful && dnsResult.testResults) {
+          dnsResult.testResults.forEach((result: any) => {
+            if (result.success && result.ips) {
+              result.ips.forEach((ip: string) => {
+                // 避免重复IP
+                if (!aRecords.find(record => record.value === ip)) {
+                  aRecords.push({
+                    type: 'A',
+                    value: ip,
+                    ttl: 300, // 默认TTL
+                  });
+                }
+              });
+            }
+          });
+        } else {
+          overallStatus = 'partial';
+        }
+      }
+    });
 
-  return {
-    domain,
-    records,
-    status: overallStatus,
-    // 添加原始测试结果供前端显示详细信息
-    testResults: data,
-    cached: data.isCached,
-    cacheTime: data.cacheTime,
+    if (aRecords.length > 0) {
+      records.A = aRecords;
+    } else {
+      overallStatus = 'error';
+    }
+
+    const result: DNSInfo = {
+      domain,
+      records,
+      status: overallStatus,
+      // 添加原始测试结果供前端显示详细信息
+      testResults: data,
+      cached: data.isCached,
+      cacheTime: data.cacheTime,
+    };
+    
+    logger.userBehavior(
+      `DNS info retrieved successfully: ${domain}`,
+      'dns-lookup',
+      { 
+        domain, 
+        cached: result.cached, 
+        status: result.status,
+        recordCount: aRecords.length
+      }
+    );
+    
+    return result;
   };
+  
+  return errorRetryManager.executeWithRetry(
+    operation,
+    {
+      maxAttempts: 3,
+      baseDelay: 1000,
+      maxDelay: 5000,
+      backoffMultiplier: 2
+    },
+    `queryDNSInfo-${domain}`
+  );
 }
 
 // 健康检查查询
 export async function queryHealthInfo(detailed: boolean = false): Promise<HealthInfo> {
-  const response = await apiRequest<ApiHealthResponse>(`/api/health${detailed ? '?detailed=true' : ''}`);
-  
-  return {
-    status: response.status,
-    version: response.version,
-    timestamp: response.time,
-    services: response.services,
-    lastCheck: response.lastCheck,
+  const operation = async () => {
+    logger.info('Querying health info', 'health-api');
+    
+    const response = await apiRequest<ApiHealthResponse>(`/api/health${detailed ? '?detailed=true' : ''}`);
+    
+    const result: HealthInfo = {
+      status: response.status,
+      version: response.version,
+      timestamp: response.time,
+      services: response.services,
+      lastCheck: response.lastCheck,
+    };
+    
+    logger.userBehavior(
+      'Health info retrieved successfully',
+      'health-check',
+      { 
+        status: result.status,
+        serviceCount: Object.keys(result.services || {}).length,
+        detailed
+      }
+    );
+    
+    return result;
   };
+  
+  return errorRetryManager.executeWithRetry(
+    operation,
+    {
+      maxAttempts: 2,
+      baseDelay: 500,
+      maxDelay: 2000,
+      backoffMultiplier: 2
+    },
+    'queryHealthInfo'
+  );
 }
 
 // 网站截图查询
 export async function queryScreenshotInfo(domain: string): Promise<ScreenshotInfo> {
-  const response = await apiRequest<ApiResponse<ApiScreenshotResponse>>(`/api/v1/screenshot/${encodeURIComponent(domain)}`);
-  
-  const data = response.data;
-  if (!data) {
-    throw new ApiError(500, '未收到有效的响应数据');
-  }
+  const operation = async () => {
+    logger.info(`Querying screenshot info for: ${domain}`, 'screenshot-api');
+    
+    const response = await apiRequest<ApiResponse<ApiScreenshotResponse>>(`/api/v1/screenshot/${encodeURIComponent(domain)}`);
+    
+    const data = response.data;
+    if (!data) {
+      throw new BusinessLogicError('未收到有效的响应数据');
+    }
 
-  return {
-    domain: data.domain,
-    imageUrl: data.imageUrl,
-    status: data.status,
-    title: data.title,
-    timestamp: data.timestamp,
+    const result: ScreenshotInfo = {
+      domain: data.domain,
+      imageUrl: data.imageUrl,
+      status: data.status,
+      title: data.title,
+      timestamp: data.timestamp,
+    };
+    
+    logger.userBehavior(
+      `Screenshot info retrieved successfully: ${domain}`,
+      'screenshot-capture',
+      { 
+        domain, 
+        status: result.status,
+        hasImage: !!result.imageUrl,
+        title: result.title
+      }
+    );
+    
+    return result;
   };
+  
+  return errorRetryManager.executeWithRetry(
+    operation,
+    {
+      maxAttempts: 2,
+      baseDelay: 2000,
+      maxDelay: 8000,
+      backoffMultiplier: 2
+    },
+    `queryScreenshotInfo-${domain}`
+  );
 }
 
 // Base64截图查询
@@ -782,15 +1130,44 @@ function buildQueryParams(params: BlogQueryParams = {}): string {
 
 // 获取所有博客文章
 export async function getBlogPosts(params: BlogQueryParams = {}): Promise<BlogPostsResponse> {
-  const queryParams = buildQueryParams({
-    ...params,
-    locale: params.locale || 'en',  // 确保传递locale参数
-    populate: params.populate || '*',  // 使用简化格式，自动填充所有关系
-    sort: params.sort || ['publishedAt:desc'],
-    publicationState: params.publicationState || 'live'
-  });
+  const operation = async () => {
+    logger.info(`Querying blog posts with params: ${JSON.stringify(params)}`, 'blog-api');
+    
+    const queryParams = buildQueryParams({
+      ...params,
+      locale: params.locale || 'en',  // 确保传递locale参数
+      populate: params.populate || '*',  // 使用简化格式，自动填充所有关系
+      sort: params.sort || ['publishedAt:desc'],
+      publicationState: params.publicationState || 'live'
+    });
+    
+    const response = await cmsRequest<BlogPostsResponse>(`/api/blog-posts?${queryParams}`);
+    
+    logger.userBehavior(
+      'Blog posts retrieved successfully',
+      'blog-list',
+      { 
+        locale: params.locale || 'en',
+        totalPosts: response.meta?.pagination?.total || 0,
+        postsCount: response.data?.length || 0,
+        page: params.pagination?.page || 1,
+        pageSize: params.pagination?.pageSize || 25
+      }
+    );
+    
+    return response;
+  };
   
-  return await cmsRequest<BlogPostsResponse>(`/api/blog-posts?${queryParams}`);
+  return errorRetryManager.executeWithRetry(
+    operation,
+    {
+      maxAttempts: 3,
+      baseDelay: 1000,
+      maxDelay: 5000,
+      backoffMultiplier: 2
+    },
+    `getBlogPosts-${JSON.stringify(params)}`
+  );
 }
 
 // 根据 slug 获取单篇博客文章
@@ -972,21 +1349,48 @@ export async function getBlogPostBySlugWithFallback(
 
 // 根据 ID 获取博客文章
 export async function getBlogPostById(id: number, locale: string = 'en'): Promise<BlogPost | null> {
-  const queryParams = buildQueryParams({
-    locale,
-    populate: '*',  // 使用简化格式
-    publicationState: 'live'
-  });
-  
-  try {
-    const response = await cmsRequest<StrapiResponse<BlogPost>>(`/api/blog-posts/${id}?${queryParams}`);
-    return response.data;
-  } catch (error) {
-    if (error instanceof CMSError && error.status === 404) {
-      return null;
+  const operation = async () => {
+    logger.info(`Querying blog post by ID: id=${id}, locale=${locale}`, 'blog-api');
+    
+    const queryParams = buildQueryParams({
+      locale,
+      populate: '*',  // 使用简化格式
+      publicationState: 'live'
+    });
+    
+    try {
+      const response = await cmsRequest<StrapiResponse<BlogPost>>(`/api/blog-posts/${id}?${queryParams}`);
+      
+      logger.userBehavior(
+        `Blog post retrieved successfully by ID: ${id}`,
+        'blog-detail',
+        { 
+          id,
+          locale,
+          title: response.data?.title || 'Unknown',
+          hasContent: !!response.data?.content
+        }
+      );
+      
+      return response.data;
+    } catch (error) {
+      if (error instanceof CMSError && error.status === 404) {
+        return null;
+      }
+      throw error;
     }
-    throw error;
-  }
+  };
+  
+  return errorRetryManager.executeWithRetry(
+    operation,
+    {
+      maxAttempts: 3,
+      baseDelay: 1000,
+      maxDelay: 5000,
+      backoffMultiplier: 2
+    },
+    `getBlogPostById-${id}-${locale}`
+  );
 }
 
 // 获取推荐博客文章

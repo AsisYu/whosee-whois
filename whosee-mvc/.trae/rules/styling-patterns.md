@@ -1,0 +1,373 @@
+---
+description: Tailwind CSS styling patterns and conventions for whosee-whois
+globs: *.tsx,*.ts,*.css
+alwaysApply: false
+---
+
+# Styling Patterns for Whosee WHOIS
+
+## Tailwind Configuration
+
+### Configuration File
+[tailwind.config.ts](mdc:tailwind.config.ts) includes:
+- shadcn/ui design system
+- Custom color palette
+- Dark mode support
+- Typography settings
+
+### CSS Variables
+Global styles in [src/app/globals.css](mdc:src/app/globals.css):
+
+```css
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 98%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222.2 84% 4.9%;
+  --destructive: 0 84.2% 60.2%;
+  --border: 214.3 31.8% 91.4%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --border: 217.2 32.6% 17.5%;
+}
+```
+
+## Design System
+
+### Color Palette
+Use semantic color classes:
+
+```typescript
+// Background colors
+"bg-background"      // Main background
+"bg-muted"          // Subtle background
+"bg-accent"         // Accent background  
+"bg-destructive"    // Error background
+"bg-primary"        // Primary brand color
+
+// Text colors
+"text-foreground"         // Main text
+"text-muted-foreground"   // Subtle text
+"text-accent-foreground"  // Accent text
+"text-destructive"        // Error text
+"text-primary"            // Primary text
+
+// Border colors
+"border"            // Default border
+"border-destructive" // Error border
+"border-primary"    // Primary border
+```
+
+### Typography Scale
+```typescript
+// Headings
+"text-4xl font-bold"        // Main page title
+"text-3xl font-semibold"    // Section title
+"text-2xl font-semibold"    // Subsection title
+"text-xl font-medium"       // Card title
+"text-lg font-medium"       // Component title
+
+// Body text
+"text-base"                 // Default body text
+"text-sm text-muted-foreground"  // Helper text
+"text-xs text-muted-foreground"  // Caption text
+```
+
+### Spacing System
+```typescript
+// Container spacing
+"container mx-auto px-4 py-8"     // Page container
+"max-w-4xl mx-auto"               // Content width
+"space-y-6"                       // Vertical spacing
+
+// Component spacing
+"p-6"                             // Card padding
+"px-4 py-2"                       // Button padding
+"gap-4"                           // Flex/grid gap
+"mb-6"                            // Section margin
+```
+
+## Component Styling Patterns
+
+### Layout Components
+
+#### Page Layout
+```typescript
+// Standard page structure
+<main className="container mx-auto px-4 py-8">
+  <div className="max-w-4xl mx-auto">
+    <h1 className="text-3xl font-bold mb-6">{title}</h1>
+    <div className="space-y-6">
+      {/* Page content */}
+    </div>
+  </div>
+</main>
+```
+
+#### Card Component
+```typescript
+// Card styling pattern
+<div className="bg-background border rounded-lg shadow-sm p-6">
+  <h3 className="text-xl font-semibold mb-4">{title}</h3>
+  <div className="space-y-4">
+    {/* Card content */}
+  </div>
+</div>
+```
+
+#### Grid Layout
+```typescript
+// Feature grid
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {features.map((feature) => (
+    <FeatureCard key={feature.id} {...feature} />
+  ))}
+</div>
+```
+
+### Form Styling
+
+#### Input Components
+```typescript
+// Standard input styling
+<input className={cn(
+  "flex h-10 w-full rounded-md border border-input",
+  "bg-background px-3 py-2 text-sm",
+  "ring-offset-background file:border-0 file:bg-transparent",
+  "file:text-sm file:font-medium placeholder:text-muted-foreground",
+  "focus-visible:outline-none focus-visible:ring-2",
+  "focus-visible:ring-ring focus-visible:ring-offset-2",
+  "disabled:cursor-not-allowed disabled:opacity-50",
+  error && "border-destructive focus-visible:ring-destructive"
+)} />
+```
+
+#### Button Variants
+```typescript
+// Button styling variants
+const buttonVariants = {
+  default: "bg-primary text-primary-foreground hover:bg-primary/90",
+  destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+  outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+  ghost: "hover:bg-accent hover:text-accent-foreground",
+  link: "text-primary underline-offset-4 hover:underline"
+};
+
+const sizeVariants = {
+  default: "h-10 px-4 py-2",
+  sm: "h-9 rounded-md px-3",
+  lg: "h-11 rounded-md px-8"
+};
+```
+
+### Navigation Styling
+
+#### Navbar Component
+```typescript
+// Navigation bar styling
+<nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+  <div className="container mx-auto px-4">
+    <div className="flex h-14 items-center justify-between">
+      <div className="flex items-center space-x-4">
+        {/* Logo and nav items */}
+      </div>
+      <div className="flex items-center space-x-2">
+        {/* Action buttons */}
+      </div>
+    </div>
+  </div>
+</nav>
+```
+
+#### Navigation Links
+```typescript
+// Active/inactive link styling
+<Link className={cn(
+  "text-sm font-medium transition-colors hover:text-primary",
+  isActive 
+    ? "text-primary" 
+    : "text-muted-foreground"
+)}>
+  {label}
+</Link>
+```
+
+## State-based Styling
+
+### Loading States
+```typescript
+// Loading skeleton
+<div className="animate-pulse">
+  <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+  <div className="h-4 bg-muted rounded w-1/2"></div>
+</div>
+
+// Loading spinner
+<div className="flex items-center justify-center p-8">
+  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+</div>
+```
+
+### Error States
+```typescript
+// Error message styling
+<div className="flex items-center p-4 text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
+  <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
+  <p className="text-sm">{errorMessage}</p>
+</div>
+```
+
+### Success States
+```typescript
+// Success message styling
+<div className="flex items-center p-4 text-green-700 bg-green-50 border border-green-200 rounded-lg dark:text-green-400 dark:bg-green-900/20 dark:border-green-800">
+  <CheckCircle className="h-5 w-5 mr-2 flex-shrink-0" />
+  <p className="text-sm">{successMessage}</p>
+</div>
+```
+
+## Data Display Styling
+
+### Table Styling
+```typescript
+// Data table styling
+<div className="rounded-md border">
+  <table className="w-full text-sm">
+    <thead className="bg-muted/50">
+      <tr>
+        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+          {header}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr className="border-t hover:bg-muted/50">
+        <td className="p-4 align-middle">
+          {data}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+```
+
+### Results Display
+```typescript
+// Search results styling
+<div className="space-y-4">
+  {results.map((result) => (
+    <div key={result.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+      <div className="flex items-start justify-between">
+        <div className="space-y-2">
+          <h3 className="font-semibold">{result.title}</h3>
+          <p className="text-sm text-muted-foreground">{result.description}</p>
+        </div>
+        <CopyButton value={result.value} />
+      </div>
+    </div>
+  ))}
+</div>
+```
+
+## Responsive Design
+
+### Breakpoint Usage
+```typescript
+// Mobile-first responsive design
+"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"  // Grid responsive
+"text-sm md:text-base lg:text-lg"                  // Text responsive
+"p-4 md:p-6 lg:p-8"                               // Padding responsive
+"space-y-4 md:space-y-6"                          // Spacing responsive
+```
+
+### Container Responsive
+```typescript
+// Responsive containers
+"container mx-auto px-4 sm:px-6 lg:px-8"         // Standard container
+"max-w-sm sm:max-w-md md:max-w-lg lg:max-w-4xl"  // Max width responsive
+```
+
+## Dark Mode Patterns
+
+### Dark Mode Classes
+```typescript
+// Dark mode variants
+"bg-white dark:bg-gray-900"           // Background colors
+"text-gray-900 dark:text-gray-100"    // Text colors
+"border-gray-200 dark:border-gray-700" // Border colors
+```
+
+### Theme-aware Components
+```typescript
+// Using CSS variables for theme support
+"bg-background text-foreground"        // Automatic theme colors
+"border-border"                        // Theme-aware borders
+"ring-ring"                           // Theme-aware focus rings
+```
+
+## Animation Patterns
+
+### Transition Classes
+```typescript
+// Standard transitions
+"transition-colors duration-200"       // Color transitions
+"transition-all duration-300"          // All property transitions
+"hover:scale-105 transition-transform" // Scale on hover
+```
+
+### Loading Animations
+```typescript
+// Pulse animation
+"animate-pulse"
+
+// Spin animation
+"animate-spin"
+
+// Bounce animation
+"animate-bounce"
+```
+
+## Utility Patterns
+
+### Common Class Combinations
+```typescript
+// Centered content
+"flex items-center justify-center"
+
+// Full height
+"min-h-screen"
+
+// Truncate text
+"truncate"
+
+// Screen reader only
+"sr-only"
+
+// Aspect ratio
+"aspect-square" // 1:1 ratio
+"aspect-video"  // 16:9 ratio
+```
+
+### Custom Utilities
+```typescript
+// Custom utility classes in globals.css
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+```

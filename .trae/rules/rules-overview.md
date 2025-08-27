@@ -81,10 +81,23 @@ This document provides an overview of all Cursor rules configured for the whosee
 - Type guards and validators
 - Advanced TypeScript patterns
 
+### 9. MVC Patterns ([mvc-patterns.md](md:.trae/rules/mvc-patterns.md))
+**Always Applied**: Yes | **Globs**: `*.ts,*.tsx`
+- MVC 架构模式指导和严格分层要求
+- Model 层数据模型和状态管理
+- Controller 层业务逻辑控制
+- View 层用户界面组件
+- 并发性能优化策略和实现
+- 用户预览体验优化技术
+- AI 代码生成指导原则
+- 最佳实践和性能优化
+- 测试策略和代码组织
+
 ## Rule Categories
 
 ### Architecture & Structure
 - [project-guide.mdc](mdc:.cursor/rules/project-guide.mdc) - Overall project structure
+- [mvc-patterns.md](md:.trae/rules/mvc-patterns.md) - MVC 架构模式指导
 - [development-workflow.mdc](mdc:.cursor/rules/development-workflow.mdc) - Development processes
 
 ### Frontend Development
@@ -138,21 +151,27 @@ go test ./...        # Run tests
 ## Usage Guidelines
 
 ### When to Use Each Rule
-1. **Starting new features**: Reference `project-guide.mdc` and `nextjs-patterns.mdc`
-2. **Creating components**: Use `component-patterns.mdc` and `styling-patterns.mdc`
-3. **Backend development**: Follow `api-patterns.mdc`
-4. **Adding translations**: Refer to `i18n-patterns.mdc`
-5. **Type definitions**: Use `type-patterns.mdc`
-6. **Setting up development**: Follow `development-workflow.mdc`
+1. **Starting new features**: 首先参考 `mvc-patterns.md` 确保架构合规，然后使用 `project-guide.mdc` 和 `nextjs-patterns.mdc`
+2. **Creating components**: 严格遵循 `mvc-patterns.md` 的分层原则，配合 `component-patterns.mdc` 和 `styling-patterns.mdc`
+3. **Performance optimization**: 参考 `mvc-patterns.md` 中的并发性能优化策略
+4. **User experience**: 遵循 `mvc-patterns.md` 中的用户预览体验优化指导
+5. **Backend development**: Follow `api-patterns.mdc`
+6. **Adding translations**: Refer to `i18n-patterns.mdc`
+7. **Type definitions**: Use `type-patterns.mdc`
+8. **Setting up development**: Follow `development-workflow.mdc`
+9. **Architecture design**: 严格遵循 `mvc-patterns.md` 进行合理的关注点分离
+10. **AI code generation**: 确保生成的代码符合 `mvc-patterns.md` 中的所有要求
 
 ### Best Practices
-- Always follow the established patterns for consistency
-- Use TypeScript strictly with proper type definitions
-- Implement internationalization for all user-facing text
-- Follow the component composition patterns from shadcn/ui
-- Use semantic Tailwind classes and design tokens
-- Test both frontend components and backend handlers
-- Follow Git conventions for commits and branching
+- **MVC 架构**: 严格遵循 MVC 分层架构，确保代码的可维护性和可测试性
+- **并发性能**: 优先使用 Promise.allSettled() 进行并发请求，实现请求去重和缓存机制
+- **用户体验**: 实现渐进式加载、骨架屏和智能错误恢复策略
+- **TypeScript**: 使用严格模式和完整的类型定义
+- **国际化**: 为所有用户界面文本实现国际化支持
+- **组件模式**: 遵循 shadcn/ui 的组件组合模式
+- **样式规范**: 使用语义化的 Tailwind 类和设计令牌
+- **测试覆盖**: 为前端组件和后端处理器提供完整测试
+- **Git 规范**: 遵循提交和分支的约定
 
 ## Updating Rules
 

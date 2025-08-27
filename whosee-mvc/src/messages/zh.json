@@ -1,0 +1,210 @@
+{
+  "common": {
+    "search": "搜索",
+    "loading": "加载中...",
+    "error": "错误",
+    "copy": "复制",
+    "copied": "已复制！",
+    "clear": "清除",
+    "retry": "重试",
+    "back": "返回",
+    "next": "下一页",
+    "previous": "上一页",
+    "close": "关闭",
+    "save": "保存",
+    "cancel": "取消",
+    "confirm": "确认",
+    "delete": "删除",
+    "edit": "编辑",
+    "view": "查看",
+    "download": "下载",
+    "upload": "上传",
+    "refresh": "刷新",
+    "settings": "设置",
+    "help": "帮助",
+    "about": "关于",
+    "contact": "联系",
+    "privacy": "隐私",
+    "terms": "条款",
+    "language": "语言",
+    "theme": "主题",
+    "light": "浅色",
+    "dark": "深色",
+    "system": "系统",
+    "yes": "是",
+    "no": "否",
+    "ok": "确定",
+    "placeholder": "请输入域名 (例如: example.com)"
+  },
+  "navigation": {
+    "home": "首页",
+    "domain": "域名查询",
+    "dns": "DNS查询",
+    "screenshot": "网站截图",
+    "health": "系统健康",
+    "blog": "博客",
+    "tools": "工具",
+    "api": "API",
+    "docs": "文档"
+  },
+  "nav": {
+    "domain": "域名",
+    "dns": "DNS",
+    "health": "健康",
+    "screenshot": "截图",
+    "description": "专业的域名分析工具",
+    "domainDesc": "WHOIS域名信息查询",
+    "dnsDesc": "DNS记录查询和分析",
+    "healthDesc": "系统健康监控",
+    "screenshotDesc": "网站截图捕获",
+    "switchLanguage": "切换语言"
+  },
+  "home": {
+    "title": "Whosee - 域名信息查询工具",
+    "subtitle": "获取全面的域名信息，包括WHOIS数据、DNS记录和网站截图",
+    "description": "专业的域名分析工具，提供WHOIS查询、DNS记录查找、健康监控和网站截图功能。",
+    "placeholder": "请输入域名 (例如: example.com)",
+    "search": "搜索",
+    "features": {
+      "title": "核心功能",
+      "domain": {
+        "title": "域名信息",
+        "description": "获取详细的WHOIS信息，包括注册详情、联系信息和域名状态"
+      },
+      "dns": {
+        "title": "DNS记录",
+        "description": "从多个DNS服务器查询DNS记录 (A, AAAA, MX, TXT, NS, CNAME, SOA)"
+      },
+      "screenshot": {
+        "title": "网站截图",
+        "description": "在不同设备视图下捕获网站截图 (桌面、移动、平板)"
+      },
+      "health": {
+        "title": "健康检查",
+        "description": "监控系统健康状态和服务状态，提供实时指标"
+      }
+    }
+  },
+  "domain": {
+    "title": "域名WHOIS查询",
+    "description": "获取全面的域名信息，包括注册详情、联系信息和名称服务器",
+    "search": {
+      "title": "搜索域名",
+      "description": "输入域名以获取WHOIS信息",
+      "placeholder": "请输入域名 (例如: example.com)"
+    },
+    "results": {
+      "title": "域名信息",
+      "registrar": "注册商",
+      "registrationDate": "注册日期",
+      "expirationDate": "到期日期",
+      "nameServers": "名称服务器",
+      "status": "状态",
+      "contacts": "联系信息",
+      "noData": "未找到域名信息"
+    },
+    "history": {
+      "title": "搜索历史",
+      "empty": "暂无搜索历史",
+      "clear": "清除历史"
+    },
+    "cache": {
+      "title": "缓存统计",
+      "size": "已缓存域名",
+      "clear": "清除缓存"
+    }
+  },
+  "dns": {
+    "title": "DNS记录查询",
+    "description": "从多个DNS服务器查询DNS记录并比较结果",
+    "search": {
+      "title": "DNS查询",
+      "description": "输入域名以查询DNS记录",
+      "placeholder": "请输入域名 (例如: example.com)"
+    },
+    "types": {
+      "title": "记录类型",
+      "all": "所有类型",
+      "A": "A记录",
+      "AAAA": "AAAA记录",
+      "MX": "MX记录",
+      "TXT": "TXT记录",
+      "NS": "NS记录",
+      "CNAME": "CNAME记录",
+      "SOA": "SOA记录"
+    },
+    "results": {
+      "title": "DNS记录",
+      "server": "DNS服务器",
+      "responseTime": "响应时间",
+      "records": "记录",
+      "noRecords": "未找到DNS记录"
+    }
+  },
+  "screenshot": {
+    "title": "网站截图",
+    "description": "在不同设备视图下捕获网站截图",
+    "search": {
+      "title": "截图捕获",
+      "description": "输入域名以捕获网站截图",
+      "placeholder": "请输入域名 (例如: example.com)"
+    },
+    "options": {
+      "title": "捕获选项",
+      "device": "设备视图",
+      "desktop": "桌面",
+      "mobile": "移动",
+      "tablet": "平板",
+      "fullPage": "整页",
+      "viewport": "仅视口"
+    },
+    "results": {
+      "title": "截图结果",
+      "domain": "域名",
+      "device": "设备",
+      "timestamp": "捕获时间",
+      "size": "图片大小",
+      "download": "下载",
+      "noImage": "无可用截图"
+    }
+  },
+  "health": {
+    "title": "系统健康监控",
+    "description": "监控系统健康状态和服务状态，提供实时指标",
+    "status": {
+      "title": "系统状态",
+      "healthy": "健康",
+      "unhealthy": "不健康",
+      "degraded": "降级",
+      "unknown": "未知"
+    },
+    "services": {
+      "title": "服务",
+      "database": "数据库",
+      "redis": "Redis缓存",
+      "api": "API服务器",
+      "dns": "DNS服务",
+      "whois": "WHOIS服务",
+      "screenshot": "截图服务"
+    },
+    "metrics": {
+      "title": "系统指标",
+      "responseTime": "响应时间",
+      "uptime": "运行时间",
+      "memoryUsage": "内存使用",
+      "cpuUsage": "CPU使用",
+      "lastCheck": "最后检查"
+    }
+  },
+  "errors": {
+    "invalidDomain": "请输入有效的域名",
+    "networkError": "网络错误，请重试",
+    "serverError": "服务器错误，请稍后重试",
+    "notFound": "未找到域名",
+    "timeout": "请求超时，请重试",
+    "rateLimit": "请求过于频繁，请稍等",
+    "unauthorized": "未授权访问",
+    "forbidden": "访问被禁止",
+    "unknown": "发生未知错误"
+  }
+}

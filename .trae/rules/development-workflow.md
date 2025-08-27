@@ -92,25 +92,199 @@ go test ./...        # Run tests
 go mod tidy          # Clean dependencies
 ```
 
+## MVC 开发流程
+
+### MVC 架构要求
+- **严格分层**: 所有代码必须遵循 MVC 分层架构，确保关注点分离
+- **Model 层**: 负责数据模型、状态管理和 API 交互
+- **Controller 层**: 处理业务逻辑、自定义 Hooks 和服务层
+- **View 层**: 专注于用户界面展示和交互
+
+### 开发流程规范
+1. **功能设计**: 首先设计 Model 层的数据结构和接口
+2. **业务逻辑**: 在 Controller 层实现业务逻辑和状态管理
+3. **界面实现**: 在 View 层创建用户界面组件
+4. **集成测试**: 确保三层之间的正确交互
+
+## 并发性能优化
+
+### 并发请求策略
+```typescript
+// 使用 Promise.allSettled() 进行并发请求
+const fetchMultipleData = async (domains: string[]) => {
+  const promises = domains.map(domain => 
+    Promise.allSettled([
+      api.whois.lookup(domain),
+      api.dns.check(domain, 'A'),
+      api.health.check(domain)
+    ])
+  );
+  
+  const results = await Promise.allSettled(promises);
+  return results.map(processResult);
+};
+```
+
+### 请求去重和缓存
+```typescript
+// 实现请求去重机制
+const requestCache = new Map<string, Promise<any>>();
+
+const deduplicatedRequest = async (key: string, requestFn: () => Promise<any>) => {
+  if (requestCache.has(key)) {
+    return requestCache.get(key);
+  }
+  
+  const promise = requestFn();
+  requestCache.set(key, promise);
+  
+  // 清理缓存
+  promise.finally(() => {
+    setTimeout(() => requestCache.delete(key), 5000);
+  });
+  
+  return promise;
+};
+```
+
+### 批量处理优化
+```typescript
+// 批量处理大量请求
+const batchProcess = async <T>(items: T[], batchSize: number = 5) => {
+  const results = [];
+  
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    const batchResults = await Promise.allSettled(
+      batch.map(item => processItem(item))
+    );
+    results.push(...batchResults);
+    
+    // 避免过载，添加延迟
+    if (i + batchSize < items.length) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  }
+  
+  return results;
+};
+```
+
+## 用户预览体验优化
+
+### 渐进式加载策略
+```typescript
+// 实现骨架屏和渐进式加载
+const ProgressiveLoader = ({ children }: { children: React.ReactNode }) => {
+  const [loadingStage, setLoadingStage] = useState('skeleton');
+  
+  useEffect(() => {
+    const stages = ['skeleton', 'partial', 'complete'];
+    let currentStage = 0;
+    
+    const timer = setInterval(() => {
+      if (currentStage < stages.length - 1) {
+        setLoadingStage(stages[++currentStage]);
+      } else {
+        clearInterval(timer);
+      }
+    }, 500);
+    
+    return () => clearInterval(timer);
+  }, []);
+  
+  return (
+    <div className={`transition-opacity duration-300 ${
+      loadingStage === 'complete' ? 'opacity-100' : 'opacity-75'
+    }`}>
+      {loadingStage === 'skeleton' ? <SkeletonLoader /> : children}
+    </div>
+  );
+};
+```
+
+### 智能错误恢复
+```typescript
+// 实现智能错误恢复机制
+const useSmartErrorRecovery = () => {
+  const [retryCount, setRetryCount] = useState(0);
+  const [lastError, setLastError] = useState<Error | null>(null);
+  
+  const executeWithRecovery = async <T>(fn: () => Promise<T>): Promise<T> => {
+    try {
+      const result = await fn();
+      setRetryCount(0);
+      setLastError(null);
+      return result;
+    } catch (error) {
+      setLastError(error as Error);
+      
+      if (retryCount < 3) {
+        setRetryCount(prev => prev + 1);
+        // 指数退避重试
+        await new Promise(resolve => 
+          setTimeout(resolve, Math.pow(2, retryCount) * 1000)
+        );
+        return executeWithRecovery(fn);
+      }
+      
+      throw error;
+    }
+  };
+  
+  return { executeWithRecovery, retryCount, lastError };
+};
+```
+
+### 性能监控集成
+```typescript
+// 实现性能监控
+const usePerformanceMonitoring = () => {
+  useEffect(() => {
+    const observer = new PerformanceObserver((list) => {
+      list.getEntries().forEach((entry) => {
+        if (entry.entryType === 'measure') {
+          console.log(`${entry.name}: ${entry.duration}ms`);
+          // 发送到监控服务
+        }
+      });
+    });
+    
+    observer.observe({ entryTypes: ['measure', 'navigation'] });
+    
+    return () => observer.disconnect();
+  }, []);
+};
+```
+
 ## Code Standards
+
+### MVC 代码规范
+- **Model 层**: 使用 TypeScript 接口定义数据模型，实现数据验证和转换
+- **Controller 层**: 使用自定义 Hooks 管理状态，实现业务逻辑分离
+- **View 层**: 专注于 UI 展示，避免直接的业务逻辑处理
+- **依赖注入**: 使用 Context 和 Provider 模式进行依赖管理
 
 ### TypeScript Standards
 - Use strict TypeScript configuration from [tsconfig.json](mdc:tsconfig.json)
 - Define interfaces in [src/types/index.ts](mdc:src/types/index.ts)
 - Use type-safe API calls with proper error handling
 - Export types alongside implementation
+- **并发类型安全**: 为并发操作定义专门的类型和接口
 
 ### Go Standards
 - Follow Go standard project layout
 - Use proper error handling with custom error types
 - Implement interfaces for testability
 - Document public functions and types
+- **并发安全**: 使用 context.Context 管理并发操作的生命周期
 
 ### Component Standards
 - Use functional components with hooks
 - Implement proper TypeScript interfaces
 - Follow shadcn/ui component patterns from [src/components/ui/](mdc:src/components/ui)
 - Use forwardRef for component composition
+- **性能优化**: 使用 React.memo、useMemo 和 useCallback 优化渲染性能
 
 ## Testing Patterns
 
