@@ -287,7 +287,7 @@ export function PerformancePanel({ className }: PerformancePanelProps) {
 
   if (!isVisible) {
     return (
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-4 right-4 z-[99999] pointer-events-auto">
         <Button
           onClick={() => setIsVisible(true)}
           variant="outline"
@@ -302,7 +302,7 @@ export function PerformancePanel({ className }: PerformancePanelProps) {
   }
 
   return (
-    <div className={`fixed bottom-4 right-4 z-50 w-96 ${className}`}>
+    <div className={`fixed bottom-4 right-4 z-[99999] w-96 pointer-events-auto ${className}`}>
       <Card className="bg-background/95 backdrop-blur-sm border shadow-lg">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">

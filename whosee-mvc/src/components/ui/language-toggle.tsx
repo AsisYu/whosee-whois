@@ -29,12 +29,12 @@ export function LanguageToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
+        <Button variant="outline" size="icon" className="bg-background/80">
           <Languages className="h-[1.2rem] w-[1.2rem]" />
           <span className="sr-only">{t('switchLanguage')}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="bg-popover/95 backdrop-blur supports-[backdrop-filter]:bg-popover/80">
         {locales.map((loc) => (
           <DropdownMenuItem
             key={loc}

@@ -103,7 +103,9 @@
     "search": {
       "title": "搜索域名",
       "description": "输入域名以获取WHOIS信息",
-      "placeholder": "请输入域名 (例如: example.com)"
+      "placeholder": "请输入域名 (例如: example.com)",
+      "searching": "搜索中...",
+      "button": "搜索"
     },
     "results": {
       "title": "域名信息",
@@ -113,12 +115,45 @@
       "nameServers": "名称服务器",
       "status": "状态",
       "contacts": "联系信息",
-      "noData": "未找到域名信息"
+      "noData": "未找到域名信息",
+      "basic": {
+        "title": "基础信息",
+        "domain": "域名",
+        "registrar": "注册商",
+        "status": "状态"
+      },
+      "dates": {
+        "title": "日期",
+        "created": "创建时间",
+        "expires": "到期时间",
+        "updated": "更新时间"
+      },
+      "contacts": {
+        "title": "联系人",
+        "name": "姓名",
+        "organization": "组织",
+        "email": "邮箱",
+        "phone": "电话"
+      },
+      "nameservers": {
+        "title": "名称服务器"
+      },
+      "tools": {
+        "title": "相关工具",
+        "description": "探索与该域名相关的更多工具",
+        "dns": "DNS 查询",
+        "screenshot": "网站截图",
+        "health": "系统健康"
+      }
     },
     "history": {
       "title": "搜索历史",
       "empty": "暂无搜索历史",
-      "clear": "清除历史"
+      "clear": "清除历史",
+      "description": "最近搜索的域名"
+    },
+    "error": {
+      "title": "请求错误"
     },
     "cache": {
       "title": "缓存统计",
@@ -132,7 +167,9 @@
     "search": {
       "title": "DNS查询",
       "description": "输入域名以查询DNS记录",
-      "placeholder": "请输入域名 (例如: example.com)"
+      "placeholder": "请输入域名 (例如: example.com)",
+      "searching": "查询中...",
+      "button": "查询"
     },
     "types": {
       "title": "记录类型",
@@ -145,12 +182,29 @@
       "CNAME": "CNAME记录",
       "SOA": "SOA记录"
     },
+    "error": {
+      "title": "请求错误"
+    },
     "results": {
       "title": "DNS记录",
       "server": "DNS服务器",
       "responseTime": "响应时间",
       "records": "记录",
-      "noRecords": "未找到DNS记录"
+      "noRecords": "未找到DNS记录",
+      "summary": {
+        "title": "汇总",
+        "totalRecords": "记录总数",
+        "recordTypes": "记录类型",
+        "status": "状态",
+        "responseTime": "响应时间"
+      },
+      "records": {
+        "name": "名称",
+        "value": "值",
+        "ttl": "TTL"
+      },
+      "noData": "没有DNS数据",
+      "noDataDescription": "未找到该域名与所选类型的记录"
     }
   },
   "screenshot": {
@@ -159,7 +213,11 @@
     "search": {
       "title": "截图捕获",
       "description": "输入域名以捕获网站截图",
-      "placeholder": "请输入域名 (例如: example.com)"
+      "placeholder": "请输入域名 (例如: example.com)",
+      "domain": "域名",
+      "invalidDomain": "请输入有效的域名",
+      "capturing": "正在捕获...",
+      "capture": "开始截图"
     },
     "options": {
       "title": "捕获选项",
@@ -167,22 +225,46 @@
       "desktop": "桌面",
       "mobile": "移动",
       "tablet": "平板",
+      "customSize": "自定义尺寸",
+      "width": "宽度",
+      "height": "高度",
+      "quality": "质量",
       "fullPage": "整页",
-      "viewport": "仅视口"
+      "fullPageDesc": "捕获超出首屏范围的整个页面"
     },
     "results": {
       "title": "截图结果",
+      "description": "{domain} 的截图",
       "domain": "域名",
       "device": "设备",
       "timestamp": "捕获时间",
-      "size": "图片大小",
+      "size": "图片尺寸",
+      "fileSize": "文件大小",
+      "captureTime": "捕获耗时",
+      "preview": "预览",
+      "metadata": "元数据",
       "download": "下载",
       "noImage": "无可用截图"
     }
   },
+  "actions": {},
+  "screenshotActions": {
+    "clear": "清除",
+    "copy": "复制",
+    "download": "下载",
+    "openNew": "新窗口打开"
+  },
   "health": {
     "title": "系统健康监控",
     "description": "监控系统健康状态和服务状态，提供实时指标",
+    "actions": {
+      "refreshing": "刷新中...",
+      "refresh": "刷新",
+      "stopAuto": "停止自动刷新",
+      "startAuto": "开始自动刷新",
+      "export": "导出报告"
+    },
+    "lastUpdated": "最后更新时间",
     "status": {
       "title": "系统状态",
       "healthy": "健康",
@@ -190,22 +272,45 @@
       "degraded": "降级",
       "unknown": "未知"
     },
+    "error": {
+      "title": "请求错误"
+    },
+    "overview": {
+      "systemStatus": "系统状态",
+      "healthScore": "健康评分",
+      "score": "评分",
+      "responseTime": "响应时间",
+      "services": "服务",
+      "healthy": "健康"
+    },
     "services": {
       "title": "服务",
+      "description": "服务状态详情",
       "database": "数据库",
       "redis": "Redis缓存",
       "api": "API服务器",
       "dns": "DNS服务",
       "whois": "WHOIS服务",
-      "screenshot": "截图服务"
+      "screenshot": "截图服务",
+      "responseTime": "响应时间",
+      "lastCheck": "最后检查"
     },
     "metrics": {
       "title": "系统指标",
+      "description": "关键系统性能指标",
       "responseTime": "响应时间",
       "uptime": "运行时间",
       "memoryUsage": "内存使用",
       "cpuUsage": "CPU使用",
       "lastCheck": "最后检查"
+    },
+    "critical": {
+      "title": "关键问题",
+      "description": "部分关键服务出现异常"
+    },
+    "noData": {
+      "title": "暂无数据",
+      "description": "没有可用的健康数据"
     }
   },
   "errors": {

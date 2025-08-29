@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,7 @@ import { logger } from '@/lib/logger';
 
 export default function DomainPage() {
   const t = useTranslations('domain');
+  const locale = useLocale();
   const [searchTerm, setSearchTerm] = useState('');
   const controller = new DomainController();
   const {
@@ -297,7 +298,7 @@ export default function DomainPage() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Button variant="outline" className="justify-start" asChild>
-                  <a href={`/dns?domain=${data.domain}`}>
+                  <a href={`/${locale}/dns?domain=${encodeURIComponent(data.domain)}`}>
                     <Globe className="h-4 w-4 mr-2" />
                     {t('results.tools.dns')}
                     <ExternalLink className="h-4 w-4 ml-auto" />
@@ -305,7 +306,7 @@ export default function DomainPage() {
                 </Button>
                 
                 <Button variant="outline" className="justify-start" asChild>
-                  <a href={`/screenshot?domain=${data.domain}`}>
+                  <a href={`/${locale}/screenshot?domain=${encodeURIComponent(data.domain)}`}>
                     <Globe className="h-4 w-4 mr-2" />
                     {t('results.tools.screenshot')}
                     <ExternalLink className="h-4 w-4 ml-auto" />
@@ -313,7 +314,7 @@ export default function DomainPage() {
                 </Button>
                 
                 <Button variant="outline" className="justify-start" asChild>
-                  <a href={`/health?domain=${data.domain}`}>
+                  <a href={`/${locale}/health?domain=${encodeURIComponent(data.domain)}`}>
                     <Shield className="h-4 w-4 mr-2" />
                     {t('results.tools.health')}
                     <ExternalLink className="h-4 w-4 ml-auto" />

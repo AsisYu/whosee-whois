@@ -1,4 +1,6 @@
 import { NextIntlClientProvider } from 'next-intl';
+import { Navbar } from '@/components/ui/navbar';
+import { Footer } from '@/components/ui/footer';
 import enMessages from '../../messages/en.json';
 import zhMessages from '../../messages/zh.json';
 
@@ -17,7 +19,13 @@ export default async function LocaleLayout({
   } catch {}
   return (
     <NextIntlClientProvider locale={locale as 'en' | 'zh'} messages={messages}>
-      {children}
+      <div className="relative flex min-h-screen flex-col">
+        <Navbar />
+        <div className="flex-1">
+          {children}
+        </div>
+        <Footer />
+      </div>
     </NextIntlClientProvider>
   );
 }

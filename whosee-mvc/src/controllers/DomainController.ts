@@ -115,6 +115,10 @@ export class DomainController extends BaseController<DomainInfo> {
    */
   private async performSearch(domain: string): Promise<void> {
     const startTime = Date.now();
+    const currentSearch = domain;
+    const requestMarker = Symbol('search');
+    // 标记当前查询，避免乱序返回覆盖
+    (this as any).__lastSearchMarker = requestMarker;
     
     await this.handleAsyncOperationWithRetry(
       async () => {
@@ -128,6 +132,10 @@ export class DomainController extends BaseController<DomainInfo> {
         }
         
         const result = await this.apiService.getDomainInfo(domain);
+        // 若期间用户又发起了新的搜索，放弃更新以避免旧数据覆盖
+        if ((this as any).__lastSearchMarker !== requestMarker) {
+          return result;
+        }
         this.model.setData(result);
         
         // 记录搜索历史

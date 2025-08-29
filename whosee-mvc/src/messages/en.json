@@ -103,7 +103,9 @@
     "search": {
       "title": "Search Domain",
       "description": "Enter a domain name to retrieve WHOIS information",
-      "placeholder": "Enter domain name (e.g., example.com)"
+      "placeholder": "Enter domain name (e.g., example.com)",
+      "searching": "Searching...",
+      "button": "Search"
     },
     "results": {
       "title": "Domain Information",
@@ -113,12 +115,45 @@
       "nameServers": "Name Servers",
       "status": "Status",
       "contacts": "Contact Information",
-      "noData": "No domain information found"
+      "noData": "No domain information found",
+      "basic": {
+        "title": "Basic Information",
+        "domain": "Domain",
+        "registrar": "Registrar",
+        "status": "Status"
+      },
+      "dates": {
+        "title": "Dates",
+        "created": "Created",
+        "expires": "Expires",
+        "updated": "Updated"
+      },
+      "contacts": {
+        "title": "Contacts",
+        "name": "Name",
+        "organization": "Organization",
+        "email": "Email",
+        "phone": "Phone"
+      },
+      "nameservers": {
+        "title": "Name Servers"
+      },
+      "tools": {
+        "title": "Related Tools",
+        "description": "Explore more tools related to this domain",
+        "dns": "DNS Lookup",
+        "screenshot": "Website Screenshot",
+        "health": "System Health"
+      }
     },
     "history": {
       "title": "Search History",
       "empty": "No search history",
-      "clear": "Clear History"
+      "clear": "Clear History",
+      "description": "Recently searched domains"
+    },
+    "error": {
+      "title": "Request Error"
     },
     "cache": {
       "title": "Cache Statistics",
@@ -132,7 +167,9 @@
     "search": {
       "title": "DNS Query",
       "description": "Enter a domain name to query DNS records",
-      "placeholder": "Enter domain name (e.g., example.com)"
+      "placeholder": "Enter domain name (e.g., example.com)",
+      "searching": "Searching...",
+      "button": "Search"
     },
     "types": {
       "title": "Record Types",
@@ -145,12 +182,29 @@
       "CNAME": "CNAME Records",
       "SOA": "SOA Records"
     },
+    "error": {
+      "title": "Request Error"
+    },
     "results": {
       "title": "DNS Records",
       "server": "DNS Server",
       "responseTime": "Response Time",
       "records": "Records",
-      "noRecords": "No DNS records found"
+      "noRecords": "No DNS records found",
+      "summary": {
+        "title": "Summary",
+        "totalRecords": "Total Records",
+        "recordTypes": "Record Types",
+        "status": "Status",
+        "responseTime": "Response Time"
+      },
+      "records": {
+        "name": "Name",
+        "value": "Value",
+        "ttl": "TTL"
+      },
+      "noData": "No DNS data",
+      "noDataDescription": "No records were found for the specified domain and types"
     }
   },
   "screenshot": {
@@ -159,7 +213,11 @@
     "search": {
       "title": "Screenshot Capture",
       "description": "Enter a domain name to capture website screenshot",
-      "placeholder": "Enter domain name (e.g., example.com)"
+      "placeholder": "Enter domain name (e.g., example.com)",
+      "domain": "Domain",
+      "invalidDomain": "Please enter a valid domain",
+      "capturing": "Capturing...",
+      "capture": "Capture"
     },
     "options": {
       "title": "Capture Options",
@@ -167,22 +225,46 @@
       "desktop": "Desktop",
       "mobile": "Mobile",
       "tablet": "Tablet",
+      "customSize": "Custom Size",
+      "width": "Width",
+      "height": "Height",
+      "quality": "Quality",
       "fullPage": "Full Page",
-      "viewport": "Viewport Only"
+      "fullPageDesc": "Capture the entire page beyond the initial viewport"
     },
     "results": {
       "title": "Screenshot Result",
+      "description": "Screenshot for {domain}",
       "domain": "Domain",
       "device": "Device",
       "timestamp": "Captured At",
       "size": "Image Size",
+      "fileSize": "File Size",
+      "captureTime": "Capture Time",
+      "preview": "Preview",
+      "metadata": "Metadata",
       "download": "Download",
       "noImage": "No screenshot available"
     }
   },
+  "actions": {},
+  "screenshotActions": {
+    "clear": "Clear",
+    "copy": "Copy",
+    "download": "Download",
+    "openNew": "Open in New Tab"
+  },
   "health": {
     "title": "System Health Monitor",
     "description": "Monitor system health and service status with real-time metrics",
+    "actions": {
+      "refreshing": "Refreshing...",
+      "refresh": "Refresh",
+      "stopAuto": "Stop Auto Refresh",
+      "startAuto": "Start Auto Refresh",
+      "export": "Export Report"
+    },
+    "lastUpdated": "Last Updated",
     "status": {
       "title": "System Status",
       "healthy": "Healthy",
@@ -190,22 +272,45 @@
       "degraded": "Degraded",
       "unknown": "Unknown"
     },
+    "error": {
+      "title": "Request Error"
+    },
+    "overview": {
+      "systemStatus": "System Status",
+      "healthScore": "Health Score",
+      "score": "Score",
+      "responseTime": "Response Time",
+      "services": "Services",
+      "healthy": "healthy"
+    },
     "services": {
       "title": "Services",
+      "description": "Service status details",
       "database": "Database",
       "redis": "Redis Cache",
       "api": "API Server",
       "dns": "DNS Service",
       "whois": "WHOIS Service",
-      "screenshot": "Screenshot Service"
+      "screenshot": "Screenshot Service",
+      "responseTime": "Response Time",
+      "lastCheck": "Last Check"
     },
     "metrics": {
       "title": "System Metrics",
+      "description": "Key system performance metrics",
       "responseTime": "Response Time",
       "uptime": "Uptime",
       "memoryUsage": "Memory Usage",
       "cpuUsage": "CPU Usage",
       "lastCheck": "Last Check"
+    },
+    "critical": {
+      "title": "Critical Issues",
+      "description": "Some critical services are experiencing issues"
+    },
+    "noData": {
+      "title": "No Data",
+      "description": "No health data available"
     }
   },
   "errors": {

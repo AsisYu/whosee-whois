@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,6 +6,7 @@ import { Home, Search } from 'lucide-react';
 
 export default function NotFound() {
   const t = useTranslations('errors');
+  const locale = useLocale();
 
   return (
     <div className="container mx-auto px-4 py-16 max-w-2xl">
@@ -30,7 +31,7 @@ export default function NotFound() {
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/domain" className="flex items-center gap-2">
+              <Link href={`/${locale}/domain`} className="flex items-center gap-2">
                 <Search className="h-4 w-4" />
                 域名查询
               </Link>

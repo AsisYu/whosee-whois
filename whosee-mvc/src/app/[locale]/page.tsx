@@ -1,7 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { Navbar } from '@/components/ui/navbar';
+import { useTranslations, useLocale } from 'next-intl';
 import { DomainView } from '@/views/DomainView';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -63,6 +62,7 @@ const highlights = [
 export default function Home() {
   const t = useTranslations('home');
   const tCommon = useTranslations('common');
+  const locale = useLocale();
   const currentLocale = (typeof navigator !== 'undefined' && navigator.language) || 'unknown';
 
   // 测试日志收集功能
@@ -125,8 +125,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-      <Navbar />
-      
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 text-center">
         <div className="mx-auto max-w-4xl">
@@ -180,7 +178,7 @@ export default function Home() {
                   <CardDescription className="mb-4 text-center">
                     {t(feature.description)}
                   </CardDescription>
-                  <Link href={feature.href}>
+                  <Link href={`/${locale}${feature.href}`}>
                     <Button variant="outline" className="w-full">
                       {tCommon('tryNow')}
                     </Button>
@@ -229,13 +227,13 @@ export default function Home() {
             {t('getStartedDesc')}
           </p>
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-            <Link href="/domain">
+            <Link href={`/${locale}/domain`}>
               <Button size="lg" className="w-full sm:w-auto">
                 <Search className="mr-2 h-4 w-4" />
                 {t('startQuery')}
               </Button>
             </Link>
-            <Link href="/health">
+            <Link href={`/${locale}/health`}>
               <Button variant="outline" size="lg" className="w-full sm:w-auto">
                 <Activity className="mr-2 h-4 w-4" />
                 {t('viewStatus')}
@@ -245,22 +243,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <div className="flex items-center space-x-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Search className="h-4 w-4" />
-              </div>
-              <span className="font-bold">Whosee</span>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              © 2024 Whosee. {tCommon('allRightsReserved')}
-            </p>
-          </div>
-        </div>
-      </footer>
+      {/* Footer 由 [locale]/layout 统一渲染 */}
     </div>
   );
 }

@@ -674,13 +674,19 @@ export class RequestDeduplicationManager {
 }
 
 // 创建默认实例
+// 环境变量驱动的默认参数，便于在不同环境调优
+const CACHE_MAX_SIZE = Number(process.env.NEXT_PUBLIC_CACHE_MAX_SIZE || '') || 300;
+const CACHE_MAX_MEMORY_MB = Number(process.env.NEXT_PUBLIC_CACHE_MAX_MEMORY_MB || '') || 10;
+const CACHE_DEFAULT_TTL_MS = Number(process.env.NEXT_PUBLIC_CACHE_DEFAULT_TTL_MS || '') || 5 * 60 * 1000;
+const CACHE_PERSIST = (process.env.NEXT_PUBLIC_CACHE_PERSIST || '0') === '1';
+
 export const defaultRequestManager = new RequestDeduplicationManager({
-  maxSize: 1000,
-  maxMemory: 50 * 1024 * 1024, // 50MB
-  defaultTtl: 5 * 60 * 1000, // 5分钟
+  maxSize: CACHE_MAX_SIZE,
+  maxMemory: CACHE_MAX_MEMORY_MB * 1024 * 1024,
+  defaultTtl: CACHE_DEFAULT_TTL_MS,
   cleanupInterval: 60 * 1000, // 1分钟
   enableMetrics: true,
-  enablePersistence: true,
+  enablePersistence: CACHE_PERSIST,
   persistenceKey: 'whosee_cache'
 });
 

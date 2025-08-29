@@ -259,7 +259,11 @@ export class ConcurrencyManager {
 
       // 只有在有任务需要处理时才继续循环
       if (this.taskQueue.length > 0 || this.runningTasks.size > 0) {
-        setTimeout(processNextBatch, 50); // 增加延迟，减少CPU占用
+        // 动态调度：当有积压且可用并发时更快调度，否则降低轮询频率
+        const hasBacklog = this.taskQueue.length > 0;
+        const underUtilized = this.runningTasks.size < this.config.maxConcurrent;
+        const nextDelay = hasBacklog && underUtilized ? 20 : 80;
+        setTimeout(processNextBatch, nextDelay);
       }
     };
 
@@ -529,9 +533,13 @@ export class ConcurrencyManager {
 }
 
 // 创建默认并发管理器实例
+// 环境变量驱动的并发参数，便于在不同部署环境快速调优
+const MAX_CONCURRENCY = Number(process.env.NEXT_PUBLIC_MAX_CONCURRENCY || '') || 12;
+const QUEUE_LIMIT = Number(process.env.NEXT_PUBLIC_QUEUE_LIMIT || '') || 1000;
+
 export const defaultConcurrencyManager = new ConcurrencyManager({
-  maxConcurrent: 5,
-  queueLimit: 100,
+  maxConcurrent: MAX_CONCURRENCY,
+  queueLimit: QUEUE_LIMIT,
   timeout: 30000,
   retryAttempts: 3,
   retryDelay: 1000,

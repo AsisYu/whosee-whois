@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -57,14 +57,15 @@ const navigationItems = [
 export function Navbar() {
   const t = useTranslations('nav');
   const pathname = usePathname();
+  const locale = useLocale();
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center">
+    <header className="sticky top-0 z-[200] w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pointer-events-auto">
+      <div className="container mx-auto px-4 md:px-6 lg:px-8 h-14 grid grid-cols-[auto_1fr_auto] items-center gap-1">
         {/* Logo */}
-        <div className="mr-4 hidden md:flex">
-          <Link href="/" className="mr-6 flex items-center space-x-2">
+        <div className="mr-2 md:mr-3 hidden md:flex col-start-1 justify-self-start">
+          <Link href={`/${locale}`} className="mr-6 flex items-center space-x-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Search className="h-4 w-4" />
             </div>
@@ -75,7 +76,7 @@ export function Navbar() {
         </div>
 
         {/* Desktop Navigation */}
-        <NavigationMenu className="hidden md:flex">
+        <NavigationMenu className="hidden md:flex col-start-2 justify-self-start">
           <NavigationMenuList>
             {navigationItems.map((item) => {
               const Icon = item.icon;
@@ -85,7 +86,7 @@ export function Navbar() {
                 <NavigationMenuItem key={item.href}>
                   <NavigationMenuLink asChild>
                     <Link 
-                      href={item.href}
+                      href={`/${locale}${item.href}`}
                       className={cn(
                         navigationMenuTriggerStyle(),
                         isActive && "bg-accent text-accent-foreground"
@@ -106,7 +107,7 @@ export function Navbar() {
           <DialogTrigger asChild>
             <Button
               variant="ghost"
-              className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
+              className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden col-start-1 justify-self-start"
             >
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle Menu</span>
@@ -132,7 +133,7 @@ export function Navbar() {
                 return (
                   <Link
                     key={item.href}
-                    href={item.href}
+                    href={`/${locale}${item.href}`}
                     onClick={() => setIsOpen(false)}
                     className={cn(
                       "flex items-center text-sm font-medium transition-colors hover:text-primary p-2 rounded-md",
@@ -148,10 +149,10 @@ export function Navbar() {
           </DialogContent>
         </Dialog>
 
-        {/* Mobile Logo */}
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <div className="w-full flex-1 md:w-auto md:flex-none">
-            <Link href="/" className="flex items-center space-x-2 md:hidden">
+        {/* Right utilities (desktop) + Mobile Logo (hidden on md+) */}
+        <div className="flex items-center space-x-2 col-start-3 justify-self-end">
+          <div className="w-full flex-1 md:hidden">
+            <Link href={`/${locale}`} className="flex items-center space-x-2 md:hidden">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <Search className="h-4 w-4" />
               </div>
@@ -160,7 +161,7 @@ export function Navbar() {
           </div>
           
           {/* Theme and Language Toggle */}
-          <nav className="flex items-center space-x-2">
+          <nav className="relative z-20 flex items-center space-x-2">
             <LanguageToggle />
             <ThemeToggle />
           </nav>

@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+.eslintcache
+.turbo
+.vscode/
 
 # next.js
 /.next/

@@ -28,44 +28,61 @@ type HealthResponse = {
 class TokenManager {
   private static token: string | null = null;
   private static tokenExpiry: number = 0;
+  private static inflight: Promise<string> | null = null;
 
   static async getToken(): Promise<string> {
     const now = Date.now();
-    if (this.token && now < this.tokenExpiry - 5000) {
+    // 预留提前刷新窗口，避免边界过期抖动
+    const earlyRefreshMs = 10_000;
+    if (this.token && now < this.tokenExpiry - earlyRefreshMs) {
       logger.debug('Using cached JWT token', 'auth');
       return this.token;
     }
 
+    // 并发单飞：如果已有获取中的请求，直接复用
+    if (this.inflight) {
+      return this.inflight;
+    }
+
     try {
       logger.info('Requesting new JWT token', 'auth');
-      
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/auth/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'User-Agent': 'Whosee-Client/1.0',
-        },
-      });
 
-      if (!response.ok) {
-        const error = new AuthenticationError(`Failed to get token: ${response.status}`);
-        globalErrorHandler.handleError(
-          error,
-          createErrorContext('TokenManager.getToken', { status: response.status })
-        );
-        throw error;
-      }
+      this.inflight = (async () => {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/auth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'User-Agent': 'Whosee-Client/1.0',
+          },
+        });
 
-      const data = await response.json();
-      this.token = data.token;
-      this.tokenExpiry = now + 30 * 1000; // 30秒有效期
-      
-      logger.info('JWT token obtained successfully', 'auth', {
-        expiresIn: 30000
-      });
-      
-      return this.token!;
+        if (!response.ok) {
+          const error = new AuthenticationError(`Failed to get token: ${response.status}`);
+          globalErrorHandler.handleError(
+            error,
+            createErrorContext('TokenManager.getToken', { status: response.status })
+          );
+          throw error;
+        }
+
+        const data = await response.json();
+        this.token = data.token;
+
+        // 优先采用服务端返回的过期时间（秒），否则使用较长的默认值（5分钟）
+        const expiresInSec = typeof data.expiresIn === 'number' ? data.expiresIn : 300;
+        // 引入抖动，避免雪崩
+        const jitterMs = 5_000 + Math.floor(Math.random() * 5_000);
+        this.tokenExpiry = Date.now() + Math.max(30_000, expiresInSec * 1000) - jitterMs;
+
+        logger.info('JWT token obtained successfully', 'auth', {
+          expiresInMs: Math.max(30_000, expiresInSec * 1000)
+        });
+
+        return this.token!;
+      })();
+
+      return await this.inflight;
     } catch (error) {
       if (error instanceof AuthenticationError) {
         throw error;
@@ -77,6 +94,9 @@ class TokenManager {
         createErrorContext('TokenManager.getToken', { originalError: error })
       );
       throw authError;
+    } finally {
+      // 重置单飞状态
+      this.inflight = null;
     }
   }
 
@@ -84,6 +104,7 @@ class TokenManager {
     logger.info('Clearing JWT token', 'auth');
     this.token = null;
     this.tokenExpiry = 0;
+    this.inflight = null;
   }
 }
 
@@ -136,6 +157,7 @@ export class ApiService {
     const url = `${this.baseUrl}${endpoint}`;
     const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
+    const overallTimeoutMs = 30_000;
     
     logger.debug(`API Request initiated: ${options.method || 'GET'} ${endpoint}`, 'api-service', {
       requestId,
@@ -145,7 +167,7 @@ export class ApiService {
     });
     
     try {
-      const headers = { ...this.defaultHeaders, ...options.headers };
+      const headers = { ...this.defaultHeaders, ...options.headers } as Record<string, string>;
       
       // 添加JWT认证
       if (requiresAuth) {
@@ -153,10 +175,14 @@ export class ApiService {
         headers['X-API-KEY'] = token;
       }
 
+      // 为请求添加 AbortController 与超时
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(`timeout:${overallTimeoutMs}ms`), overallTimeoutMs);
       const response = await fetch(url, {
         ...options,
         headers,
-      });
+        signal: controller.signal
+      }).finally(() => clearTimeout(timeout));
       
       const duration = Date.now() - startTime;
       
