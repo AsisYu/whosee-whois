@@ -1,0 +1,168 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Project Guide - Whosee WHOIS Domain Lookup Tool
+
+## Project Overview
+
+Whosee is a comprehensive domain information lookup tool built with Next.js frontend and Go backend, providing WHOIS data, DNS records, health monitoring, and website screenshots.
+
+## Architecture
+
+### Frontend (Next.js)
+- **Framework**: Next.js 15 with App Router
+- **Runtime**: React 19 with TypeScript
+- **Styling**: Tailwind CSS + shadcn/ui components
+- **Internationalization**: next-intl (English/Chinese)
+- **Theme**: Dark/Light mode with next-themes
+
+### Backend (Go)
+- **Framework**: Custom Go HTTP server with Gin-like patterns
+- **Services**: WHOIS, DNS, Screenshot, Health monitoring
+- **Deployment**: Docker + Kubernetes ready
+- **Cache**: Redis for performance optimization
+
+## Project Structure
+
+### Frontend Structure (`src/`)
+```
+src/
+├── app/                     # Next.js App Router pages
+│   ├── domain/             # Domain WHOIS lookup page
+│   ├── dns/                # DNS records page  
+│   ├── health/             # Health monitoring page
+│   ├── screenshot/         # Website screenshot page
+│   ├── layout.tsx          # Root layout with i18n & theme
+│   └── page.tsx            # Homepage with features
+├── components/             # Reusable UI components
+│   ├── ui/                 # shadcn/ui base components
+│   ├── providers/          # Context providers (theme)
+│   └── examples/           # API demo components
+├── lib/                    # Utility libraries
+│   ├── api.ts              # Frontend API client
+│   ├── secure-api.ts       # Secure API endpoints
+│   └── utils/              # Helper utilities
+├── types/                  # TypeScript type definitions
+├── i18n/                   # Internationalization config
+└── messages/               # Translation files (en.json, zh.json)
+```
+
+### Backend Structure (`server/`)
+```
+server/
+├── handlers/               # HTTP request handlers
+├── middleware/             # HTTP middleware chain  
+├── services/              # Business logic layer
+├── providers/             # External API integrations
+├── routes/                # Route definitions
+├── types/                 # Go struct definitions
+├── utils/                 # Helper utilities
+├── config/                # Configuration files
+├── k8s/                   # Kubernetes deployment
+└── static/                # Static file serving
+```
+
+## Key File References
+
+### Frontend Core Files
+- **Main Layout**: [src/app/layout.tsx](mdc:src/app/layout.tsx) - Root layout with providers
+- **Homepage**: [src/app/page.tsx](mdc:src/app/page.tsx) - Landing page with features
+- **API Client**: [src/lib/api.ts](mdc:src/lib/api.ts) - Frontend API communication
+- **Types**: [src/types/index.ts](mdc:src/types/index.ts) - TypeScript interfaces
+- **Config**: [src/i18n/config.ts](mdc:src/i18n/config.ts) - Internationalization setup
+
+### Backend Core Files  
+- **Main Server**: [server/main.go](mdc:server/main.go) - Application entry point
+- **Routes**: [server/routes/routes.go](mdc:server/routes/routes.go) - API route definitions
+- **WHOIS Handler**: [server/handlers/whois.go](mdc:server/handlers/whois.go) - Domain lookup logic
+- **DNS Handler**: [server/handlers/dns.go](mdc:server/handlers/dns.go) - DNS record queries
+- **Types**: [server/types/whois.go](mdc:server/types/whois.go) - Go struct definitions
+
+### Configuration Files
+- **Next.js Config**: [next.config.ts](mdc:next.config.ts) - Next.js configuration
+- **Package**: [package.json](mdc:package.json) - Dependencies and scripts
+- **Tailwind**: [tailwind.config.ts](mdc:tailwind.config.ts) - Styling configuration
+- **TypeScript**: [tsconfig.json](mdc:tsconfig.json) - TypeScript config
+
+## Development Workflow
+
+### Getting Started
+1. **Frontend**: `npm run dev` (Next.js on port 3000)
+2. **Backend**: `cd server && go run main.go` (Go server on port 8080)
+3. **Build**: `npm run build` for production build
+
+### Environment Setup
+- **Development**: Uses Next.js proxy for API calls
+- **Production**: Direct API calls to Go backend
+- **Authentication**: JWT tokens with X-API-KEY headers
+
+## Feature Pages
+
+### Domain Page ([src/app/domain/page.tsx](mdc:src/app/domain/page.tsx))
+- WHOIS data lookup and display
+- RDAP protocol support
+- Domain availability checking
+- Registrar and nameserver information
+
+### DNS Page ([src/app/dns/page.tsx](mdc:src/app/dns/page.tsx))  
+- DNS record queries (A, AAAA, MX, TXT, NS, CNAME, SOA)
+- Multiple DNS server testing
+- Response time monitoring
+- Cache status display
+
+### Health Page ([src/app/health/page.tsx](mdc:src/app/health/page.tsx))
+- System health monitoring
+- Service status dashboard
+- Performance metrics
+- Redis and database connectivity
+
+### Screenshot Page ([src/app/screenshot/page.tsx](mdc:src/app/screenshot/page.tsx))
+- Website screenshot capture
+- Multiple device views (desktop, mobile, tablet)
+- ITDog speed testing integration
+- Base64 image data support
+
+## Internationalization
+
+### Supported Languages
+- **English** (`en`): [src/messages/en.json](mdc:src/messages/en.json)
+- **Chinese** (`zh`): [src/messages/zh.json](mdc:src/messages/zh.json)
+
+### Usage Pattern
+```typescript
+import { useTranslations } from 'next-intl';
+
+function Component() {
+  const t = useTranslations('namespace');
+  return <h1>{t('title')}</h1>;
+}
+```
+
+## API Integration
+
+### Frontend API Client
+- **Base Client**: [src/lib/api.ts](mdc:src/lib/api.ts)
+- **Secure Client**: [src/lib/secure-api.ts](mdc:src/lib/secure-api.ts)
+- **JWT Authentication**: Automatic token management
+- **Error Handling**: Comprehensive error types and recovery
+
+### Backend API Endpoints
+- **WHOIS**: `/api/v1/whois/{domain}` - Domain information
+- **RDAP**: `/api/v1/rdap/{domain}` - RDAP protocol queries  
+- **DNS**: `/api/v1/dns/{domain}` - DNS record lookup
+- **Health**: `/api/health` - System health status
+- **Screenshot**: `/api/v1/screenshot/{domain}` - Website capture
+
+## Deployment
+
+### Docker Support
+- **Backend**: [server/Dockerfile](mdc:server/Dockerfile)
+- **Kubernetes**: [server/k8s/](mdc:server/k8s) deployment files
+
+### Environment Variables
+- `NEXT_PUBLIC_API_KEY`: Frontend API key
+- `NEXT_PUBLIC_API_SECRET`: Frontend API secret  
+- `NODE_ENV`: Environment mode
+- `PORT`: Server port configuration

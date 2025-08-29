@@ -1,0 +1,327 @@
+{
+  "common": {
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Error",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "clear": "Clear",
+    "retry": "Retry",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "download": "Download",
+    "upload": "Upload",
+    "refresh": "Refresh",
+    "settings": "Settings",
+    "help": "Help",
+    "about": "About",
+    "contact": "Contact",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "language": "Language",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "tryNow": "Try Now",
+    "allRightsReserved": "All rights reserved",
+    "switchLanguage": "Switch Language",
+    "toggleTheme": "Toggle Theme",
+    "lightTheme": "Light Theme",
+    "darkTheme": "Dark Theme",
+    "systemTheme": "System Theme",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "placeholder": "Enter domain name (e.g., example.com)"
+  },
+  "navigation": {
+    "home": "Home",
+    "domain": "Domain Query",
+    "dns": "DNS Query",
+    "screenshot": "Website Screenshot",
+    "health": "System Health",
+    "blog": "Blog",
+    "tools": "Tools",
+    "api": "API",
+    "docs": "Documentation"
+  },
+  "nav": {
+    "domain": "Domain",
+    "dns": "DNS",
+    "health": "Health",
+    "screenshot": "Screenshot",
+    "description": "Professional domain analysis tool",
+    "domainDesc": "WHOIS domain information lookup",
+    "dnsDesc": "DNS records query and analysis",
+    "healthDesc": "System health monitoring",
+    "screenshotDesc": "Website screenshot capture",
+    "switchLanguage": "Switch Language"
+  },
+  "home": {
+    "title": "Whosee - Domain Information Lookup Tool",
+    "subtitle": "Get comprehensive domain information including WHOIS data, DNS records, and website screenshots",
+    "description": "Professional domain analysis tool providing WHOIS queries, DNS record lookups, health monitoring, and website screenshots.",
+    "placeholder": "Enter domain name (e.g., example.com)",
+    "search": "Search",
+    "features": "Core Features",
+    "featuresDesc": "Professional domain analysis tool providing comprehensive services",
+    "domainQuery": "Domain Query",
+    "domainQueryDesc": "Get detailed WHOIS information including registration details, contact information and domain status",
+    "dnsQuery": "DNS Query",
+    "dnsQueryDesc": "Query DNS records (A, AAAA, MX, TXT, NS, CNAME, SOA) from multiple DNS servers",
+    "websiteScreenshot": "Website Screenshot",
+    "websiteScreenshotDesc": "Capture website screenshots in desktop, mobile and tablet views",
+    "systemMonitoring": "System Monitoring",
+    "systemMonitoringDesc": "Monitor system and service status with real-time metrics",
+    "whyChoose": "Why Choose Us",
+    "whyChooseDesc": "Professional, fast and reliable domain analysis services",
+    "fastResponse": "Fast Response",
+    "fastResponseDesc": "Optimized query algorithms with sub-second response time",
+    "secureReliable": "Secure & Reliable",
+    "secureReliableDesc": "Latest security protocols to protect data transmission",
+    "responsiveDesign": "Responsive Design",
+    "responsiveDesignDesc": "Perfectly adapts to all devices for on-the-go queries",
+    "realTimeData": "Real-time Data",
+    "realTimeDataDesc": "Data sourced directly from authoritative providers",
+    "getStarted": "Get Started",
+    "getStartedDesc": "Start querying domain information now and experience professional analysis",
+    "startQuery": "Start Query",
+    "viewStatus": "View Status"
+  },
+  "domain": {
+    "title": "Domain WHOIS Lookup",
+    "description": "Get comprehensive domain information including registration details, contact information, and name servers",
+    "search": {
+      "title": "Search Domain",
+      "description": "Enter a domain name to retrieve WHOIS information",
+      "placeholder": "Enter domain name (e.g., example.com)",
+      "searching": "Searching...",
+      "button": "Search"
+    },
+    "results": {
+      "title": "Domain Information",
+      "registrar": "Registrar",
+      "registrationDate": "Registration Date",
+      "expirationDate": "Expiration Date",
+      "nameServers": "Name Servers",
+      "status": "Status",
+      "contacts": "Contact Information",
+      "noData": "No domain information found",
+      "basic": {
+        "title": "Basic Information",
+        "domain": "Domain",
+        "registrar": "Registrar",
+        "status": "Status"
+      },
+      "dates": {
+        "title": "Dates",
+        "created": "Created",
+        "expires": "Expires",
+        "updated": "Updated"
+      },
+      "contacts": {
+        "title": "Contacts",
+        "name": "Name",
+        "organization": "Organization",
+        "email": "Email",
+        "phone": "Phone"
+      },
+      "nameservers": {
+        "title": "Name Servers"
+      },
+      "tools": {
+        "title": "Related Tools",
+        "description": "Explore more tools related to this domain",
+        "dns": "DNS Lookup",
+        "screenshot": "Website Screenshot",
+        "health": "System Health"
+      }
+    },
+    "history": {
+      "title": "Search History",
+      "empty": "No search history",
+      "clear": "Clear History",
+      "description": "Recently searched domains"
+    },
+    "error": {
+      "title": "Request Error"
+    },
+    "cache": {
+      "title": "Cache Statistics",
+      "size": "Cached Domains",
+      "clear": "Clear Cache"
+    }
+  },
+  "dns": {
+    "title": "DNS Records Lookup",
+    "description": "Query DNS records from multiple DNS servers and compare results",
+    "search": {
+      "title": "DNS Query",
+      "description": "Enter a domain name to query DNS records",
+      "placeholder": "Enter domain name (e.g., example.com)",
+      "searching": "Searching...",
+      "button": "Search"
+    },
+    "types": {
+      "title": "Record Types",
+      "all": "All Types",
+      "A": "A Records",
+      "AAAA": "AAAA Records",
+      "MX": "MX Records",
+      "TXT": "TXT Records",
+      "NS": "NS Records",
+      "CNAME": "CNAME Records",
+      "SOA": "SOA Records"
+    },
+    "error": {
+      "title": "Request Error"
+    },
+    "results": {
+      "title": "DNS Records",
+      "server": "DNS Server",
+      "responseTime": "Response Time",
+      "records": "Records",
+      "noRecords": "No DNS records found",
+      "summary": {
+        "title": "Summary",
+        "totalRecords": "Total Records",
+        "recordTypes": "Record Types",
+        "status": "Status",
+        "responseTime": "Response Time"
+      },
+      "records": {
+        "name": "Name",
+        "value": "Value",
+        "ttl": "TTL"
+      },
+      "noData": "No DNS data",
+      "noDataDescription": "No records were found for the specified domain and types"
+    }
+  },
+  "screenshot": {
+    "title": "Website Screenshot",
+    "description": "Capture website screenshots in different device views",
+    "search": {
+      "title": "Screenshot Capture",
+      "description": "Enter a domain name to capture website screenshot",
+      "placeholder": "Enter domain name (e.g., example.com)",
+      "domain": "Domain",
+      "invalidDomain": "Please enter a valid domain",
+      "capturing": "Capturing...",
+      "capture": "Capture"
+    },
+    "options": {
+      "title": "Capture Options",
+      "device": "Device View",
+      "desktop": "Desktop",
+      "mobile": "Mobile",
+      "tablet": "Tablet",
+      "customSize": "Custom Size",
+      "width": "Width",
+      "height": "Height",
+      "quality": "Quality",
+      "fullPage": "Full Page",
+      "fullPageDesc": "Capture the entire page beyond the initial viewport"
+    },
+    "results": {
+      "title": "Screenshot Result",
+      "description": "Screenshot for {domain}",
+      "domain": "Domain",
+      "device": "Device",
+      "timestamp": "Captured At",
+      "size": "Image Size",
+      "fileSize": "File Size",
+      "captureTime": "Capture Time",
+      "preview": "Preview",
+      "metadata": "Metadata",
+      "download": "Download",
+      "noImage": "No screenshot available"
+    }
+  },
+  "actions": {},
+  "screenshotActions": {
+    "clear": "Clear",
+    "copy": "Copy",
+    "download": "Download",
+    "openNew": "Open in New Tab"
+  },
+  "health": {
+    "title": "System Health Monitor",
+    "description": "Monitor system health and service status with real-time metrics",
+    "actions": {
+      "refreshing": "Refreshing...",
+      "refresh": "Refresh",
+      "stopAuto": "Stop Auto Refresh",
+      "startAuto": "Start Auto Refresh",
+      "export": "Export Report"
+    },
+    "lastUpdated": "Last Updated",
+    "status": {
+      "title": "System Status",
+      "healthy": "Healthy",
+      "unhealthy": "Unhealthy",
+      "degraded": "Degraded",
+      "unknown": "Unknown"
+    },
+    "error": {
+      "title": "Request Error"
+    },
+    "overview": {
+      "systemStatus": "System Status",
+      "healthScore": "Health Score",
+      "score": "Score",
+      "responseTime": "Response Time",
+      "services": "Services",
+      "healthy": "healthy"
+    },
+    "services": {
+      "title": "Services",
+      "description": "Service status details",
+      "database": "Database",
+      "redis": "Redis Cache",
+      "api": "API Server",
+      "dns": "DNS Service",
+      "whois": "WHOIS Service",
+      "screenshot": "Screenshot Service",
+      "responseTime": "Response Time",
+      "lastCheck": "Last Check"
+    },
+    "metrics": {
+      "title": "System Metrics",
+      "description": "Key system performance metrics",
+      "responseTime": "Response Time",
+      "uptime": "Uptime",
+      "memoryUsage": "Memory Usage",
+      "cpuUsage": "CPU Usage",
+      "lastCheck": "Last Check"
+    },
+    "critical": {
+      "title": "Critical Issues",
+      "description": "Some critical services are experiencing issues"
+    },
+    "noData": {
+      "title": "No Data",
+      "description": "No health data available"
+    }
+  },
+  "errors": {
+    "invalidDomain": "Please enter a valid domain name",
+    "networkError": "Network error, please try again",
+    "serverError": "Server error, please try again later",
+    "notFound": "Domain not found",
+    "timeout": "Request timeout, please try again",
+    "rateLimit": "Too many requests, please wait",
+    "unauthorized": "Unauthorized access",
+    "forbidden": "Access forbidden",
+    "unknown": "Unknown error occurred"
+  }
+}
