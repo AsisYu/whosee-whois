@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
+import { log } from '@/lib/logger';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +30,10 @@ import { cn } from '@/lib/utils';
 
 export default function HealthPage() {
   const t = useTranslations('health');
+  const locale = useLocale();
+  useEffect(() => {
+    try { log.info('[i18n] HealthPage render', 'i18n', { locale, title: t('title') }); } catch {}
+  }, [locale]);
   const [refreshInterval, setRefreshInterval] = useState(HEALTH_CHECK_OPTIONS.defaultInterval);
   
   const {

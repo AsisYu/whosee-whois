@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getLocale } from 'next-intl/server';
 // i18n Provider is applied in src/app/[locale]/layout.tsx
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import ErrorBoundary from '@/components/providers/error-boundary';
@@ -56,9 +57,9 @@ interface RootLayoutProps {
 }
 
 export default async function RootLayout({ children }: RootLayoutProps) {
-
+  const locale = await getLocale();
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body
         className="antialiased min-h-screen bg-background font-sans"
         suppressHydrationWarning

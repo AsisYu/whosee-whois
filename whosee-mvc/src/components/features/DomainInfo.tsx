@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { 
   Globe, 
   Calendar, 
@@ -32,6 +33,7 @@ interface DomainInfoProps {
  */
 export function DomainInfo({ className, showRawData = false }: DomainInfoProps) {
   const { data, loading, error, getFormattedData } = useDomain();
+  const t = useTranslations('domain');
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [showRaw, setShowRaw] = useState(showRawData);
 
@@ -76,7 +78,7 @@ export function DomainInfo({ className, showRawData = false }: DomainInfoProps) 
         <CardHeader>
           <CardTitle className="text-destructive flex items-center space-x-2">
             <Shield className="h-5 w-5" />
-            <span>Error</span>
+            <span>{t('error.title')}</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -93,7 +95,7 @@ export function DomainInfo({ className, showRawData = false }: DomainInfoProps) 
         <CardContent className="flex flex-col items-center justify-center py-12">
           <Globe className="h-12 w-12 text-muted-foreground mb-4" />
           <p className="text-muted-foreground text-center">
-            Enter a domain name to view WHOIS information
+            {t('search.description')}
           </p>
         </CardContent>
       </Card>
@@ -107,78 +109,79 @@ export function DomainInfo({ className, showRawData = false }: DomainInfoProps) 
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Globe className="h-5 w-5" />
-            <span>Domain Information</span>
+            <span>{t('results.title')}</span>
           </CardTitle>
           <CardDescription>
-            Basic domain details and registration information
+            {t('description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <InfoRow
             icon={<Globe className="h-4 w-4" />}
-            label="Domain Name"
-            value={data.domain_name}
-            onCopy={() => handleCopy(data.domain_name, 'domain')}
+            label={t('results.basic.domain')}
+            value={data.domain}
+            onCopy={() => handleCopy(data.domain, 'domain')}
             copied={copiedField === 'domain'}
           />
           
           {data.registrar && (
             <InfoRow
               icon={<Building className="h-4 w-4" />}
-              label="Registrar"
+              label={t('results.basic.registrar')}
               value={data.registrar}
-              onCopy={() => handleCopy(data.registrar, 'registrar')}
+              onCopy={() => handleCopy(data.registrar!, 'registrar')}
               copied={copiedField === 'registrar'}
             />
           )}
           
-          {data.creation_date && (
+          {data.registrationDate && (
             <InfoRow
               icon={<Calendar className="h-4 w-4" />}
-              label="Created"
-              value={formatDate(data.creation_date)}
-              onCopy={() => handleCopy(data.creation_date, 'created')}
+              label={t('results.dates.created')}
+              value={formatDate(data.registrationDate)}
+              onCopy={() => handleCopy(data.registrationDate!, 'created')}
               copied={copiedField === 'created'}
             />
           )}
           
-          {data.expiration_date && (
+          {data.expirationDate && (
             <InfoRow
               icon={<Clock className="h-4 w-4" />}
-              label="Expires"
-              value={formatDate(data.expiration_date)}
-              onCopy={() => handleCopy(data.expiration_date, 'expires')}
+              label={t('results.dates.expires')}
+              value={formatDate(data.expirationDate)}
+              onCopy={() => handleCopy(data.expirationDate!, 'expires')}
               copied={copiedField === 'expires'}
             />
           )}
           
-          {data.updated_date && (
+          {/* 若后端提供更新时间，可在类型中补充并显示 */}
+          {/* {data.updatedDate && (
             <InfoRow
               icon={<Calendar className="h-4 w-4" />}
-              label="Updated"
-              value={formatDate(data.updated_date)}
-              onCopy={() => handleCopy(data.updated_date, 'updated')}
+              label={t('results.dates.updated')}
+              value={formatDate(data.updatedDate)}
+              onCopy={() => handleCopy(data.updatedDate!, 'updated')}
               copied={copiedField === 'updated'}
             />
-          )}
+          )} */}
         </CardContent>
       </Card>
 
       {/* 名称服务器 */}
-      {data.name_servers && data.name_servers.length > 0 && (
+      {data.nameServers && data.nameServers.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Server className="h-5 w-5" />
-              <span>Name Servers</span>
+              <span>{t('results.nameservers.title')}</span>
             </CardTitle>
             <CardDescription>
-              DNS name servers for this domain
+              {t('results.nameservers.title')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {data.name_servers.map((ns, index) => (
+              {data.nameServers.map((ns: string, index: number) => (
                 <InfoRow
                   key={index}
                   icon={<Server className="h-4 w-4" />}
@@ -194,28 +197,28 @@ export function DomainInfo({ className, showRawData = false }: DomainInfoProps) 
       )}
 
       {/* 联系人信息 */}
-      {(data.registrant || data.admin || data.tech) && (
+      {(data.contacts?.registrant || data.contacts?.admin || data.contacts?.tech) && (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {data.registrant && (
+          {data.contacts?.registrant && (
             <ContactCard
-              title="Registrant"
-              contact={data.registrant}
+              title={t('results.roles.registrant')}
+              contact={data.contacts.registrant as any}
               onCopy={handleCopy}
               copiedField={copiedField}
             />
           )}
-          {data.admin && (
+          {data.contacts?.admin && (
             <ContactCard
-              title="Admin Contact"
-              contact={data.admin}
+              title={t('results.roles.admin')}
+              contact={data.contacts.admin as any}
               onCopy={handleCopy}
               copiedField={copiedField}
             />
           )}
-          {data.tech && (
+          {data.contacts?.tech && (
             <ContactCard
-              title="Tech Contact"
-              contact={data.tech}
+              title={t('results.roles.tech')}
+              contact={data.contacts.tech as any}
               onCopy={handleCopy}
               copiedField={copiedField}
             />
@@ -224,14 +227,15 @@ export function DomainInfo({ className, showRawData = false }: DomainInfoProps) 
       )}
 
       {/* 原始数据 */}
-      {data.raw_data && (
+      {/* 若原始数据可用，可按需显示 */}
+      {/* {data.raw && (
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Raw WHOIS Data</CardTitle>
+                <CardTitle>{t('results.raw.title')}</CardTitle>
                 <CardDescription>
-                  Complete WHOIS response from the registry
+                  {t('results.raw.description')}
                 </CardDescription>
               </div>
               <Button
@@ -239,7 +243,7 @@ export function DomainInfo({ className, showRawData = false }: DomainInfoProps) 
                 size="sm"
                 onClick={() => setShowRaw(!showRaw)}
               >
-                {showRaw ? 'Hide' : 'Show'} Raw Data
+                {showRaw ? t('results.raw.hide') : t('results.raw.show')}
               </Button>
             </div>
           </CardHeader>
@@ -247,13 +251,13 @@ export function DomainInfo({ className, showRawData = false }: DomainInfoProps) 
             <CardContent>
               <div className="relative">
                 <pre className="text-sm bg-muted p-4 rounded-md overflow-x-auto whitespace-pre-wrap">
-                  {data.raw_data}
+                  {data.raw}
                 </pre>
                 <Button
                   variant="outline"
                   size="sm"
                   className="absolute top-2 right-2"
-                  onClick={() => handleCopy(data.raw_data || '', 'raw')}
+                  onClick={() => handleCopy(data.raw || '', 'raw')}
                 >
                   {copiedField === 'raw' ? (
                     <Check className="h-4 w-4" />
@@ -265,7 +269,7 @@ export function DomainInfo({ className, showRawData = false }: DomainInfoProps) 
             </CardContent>
           )}
         </Card>
-      )}
+      )} */}
     </div>
   );
 }

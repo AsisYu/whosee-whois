@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { DomainSearch } from '@/components/features/DomainSearch';
 import { DomainInfo } from '@/components/features/DomainInfo';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,8 +12,10 @@ import { Globe, Search, History, TrendingUp } from 'lucide-react';
  * 域名查询视图 - MVC架构中的View层
  */
 export function DomainView() {
-  const { hasData, hasHistory, getCacheStats } = useDomain();
+  const t = useTranslations('domain');
+  const { hasData, hasHistory, getCacheStats, searchHistory } = useDomain();
   const cacheStats = getCacheStats();
+  const historyCount = searchHistory.length;
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
@@ -20,11 +23,10 @@ export function DomainView() {
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center space-x-2">
           <Globe className="h-8 w-8 text-primary" />
-          <h1 className="text-4xl font-bold">Domain WHOIS Lookup</h1>
+          <h1 className="text-4xl font-bold">{t('title')}</h1>
         </div>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Get comprehensive domain information including registration details, 
-          contact information, and name servers.
+          {t('description')}
         </p>
       </div>
 
@@ -34,15 +36,15 @@ export function DomainView() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Search className="h-5 w-5" />
-              <span>Search Domain</span>
+              <span>{t('search.title')}</span>
             </CardTitle>
             <CardDescription>
-              Enter a domain name to retrieve WHOIS information
+              {t('search.description')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <DomainSearch 
-              placeholder="Enter domain name (e.g., example.com)"
+              placeholder={t('search.placeholder')}
               showHistory={true}
             />
           </CardContent>
@@ -50,29 +52,17 @@ export function DomainView() {
       </div>
 
       {/* 统计信息 */}
-      {(hasHistory || cacheStats.totalQueries > 0) && (
+      {(hasHistory || cacheStats.size > 0) && (
         <div className="max-w-4xl mx-auto">
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardContent className="flex items-center space-x-4 p-6">
                 <div className="p-2 bg-primary/10 rounded-lg">
                   <Search className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">{cacheStats.totalQueries}</div>
-                  <div className="text-sm text-muted-foreground">Total Queries</div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="flex items-center space-x-4 p-6">
-                <div className="p-2 bg-green-500/10 rounded-lg">
-                  <TrendingUp className="h-6 w-6 text-green-500" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">{cacheStats.cacheHits}</div>
-                  <div className="text-sm text-muted-foreground">Cache Hits</div>
+                  <div className="text-2xl font-bold">{historyCount}</div>
+                  <div className="text-sm text-muted-foreground">{t('history.title')}</div>
                 </div>
               </CardContent>
             </Card>
@@ -83,8 +73,8 @@ export function DomainView() {
                   <History className="h-6 w-6 text-blue-500" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">{cacheStats.cacheSize}</div>
-                  <div className="text-sm text-muted-foreground">Cached Domains</div>
+                  <div className="text-2xl font-bold">{cacheStats.size}</div>
+                  <div className="text-sm text-muted-foreground">{t('cache.size')}</div>
                 </div>
               </CardContent>
             </Card>
@@ -102,45 +92,42 @@ export function DomainView() {
         <div className="max-w-4xl mx-auto">
           <Card>
             <CardHeader>
-              <CardTitle>What is WHOIS?</CardTitle>
+              <CardTitle>{t('info.whatIs')}</CardTitle>
               <CardDescription>
-                Learn about domain registration information
+                {t('info.subtitle')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                WHOIS is a query and response protocol that provides information about 
-                domain name registrations. It includes details such as:
+                {t('description')}
               </p>
               
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <h4 className="font-semibold">Registration Details</h4>
+                  <h4 className="font-semibold">{t('info.registration.title')}</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Domain creation date</li>
-                    <li>• Expiration date</li>
-                    <li>• Last update date</li>
-                    <li>• Registrar information</li>
+                    <li>• {t('info.registration.items.created')}</li>
+                    <li>• {t('info.registration.items.expires')}</li>
+                    <li>• {t('info.registration.items.updated')}</li>
+                    <li>• {t('info.registration.items.registrar')}</li>
                   </ul>
                 </div>
                 
                 <div className="space-y-2">
-                  <h4 className="font-semibold">Technical Information</h4>
+                  <h4 className="font-semibold">{t('info.technical.title')}</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• Name servers</li>
-                    <li>• DNS configuration</li>
-                    <li>• Domain status</li>
-                    <li>• Contact information</li>
+                    <li>• {t('info.technical.items.nameservers')}</li>
+                    <li>• {t('info.technical.items.dns')}</li>
+                    <li>• {t('info.technical.items.status')}</li>
+                    <li>• {t('info.technical.items.contacts')}</li>
                   </ul>
                 </div>
               </div>
               
               <div className="pt-4 border-t">
-                <h4 className="font-semibold mb-2">Privacy Notice</h4>
+                <h4 className="font-semibold mb-2">{t('info.privacy.title')}</h4>
                 <p className="text-sm text-muted-foreground">
-                  Some domain registrations may use privacy protection services, 
-                  which replace personal contact information with generic contact details 
-                  to protect the domain owner's privacy.
+                  {t('info.privacy.text')}
                 </p>
               </div>
             </CardContent>

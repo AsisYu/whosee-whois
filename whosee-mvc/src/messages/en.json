@@ -32,6 +32,55 @@
     "dark": "Dark",
     "system": "System",
     "tryNow": "Try Now",
+    "logTestButton": "Test log collection",
+    "log": {
+      "title": "Log Collection Test",
+      "subtitle": "Test logging, performance monitoring and user behavior tracking",
+      "statsTitle": "Log Statistics",
+      "statsDesc": "Statistics for the current session",
+      "total": "Total",
+      "errors": "Errors",
+      "warnings": "Warnings",
+      "performanceIssues": "Performance Issues",
+      "refreshStats": "Refresh Stats",
+      "viewStored": "View Stored Logs",
+      "clearLogs": "Clear Logs",
+      "levelTest": {
+        "title": "Log Levels Test",
+        "desc": "Test different log levels",
+        "debug": "Debug Log",
+        "info": "Info Log",
+        "warn": "Warning Log",
+        "error": "Error Log"
+      },
+      "special": {
+        "title": "Special Tests",
+        "desc": "Performance monitoring and user actions",
+        "executing": "Executing...",
+        "performanceTest": "Performance Test",
+        "userAction": "User Action Log",
+        "generating": "Generating...",
+        "batchTest": "Batch Logs Test"
+      },
+      "instructions": {
+        "title": "Instructions",
+        "view": {
+          "title": "How to view logs:",
+          "item1": "Press F12 to open DevTools and view console logs",
+          "item2": "Click 'View Stored Logs' to see localStorage logs",
+          "item3": "Logs are automatically saved to localStorage"
+        },
+        "features": {
+          "title": "Features:",
+          "item1": "Supports DEBUG, INFO, WARN, ERROR",
+          "item2": "Automatically records performance metrics",
+          "item3": "Tracks user behavior and interactions",
+          "item4": "Supports error stack traces",
+          "item5": "Buffered and batch flush to storage",
+          "item6": "Provides statistics and monitoring panel"
+        }
+      }
+    },
     "allRightsReserved": "All rights reserved",
     "switchLanguage": "Switch Language",
     "toggleTheme": "Toggle Theme",
@@ -133,10 +182,22 @@
         "name": "Name",
         "organization": "Organization",
         "email": "Email",
-        "phone": "Phone"
+        "phone": "Phone",
+        "address": "Address"
       },
       "nameservers": {
         "title": "Name Servers"
+      },
+      "roles": {
+        "registrant": "Registrant",
+        "admin": "Admin Contact",
+        "tech": "Tech Contact"
+      },
+      "raw": {
+        "title": "Raw WHOIS Data",
+        "description": "Complete WHOIS response from the registry",
+        "show": "Show Raw Data",
+        "hide": "Hide Raw Data"
       },
       "tools": {
         "title": "Related Tools",
@@ -159,6 +220,32 @@
       "title": "Cache Statistics",
       "size": "Cached Domains",
       "clear": "Clear Cache"
+    },
+    "info": {
+      "whatIs": "What is WHOIS?",
+      "subtitle": "Learn about domain registration information",
+      "registration": {
+        "title": "Registration Details",
+        "items": {
+          "created": "Domain creation date",
+          "expires": "Expiration date",
+          "updated": "Last update date",
+          "registrar": "Registrar information"
+        }
+      },
+      "technical": {
+        "title": "Technical Information",
+        "items": {
+          "nameservers": "Name servers",
+          "dns": "DNS configuration",
+          "status": "Domain status",
+          "contacts": "Contact information"
+        }
+      },
+      "privacy": {
+        "title": "Privacy Notice",
+        "text": "Some domain registrations may use privacy protection services, which replace personal contact information with generic contact details to protect the domain owner's privacy."
+      }
     }
   },
   "dns": {
@@ -245,15 +332,17 @@
       "metadata": "Metadata",
       "download": "Download",
       "noImage": "No screenshot available"
+    },
+    "actions": {
+      "clear": "Clear",
+      "copy": "Copy",
+      "download": "Download",
+      "openNew": "Open in New Tab"
     }
   },
   "actions": {},
-  "screenshotActions": {
-    "clear": "Clear",
-    "copy": "Copy",
-    "download": "Download",
-    "openNew": "Open in New Tab"
-  },
+  
+  
   "health": {
     "title": "System Health Monitor",
     "description": "Monitor system health and service status with real-time metrics",
@@ -317,7 +406,11 @@
     "invalidDomain": "Please enter a valid domain name",
     "networkError": "Network error, please try again",
     "serverError": "Server error, please try again later",
-    "notFound": "Domain not found",
+    "notFound": "Page not found",
+    "notFoundDescription": "Sorry, the page you are looking for doesn't exist or has been moved.",
+    "backToHome": "Back to Home",
+    "goToDomain": "Go to Domain Lookup",
+    "contactSupport": "If you believe this is an error, please contact support.",
     "timeout": "Request timeout, please try again",
     "rateLimit": "Too many requests, please wait",
     "unauthorized": "Unauthorized access",

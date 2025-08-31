@@ -171,25 +171,12 @@ export class DomainController extends BaseController<DomainInfo> {
   /**
    * 添加到搜索历史
    */
-  private addToSearchHistory(domain: string, result: DomainInfo): void {
+  private addToSearchHistory(domain: string, _result: DomainInfo): void {
     try {
       const history = this.getSearchHistory();
-      const newEntry = {
-        domain,
-        timestamp: new Date().toISOString(),
-        registrar: result.registrar,
-        status: result.status?.[0] || 'unknown'
-      };
-      
-      // 添加到历史记录开头，保持最新的在前面
-      history.unshift(newEntry);
-      
-      // 限制历史记录数量
-      if (history.length > 50) {
-        history.splice(50);
-      }
-      
-      localStorage.setItem('domainSearchHistory', JSON.stringify(history));
+      const normalized = domain.toLowerCase();
+      const next = [normalized, ...history.filter((d) => d !== normalized)].slice(0, 50);
+      localStorage.setItem('domainSearchHistory', JSON.stringify(next));
     } catch (error) {
       logger.warn('保存搜索历史失败', { domain, error });
     }
@@ -198,10 +185,15 @@ export class DomainController extends BaseController<DomainInfo> {
   /**
    * 获取搜索历史
    */
-  getSearchHistory(): Array<{ domain: string; result: DomainInfo; timestamp: number }> {
+  getSearchHistory(): string[] {
     try {
       const history = localStorage.getItem('domainSearchHistory');
-      return history ? JSON.parse(history) : [];
+      const list = history ? JSON.parse(history) : [];
+      if (Array.isArray(list)) {
+        if (list.length > 0 && typeof list[0] === 'string') return list as string[];
+        return (list as Array<{ domain?: string }>).map((i) => i?.domain).filter(Boolean) as string[];
+      }
+      return [];
     } catch (error) {
       logger.warn('获取搜索历史失败', { error });
       return [];

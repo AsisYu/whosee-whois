@@ -1,37 +1,15 @@
-import { notFound } from 'next/navigation';
-import { getRequestConfig } from 'next-intl/server';
+import { routing } from './routing';
 
-// 支持的语言列表
-export const locales = ['en', 'zh'] as const;
-export type Locale = (typeof locales)[number];
-
-// 默认语言
-export const defaultLocale: Locale = 'en';
-
-// 语言配置
-export default getRequestConfig(async ({ locale }) => {
-  // 验证传入的语言是否支持
-  if (!locales.includes(locale as Locale)) {
-    notFound();
-  }
-
-  return {
-    messages: (await import(`../messages/${locale}.json`)).default
-  };
-});
-
-// 语言映射函数
-export function getLocaleFromPath(pathname: string): Locale {
-  const segments = pathname.split('/');
-  const locale = segments[1] as Locale;
-  return locales.includes(locale) ? locale : defaultLocale;
-}
+// 单一真源：从 routing 读取 locales 与默认语言
+export const locales = routing.locales as readonly ['en', 'zh'];
+export type Locale = (typeof routing.locales)[number];
+export const defaultLocale: Locale = routing.defaultLocale as Locale;
 
 // CMS语言映射
 export function toCMSLocale(locale: string): string {
   const mapping: Record<string, string> = {
-    'en': 'en',
-    'zh': 'zh-Hans'
+    en: 'en',
+    zh: 'zh-Hans'
   };
   return mapping[locale] || 'en';
 }

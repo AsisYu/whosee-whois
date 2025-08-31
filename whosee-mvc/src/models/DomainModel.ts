@@ -1,5 +1,5 @@
 import { SingletonModel } from './BaseModel';
-import { DomainInfo, ApiResponse } from '@/types';
+import { DomainInfo } from '@/types';
 import { apiClient } from '@/services/ApiService';
 
 /**
@@ -26,14 +26,18 @@ export class DomainModel extends SingletonModel<DomainInfo> {
       return;
     }
 
-    const result = await this.handleApiResponse(() => 
-      apiClient.getDomainInfo(domain)
-    );
-
-    if (result) {
+    try {
+      this.setLoading(true);
+      this.setError(null);
+      const result = await apiClient.getDomainInfo(domain);
       this.setData(result);
       this.addToCache(domain, result);
       this.addToHistory(domain);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '请求失败';
+      this.setError(message);
+    } finally {
+      this.setLoading(false);
     }
   }
 
@@ -138,10 +142,8 @@ export class DomainModel extends SingletonModel<DomainInfo> {
 
     const promises = validDomains.map(domain => 
       apiClient.getDomainInfo(domain)
-        .then(response => {
-          if (response.success && response.data) {
-            this.addToCache(domain, response.data);
-          }
+        .then((info) => {
+          this.addToCache(domain, info);
         })
         .catch(() => {}) // 忽略预加载错误
     );

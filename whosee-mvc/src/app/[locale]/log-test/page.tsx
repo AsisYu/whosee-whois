@@ -182,9 +182,9 @@ export default function LogTestPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">日志收集系统测试</h1>
+        <h1 className="text-3xl font-bold mb-2">{t('log.title')}</h1>
         <p className="text-muted-foreground">
-          测试项目的日志收集功能，包括不同级别的日志、性能监控和用户行为追踪
+          {t('log.subtitle')}
         </p>
       </div>
 
@@ -193,43 +193,43 @@ export default function LogTestPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5" />
-            日志统计信息
+            {t('log.statsTitle')}
           </CardTitle>
           <CardDescription>
-            当前会话的日志收集统计
+            {t('log.statsDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-600">{logStats.totalLogs}</div>
-              <div className="text-sm text-muted-foreground">总日志数</div>
+              <div className="text-sm text-muted-foreground">{t('log.total')}</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-red-600">{logStats.errorCount}</div>
-              <div className="text-sm text-muted-foreground">错误数</div>
+              <div className="text-sm text-muted-foreground">{t('log.errors')}</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-yellow-600">{logStats.warningCount}</div>
-              <div className="text-sm text-muted-foreground">警告数</div>
+              <div className="text-sm text-muted-foreground">{t('log.warnings')}</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-orange-600">{logStats.performanceIssues}</div>
-              <div className="text-sm text-muted-foreground">性能问题</div>
+              <div className="text-sm text-muted-foreground">{t('log.performanceIssues')}</div>
             </div>
           </div>
           <div className="mt-4 flex gap-2">
             <Button onClick={updateStats} variant="outline" size="sm">
               <RefreshCw className="h-4 w-4 mr-2" />
-              刷新统计
+              {t('log.refreshStats')}
             </Button>
             <Button onClick={viewStoredLogs} variant="outline" size="sm">
               <Info className="h-4 w-4 mr-2" />
-              查看存储日志
+              {t('log.viewStored')}
             </Button>
             <Button onClick={clearLogs} variant="destructive" size="sm">
               <Trash2 className="h-4 w-4 mr-2" />
-              清理日志
+              {t('log.clearLogs')}
             </Button>
           </div>
         </CardContent>
@@ -241,31 +241,31 @@ export default function LogTestPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Bug className="h-5 w-5" />
-              日志级别测试
+              {t('log.levelTest.title')}
             </CardTitle>
             <CardDescription>
-              测试不同级别的日志记录功能
+              {t('log.levelTest.desc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button onClick={testDebugLog} variant="outline" className="w-full justify-start">
               <Badge variant="secondary" className="mr-2">DEBUG</Badge>
-              调试日志
+              {t('log.levelTest.debug')}
             </Button>
             <Button onClick={testInfoLog} variant="outline" className="w-full justify-start">
               <Info className="h-4 w-4 mr-2" />
               <Badge variant="default" className="mr-2">INFO</Badge>
-              信息日志
+              {t('log.levelTest.info')}
             </Button>
             <Button onClick={testWarningLog} variant="outline" className="w-full justify-start">
               <AlertTriangle className="h-4 w-4 mr-2" />
               <Badge variant="destructive" className="mr-2">WARN</Badge>
-              警告日志
+              {t('log.levelTest.warn')}
             </Button>
             <Button onClick={testErrorLog} variant="outline" className="w-full justify-start">
               <AlertCircle className="h-4 w-4 mr-2" />
               <Badge variant="destructive" className="mr-2">ERROR</Badge>
-              错误日志
+              {t('log.levelTest.error')}
             </Button>
           </CardContent>
         </Card>
@@ -274,10 +274,10 @@ export default function LogTestPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Zap className="h-5 w-5" />
-              特殊功能测试
+              {t('log.special.title')}
             </CardTitle>
             <CardDescription>
-              测试性能监控和用户行为追踪
+              {t('log.special.desc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -288,11 +288,11 @@ export default function LogTestPage() {
               disabled={isLoading}
             >
               <BarChart3 className="h-4 w-4 mr-2" />
-              {isLoading ? '执行中...' : '性能日志测试'}
+              {isLoading ? t('log.special.executing') : t('log.special.performanceTest')}
             </Button>
             <Button onClick={testUserActionLog} variant="outline" className="w-full justify-start">
               <User className="h-4 w-4 mr-2" />
-              用户行为日志
+              {t('log.special.userAction')}
             </Button>
             <Button 
               onClick={testBatchLogs} 
@@ -301,7 +301,7 @@ export default function LogTestPage() {
               disabled={isLoading}
             >
               <RefreshCw className="h-4 w-4 mr-2" />
-              {isLoading ? '生成中...' : '批量日志测试'}
+              {isLoading ? t('log.special.generating') : t('log.special.batchTest')}
             </Button>
           </CardContent>
         </Card>
@@ -310,28 +310,28 @@ export default function LogTestPage() {
       {/* 使用说明 */}
       <Card>
         <CardHeader>
-          <CardTitle>使用说明</CardTitle>
+          <CardTitle>{t('log.instructions.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4 text-sm">
             <div>
-              <h4 className="font-semibold mb-2">日志查看方式：</h4>
+              <h4 className="font-semibold mb-2">{t('log.instructions.view.title')}</h4>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>按 F12 打开开发者工具查看控制台日志</li>
-                <li>点击"查看存储日志"按钮查看本地存储的日志数据</li>
-                <li>日志会自动保存到 localStorage 中</li>
+                <li>{t('log.instructions.view.item1')}</li>
+                <li>{t('log.instructions.view.item2')}</li>
+                <li>{t('log.instructions.view.item3')}</li>
               </ul>
             </div>
             <Separator />
             <div>
-              <h4 className="font-semibold mb-2">日志功能特性：</h4>
+              <h4 className="font-semibold mb-2">{t('log.instructions.features.title')}</h4>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>支持 DEBUG、INFO、WARN、ERROR 四个级别</li>
-                <li>自动记录性能指标和执行时间</li>
-                <li>追踪用户行为和交互数据</li>
-                <li>支持错误堆栈跟踪</li>
-                <li>自动缓冲和批量刷新到存储</li>
-                <li>提供统计信息和监控面板</li>
+                <li>{t('log.instructions.features.item1')}</li>
+                <li>{t('log.instructions.features.item2')}</li>
+                <li>{t('log.instructions.features.item3')}</li>
+                <li>{t('log.instructions.features.item4')}</li>
+                <li>{t('log.instructions.features.item5')}</li>
+                <li>{t('log.instructions.features.item6')}</li>
               </ul>
             </div>
           </div>

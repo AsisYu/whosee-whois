@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
+import { log } from '@/lib/logger';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +19,10 @@ import { logger } from '@/lib/logger';
 
 export default function DNSPage() {
   const t = useTranslations('dns');
+  const locale = useLocale();
+  useEffect(() => {
+    try { log.info('[i18n] DNSPage render', 'i18n', { locale, title: t('title') }); } catch {}
+  }, [locale]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([...DEFAULT_DNS_TYPES]);
   const {
@@ -113,7 +119,7 @@ export default function DNSPage() {
               placeholder={t('search.placeholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               className="flex-1"
             />
             <Button 

@@ -1,4 +1,5 @@
 import { SingletonModel } from './BaseModel';
+import { api as apiLib } from '@/lib/api';
 import { ApiService } from '@/services/ApiService';
 import { DNSRecord } from '@/types';
 import { logger } from '@/lib/logger';
@@ -30,25 +31,11 @@ export class DNSModel extends SingletonModel<DNSRecord[]> {
     }
 
     try {
-      // 并发查询所有DNS记录类型
-      const queries = types.map(type => 
-        ApiService.get<DNSRecord[]>(`/api/v1/dns/${encodeURIComponent(domain)}`, {
-          params: { type }
-        }).catch(error => {
-          logger.warn(`查询${type}记录失败:`, error);
-          return { data: [] as DNSRecord[] };
-        })
-      );
-
-      const results = await Promise.allSettled(queries);
-      
-      // 合并所有成功的查询结果
-      const allRecords: DNSRecord[] = [];
-      results.forEach((result, index) => {
-        if (result.status === 'fulfilled' && result.value.data) {
-          allRecords.push(...result.value.data);
-        }
-      });
+      // 使用统一 ApiService 获取完整 DNS 信息并在前端按类型过滤
+      const full = await new ApiService().getDNSInfo(domain);
+      const all = Array.isArray(full.records) ? full.records : [];
+      const typeSet = new Set(types.map(t => t.toUpperCase()));
+      const allRecords: DNSRecord[] = all.filter(r => typeSet.has((r.type || '').toUpperCase()));
 
       // 去重和排序
       const uniqueRecords = this.deduplicateRecords(allRecords);

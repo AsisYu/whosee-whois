@@ -232,16 +232,15 @@ export class DNSController extends BaseController<DNSRecord[]> {
   /**
    * 添加到查询历史
    */
-  private addToQueryHistory(domain: string, types: string[], result: DNSRecord[]): void {
+  private addToQueryHistory(domain: string, types: string[], result: DNSRecord[] | null): void {
     try {
       const history = this.getQueryHistory();
       const newEntry = {
         domain,
         types,
         timestamp: new Date().toISOString(),
-        recordCount: result?.length || 0,
-        servers: result?.servers || []
-      };
+        recordCount: result?.length || 0
+      } as any;
       
       // 添加到历史记录开头
       history.unshift(newEntry);
@@ -260,7 +259,7 @@ export class DNSController extends BaseController<DNSRecord[]> {
   /**
    * 获取查询历史
    */
-  getQueryHistory(): Array<{ domain: string; types: string[]; result: DNSRecord[]; timestamp: number }> {
+  getQueryHistory(): Array<{ domain: string; types: string[]; timestamp: number }> {
     try {
       const history = localStorage.getItem('dnsQueryHistory');
       return history ? JSON.parse(history) : [];

@@ -36,6 +36,55 @@
     "ok": "确定",
     "placeholder": "请输入域名 (例如: example.com)",
     "tryNow": "立即尝试",
+    "logTestButton": "测试日志收集功能",
+    "log": {
+      "title": "日志收集系统测试",
+      "subtitle": "测试日志、性能监控与用户行为追踪",
+      "statsTitle": "日志统计信息",
+      "statsDesc": "当前会话的日志收集统计",
+      "total": "总日志数",
+      "errors": "错误数",
+      "warnings": "警告数",
+      "performanceIssues": "性能问题",
+      "refreshStats": "刷新统计",
+      "viewStored": "查看存储日志",
+      "clearLogs": "清理日志",
+      "levelTest": {
+        "title": "日志级别测试",
+        "desc": "测试不同级别的日志记录功能",
+        "debug": "调试日志",
+        "info": "信息日志",
+        "warn": "警告日志",
+        "error": "错误日志"
+      },
+      "special": {
+        "title": "特殊功能测试",
+        "desc": "测试性能监控和用户行为追踪",
+        "executing": "执行中...",
+        "performanceTest": "性能日志测试",
+        "userAction": "用户行为日志",
+        "generating": "生成中...",
+        "batchTest": "批量日志测试"
+      },
+      "instructions": {
+        "title": "使用说明",
+        "view": {
+          "title": "日志查看方式：",
+          "item1": "按 F12 打开开发者工具查看控制台日志",
+          "item2": "点击“查看存储日志”按钮查看本地存储的日志数据",
+          "item3": "日志会自动保存到 localStorage 中"
+        },
+        "features": {
+          "title": "日志功能特性：",
+          "item1": "支持 DEBUG、INFO、WARN、ERROR 四个级别",
+          "item2": "自动记录性能指标和执行时间",
+          "item3": "追踪用户行为和交互数据",
+          "item4": "支持错误堆栈跟踪",
+          "item5": "自动缓冲和批量刷新到存储",
+          "item6": "提供统计信息和监控面板"
+        }
+      }
+    },
     "allRightsReserved": "版权所有",
     "switchLanguage": "切换语言",
     "toggleTheme": "切换主题",
@@ -133,10 +182,22 @@
         "name": "姓名",
         "organization": "组织",
         "email": "邮箱",
-        "phone": "电话"
+        "phone": "电话",
+        "address": "地址"
       },
       "nameservers": {
         "title": "名称服务器"
+      },
+      "roles": {
+        "registrant": "注册联系人",
+        "admin": "管理联系人",
+        "tech": "技术联系人"
+      },
+      "raw": {
+        "title": "原始 WHOIS 数据",
+        "description": "来自注册局的完整 WHOIS 响应",
+        "show": "显示原始数据",
+        "hide": "隐藏原始数据"
       },
       "tools": {
         "title": "相关工具",
@@ -159,6 +220,32 @@
       "title": "缓存统计",
       "size": "已缓存域名",
       "clear": "清除缓存"
+    },
+    "info": {
+      "whatIs": "什么是 WHOIS？",
+      "subtitle": "了解域名注册信息",
+      "registration": {
+        "title": "注册信息",
+        "items": {
+          "created": "域名创建时间",
+          "expires": "到期时间",
+          "updated": "最后更新时间",
+          "registrar": "注册商信息"
+        }
+      },
+      "technical": {
+        "title": "技术信息",
+        "items": {
+          "nameservers": "名称服务器",
+          "dns": "DNS 配置",
+          "status": "域名状态",
+          "contacts": "联系信息"
+        }
+      },
+      "privacy": {
+        "title": "隐私说明",
+        "text": "部分域名注册可能使用隐私保护服务，隐藏个人联系信息并以通用信息替代，以保护域名所有者隐私。"
+      }
     }
   },
   "dns": {
@@ -245,15 +332,15 @@
       "metadata": "元数据",
       "download": "下载",
       "noImage": "无可用截图"
+    },
+    "actions": {
+      "clear": "清除",
+      "copy": "复制",
+      "download": "下载",
+      "openNew": "新窗口打开"
     }
   },
   "actions": {},
-  "screenshotActions": {
-    "clear": "清除",
-    "copy": "复制",
-    "download": "下载",
-    "openNew": "新窗口打开"
-  },
   "health": {
     "title": "系统健康监控",
     "description": "监控系统健康状态和服务状态，提供实时指标",
@@ -317,7 +404,11 @@
     "invalidDomain": "请输入有效的域名",
     "networkError": "网络错误，请重试",
     "serverError": "服务器错误，请稍后重试",
-    "notFound": "未找到域名",
+    "notFound": "页面未找到",
+    "notFoundDescription": "抱歉，您访问的页面不存在或已被移动。",
+    "backToHome": "返回首页",
+    "goToDomain": "前往域名查询",
+    "contactSupport": "如果您认为这是一个错误，请联系技术支持。",
     "timeout": "请求超时，请重试",
     "rateLimit": "请求过于频繁，请稍等",
     "unauthorized": "未授权访问",

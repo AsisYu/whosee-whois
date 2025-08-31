@@ -63,42 +63,51 @@ export default function Home() {
   const t = useTranslations('home');
   const tCommon = useTranslations('common');
   const locale = useLocale();
+  useEffect(() => {
+    try {
+      console.log('[i18n][CSR] current locale =', locale);
+      console.log('[i18n][CSR] home.title =', t('title'));
+    } catch {}
+  }, [locale]);
   const currentLocale = (typeof navigator !== 'undefined' && navigator.language) || 'unknown';
 
   // 测试日志收集功能
   useEffect(() => {
-    try {
-      // eslint-disable-next-line no-console
-      console.log('[i18n][CSR] useTranslations(home).title =', t('title'));
-      // eslint-disable-next-line no-console
-      console.log('[i18n][CSR] browser locale =', currentLocale);
-    } catch {}
-    // 页面加载时记录日志
-    log.info('主页面已加载', 'page-load', {
-      timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-      url: window.location.href
-    });
+    if (process.env.NEXT_PUBLIC_DEBUG_PERF === '1') {
+      try {
+        // eslint-disable-next-line no-console
+        console.log('[i18n][CSR] useTranslations(home).title =', t('title'));
+        // eslint-disable-next-line no-console
+        console.log('[i18n][CSR] browser locale =', currentLocale);
+      } catch {}
+      // 页面加载时记录日志
+      log.info('主页面已加载', 'page-load', {
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        url: window.location.href
+      });
 
-    // 记录性能日志
-    const timer = log.timer('page-render');
-    setTimeout(() => {
-      timer(true, { component: 'HomePage' });
-    }, 100);
+      // 记录性能日志
+      const timer = log.timer('page-render');
+      setTimeout(() => {
+        timer(true, { component: 'HomePage' });
+      }, 100);
 
-    // 记录用户行为
-    log.userAction('page-visit', 'HomePage', {
-      referrer: document.referrer,
-      timestamp: Date.now()
-    });
+      // 记录用户行为
+      log.userAction('page-visit', 'HomePage', {
+        referrer: document.referrer,
+        timestamp: Date.now()
+      });
 
-    return () => {
-      log.info('主页面即将卸载', 'page-unload');
-    };
+      return () => {
+        log.info('主页面即将卸载', 'page-unload');
+      };
+    }
   }, []);
 
   // 测试不同级别的日志
   const testLogs = () => {
+    if (process.env.NEXT_PUBLIC_DEBUG_PERF !== '1') return;
     log.debug('这是一个调试日志', 'log-test', { level: 'debug' });
     log.info('这是一个信息日志', 'log-test', { level: 'info' });
     log.warn('这是一个警告日志', 'log-test', { level: 'warn' });
@@ -120,6 +129,8 @@ export default function Home() {
     const stats = logger.getLogStats();
     console.log('日志统计:', stats);
     
+    // 仅调试时允许提示
+    // eslint-disable-next-line no-alert
     alert(`日志测试完成！\n总日志数: ${stats.totalLogs}\n错误数: ${stats.errorCount}\n警告数: ${stats.warningCount}\n性能问题: ${stats.performanceIssues}`);
   };
 
@@ -148,7 +159,7 @@ export default function Home() {
               className="mx-auto flex items-center gap-2"
             >
               <Bug className="h-4 w-4" />
-              测试日志收集功能
+              {tCommon('logTestButton')}
             </Button>
           </div>
         </div>

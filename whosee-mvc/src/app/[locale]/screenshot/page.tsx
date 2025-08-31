@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
+import { log } from '@/lib/logger';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +35,10 @@ import { cn } from '@/lib/utils';
 
 export default function ScreenshotPage() {
   const t = useTranslations('screenshot');
+  const locale = useLocale();
+  useEffect(() => {
+    try { log.info('[i18n] ScreenshotPage render', 'i18n', { locale, title: t('title') }); } catch {}
+  }, [locale]);
   const [domain, setDomain] = useState('');
   const [selectedDevice, setSelectedDevice] = useState(DEVICE_PRESETS[0]);
   const [customWidth, setCustomWidth] = useState(1920);

@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations, useLocale } from 'next-intl';
+import { log } from '@/lib/logger';
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -59,6 +60,11 @@ export function Navbar() {
   const pathname = usePathname();
   const locale = useLocale();
   const [isOpen, setIsOpen] = React.useState(false);
+  React.useEffect(() => {
+    try {
+      log.info('[i18n] Navbar render', 'i18n', { locale, pathname });
+    } catch {}
+  }, [locale, pathname]);
 
   return (
     <header className="sticky top-0 z-[200] w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pointer-events-auto">
@@ -80,7 +86,7 @@ export function Navbar() {
           <NavigationMenuList>
             {navigationItems.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname.includes(item.href);
+              const isActive = pathname.startsWith(`/${locale}${item.href}`);
               
               return (
                 <NavigationMenuItem key={item.href}>
@@ -128,7 +134,7 @@ export function Navbar() {
             <div className="grid gap-4 py-4">
               {navigationItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = pathname.includes(item.href);
+                const isActive = pathname.startsWith(`/${locale}${item.href}`);
                 
                 return (
                   <Link

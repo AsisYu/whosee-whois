@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
+import { log } from '@/lib/logger';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +17,9 @@ import { logger } from '@/lib/logger';
 export default function DomainPage() {
   const t = useTranslations('domain');
   const locale = useLocale();
+  useEffect(() => {
+    try { log.info('[i18n] DomainPage render', 'i18n', { locale, title: t('title') }); } catch {}
+  }, [locale]);
   const [searchTerm, setSearchTerm] = useState('');
   const controller = new DomainController();
   const {
@@ -23,8 +27,10 @@ export default function DomainPage() {
     loading,
     error,
     searchHistory,
-    searchDomain
+    searchDomain,
+    getFormattedData
   } = useDomain(controller);
+  const formatted = getFormattedData();
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
@@ -75,7 +81,7 @@ export default function DomainPage() {
               placeholder={t('search.placeholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               className="flex-1"
             />
             <Button 
@@ -178,29 +184,20 @@ export default function DomainPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {data.creationDate && (
+                {formatted?.registrationDate && (
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t('results.dates.created')}</label>
                     <div className="p-2 bg-muted rounded text-sm">
-                      {formatDate(data.creationDate)}
+                      {formatted.registrationDate}
                     </div>
                   </div>
                 )}
                 
-                {data.expirationDate && (
+                {formatted?.expirationDate && (
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t('results.dates.expires')}</label>
                     <div className="p-2 bg-muted rounded text-sm">
-                      {formatDate(data.expirationDate)}
-                    </div>
-                  </div>
-                )}
-                
-                {data.updatedDate && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">{t('results.dates.updated')}</label>
-                    <div className="p-2 bg-muted rounded text-sm">
-                      {formatDate(data.updatedDate)}
+                      {formatted.expirationDate}
                     </div>
                   </div>
                 )}
@@ -208,8 +205,8 @@ export default function DomainPage() {
             </CardContent>
           </Card>
 
-          {/* Contact Information */}
-          {data.contacts && data.contacts.length > 0 && (
+          {/* Contact Information (object-based) */}
+          {data.contacts && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -219,39 +216,43 @@ export default function DomainPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {data.contacts.map((contact, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Badge variant="outline">{contact.type}</Badge>
+                  {(['registrant','admin','tech'] as const).map((role) => {
+                    const contact = (data.contacts as any)[role];
+                    if (!contact) return null;
+                    return (
+                      <div key={role} className="border rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Badge variant="outline">{role}</Badge>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                          {contact.name && (
+                            <div>
+                              <span className="font-medium">{t('results.contacts.name')}: </span>
+                              {contact.name}
+                            </div>
+                          )}
+                          {contact.organization && (
+                            <div>
+                              <span className="font-medium">{t('results.contacts.organization')}: </span>
+                              {contact.organization}
+                            </div>
+                          )}
+                          {contact.email && (
+                            <div>
+                              <span className="font-medium">{t('results.contacts.email')}: </span>
+                              {contact.email}
+                            </div>
+                          )}
+                          {contact.phone && (
+                            <div>
+                              <span className="font-medium">{t('results.contacts.phone')}: </span>
+                              {contact.phone}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                        {contact.name && (
-                          <div>
-                            <span className="font-medium">{t('results.contacts.name')}: </span>
-                            {contact.name}
-                          </div>
-                        )}
-                        {contact.organization && (
-                          <div>
-                            <span className="font-medium">{t('results.contacts.organization')}: </span>
-                            {contact.organization}
-                          </div>
-                        )}
-                        {contact.email && (
-                          <div>
-                            <span className="font-medium">{t('results.contacts.email')}: </span>
-                            {contact.email}
-                          </div>
-                        )}
-                        {contact.phone && (
-                          <div>
-                            <span className="font-medium">{t('results.contacts.phone')}: </span>
-                            {contact.phone}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
