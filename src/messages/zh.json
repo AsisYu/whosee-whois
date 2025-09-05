@@ -1,590 +1,418 @@
 {
-  "nav": {
-    "domain": "域名",
-    "dns": "DNS",
-    "screenshot": "截图",
-    "health": "健康检查",
-    "blog": "博客"
-  },
   "common": {
     "search": "搜索",
     "loading": "加载中...",
     "error": "错误",
-    "success": "成功",
     "copy": "复制",
     "copied": "已复制！",
-    "lightMode": "浅色模式",
-    "darkMode": "深色模式",
-    "language": "语言",
+    "clear": "清除",
     "retry": "重试",
-    "networkError": "网络错误",
-    "networkErrorMessage": "无法连接到服务器，请检查网络连接后重试。",
-    "notFound": "未找到",
-    "notFoundMessage": "请求的资源不存在。",
-    "resourceNotFound": "未找到{resource}",
-    "readMore": "阅读更多",
-    "viewAll": "查看全部",
-    "backToTop": "返回顶部",
-    "share": "分享",
-    "categories": "分类",
-    "tags": "标签",
-    "author": "作者",
-    "publishedAt": "发布时间",
-    "updatedAt": "更新时间",
-    "minute": "分钟",
-    "minutes": "分钟",
-    "minRead": "分钟阅读",
-    "relatedPosts": "相关文章",
-    "noResults": "没有找到结果",
-    "searchResults": "搜索结果",
+    "back": "返回",
+    "next": "下一页",
+    "previous": "上一页",
+    "close": "关闭",
+    "save": "保存",
+    "cancel": "取消",
+    "confirm": "确认",
+    "delete": "删除",
+    "edit": "编辑",
+    "view": "查看",
+    "download": "下载",
+    "upload": "上传",
+    "refresh": "刷新",
+    "settings": "设置",
+    "help": "帮助",
+    "about": "关于",
+    "contact": "联系",
+    "privacy": "隐私",
+    "terms": "条款",
+    "language": "语言",
+    "theme": "主题",
+    "light": "浅色",
+    "dark": "深色",
+    "system": "系统",
+    "yes": "是",
+    "no": "否",
+    "ok": "确定",
+    "placeholder": "请输入域名 (例如: example.com)",
+    "tryNow": "立即尝试",
+    "logTestButton": "测试日志收集功能",
+    "log": {
+      "title": "日志收集系统测试",
+      "subtitle": "测试日志、性能监控与用户行为追踪",
+      "statsTitle": "日志统计信息",
+      "statsDesc": "当前会话的日志收集统计",
+      "total": "总日志数",
+      "errors": "错误数",
+      "warnings": "警告数",
+      "performanceIssues": "性能问题",
+      "refreshStats": "刷新统计",
+      "viewStored": "查看存储日志",
+      "clearLogs": "清理日志",
+      "levelTest": {
+        "title": "日志级别测试",
+        "desc": "测试不同级别的日志记录功能",
+        "debug": "调试日志",
+        "info": "信息日志",
+        "warn": "警告日志",
+        "error": "错误日志"
+      },
+      "special": {
+        "title": "特殊功能测试",
+        "desc": "测试性能监控和用户行为追踪",
+        "executing": "执行中...",
+        "performanceTest": "性能日志测试",
+        "userAction": "用户行为日志",
+        "generating": "生成中...",
+        "batchTest": "批量日志测试"
+      },
+      "instructions": {
+        "title": "使用说明",
+        "view": {
+          "title": "日志查看方式：",
+          "item1": "按 F12 打开开发者工具查看控制台日志",
+          "item2": "点击“查看存储日志”按钮查看本地存储的日志数据",
+          "item3": "日志会自动保存到 localStorage 中"
+        },
+        "features": {
+          "title": "日志功能特性：",
+          "item1": "支持 DEBUG、INFO、WARN、ERROR 四个级别",
+          "item2": "自动记录性能指标和执行时间",
+          "item3": "追踪用户行为和交互数据",
+          "item4": "支持错误堆栈跟踪",
+          "item5": "自动缓冲和批量刷新到存储",
+          "item6": "提供统计信息和监控面板"
+        }
+      }
+    },
+    "allRightsReserved": "版权所有",
+    "switchLanguage": "切换语言",
+    "toggleTheme": "切换主题",
+    "lightTheme": "浅色主题",
+    "darkTheme": "深色主题",
+    "systemTheme": "系统主题"
+  },
+  "navigation": {
     "home": "首页",
-    "blog": "博客"
+    "domain": "域名查询",
+    "dns": "DNS查询",
+    "screenshot": "网站截图",
+    "health": "系统健康",
+    "blog": "博客",
+    "tools": "工具",
+    "api": "API",
+    "docs": "文档"
+  },
+  "nav": {
+    "domain": "域名",
+    "dns": "DNS",
+    "health": "健康",
+    "screenshot": "截图",
+    "description": "专业的域名分析工具",
+    "domainDesc": "WHOIS域名信息查询",
+    "dnsDesc": "DNS记录查询和分析",
+    "healthDesc": "系统健康监控",
+    "screenshotDesc": "网站截图捕获",
+    "switchLanguage": "切换语言"
   },
   "home": {
-    "title": "Whosee - 专业域名查询工具",
-    "subtitle": "快速、全面的域名信息查询服务",
-    "description": "快速、全面的域名信息查询服务，提供域名查询、DNS解析、网站截图、健康检查等功能",
-    "placeholder": "输入域名 (例如：example.com)",
+    "title": "Whosee - 域名信息查询工具",
+    "subtitle": "获取全面的域名信息，包括WHOIS数据、DNS记录和网站截图",
+    "description": "专业的域名分析工具，提供WHOIS查询、DNS记录查找、健康监控和网站截图功能。",
+    "placeholder": "请输入域名 (例如: example.com)",
     "search": "搜索",
-    "features": {
-      "title": "强大功能",
-      "subtitle": "全面的域名信息查询服务，帮助您深入了解任何域名",
-      "domain": {
-        "title": "域名信息",
-        "description": "获取详细的WHOIS信息、注册详情和域名状态"
-      },
-      "whois": {
-        "title": "域名查询",
-        "description": "获取详细的WHOIS信息、注册详情和域名状态"
-      },
-      "dns": {
-        "title": "DNS记录",
-        "description": "查询DNS记录，包括A、AAAA、MX、TXT、NS等记录类型"
-      },
-      "screenshot": {
-        "title": "网站截图",
-        "description": "捕获和预览网站截图"
-      },
-      "health": {
-        "title": "健康检查",
-        "description": "监控网站可用性和响应时间"
-      },
-      "blog": {
-        "title": "技术博客",
-        "description": "域名技术见解、教程和行业趋势"
-      }
-    },
-    "latestPosts": {
-      "title": "最新博客文章",
-      "subtitle": "获取最新的域名技术见解和教程",
-      "viewAllPosts": "查看所有文章"
-    }
+    "features": "核心功能",
+    "featuresDesc": "专业的域名分析工具，提供全方位的域名信息服务",
+    "domainQuery": "域名查询",
+    "domainQueryDesc": "获取详细的WHOIS信息，包括注册详情、联系信息和域名状态",
+    "dnsQuery": "DNS查询",
+    "dnsQueryDesc": "从多个DNS服务器查询DNS记录 (A, AAAA, MX, TXT, NS, CNAME, SOA)",
+    "websiteScreenshot": "网站截图",
+    "websiteScreenshotDesc": "在不同设备视图下捕获网站截图 (桌面、移动、平板)",
+    "systemMonitoring": "系统监控",
+    "systemMonitoringDesc": "监控系统健康状态和服务状态，提供实时指标",
+    "whyChoose": "为什么选择我们",
+    "whyChooseDesc": "专业、快速、可靠的域名分析服务",
+    "fastResponse": "快速响应",
+    "fastResponseDesc": "优化的查询算法，亚秒级响应时间",
+    "secureReliable": "安全可靠",
+    "secureReliableDesc": "采用最新的安全协议，保障数据传输安全",
+    "responsiveDesign": "响应式设计",
+    "responsiveDesignDesc": "完美适配各种设备，随时随地查询域名信息",
+    "realTimeData": "实时数据",
+    "realTimeDataDesc": "直接从权威数据源获取最新的域名信息",
+    "getStarted": "开始使用",
+    "getStartedDesc": "立即开始查询域名信息，体验专业的域名分析服务",
+    "startQuery": "开始查询",
+    "viewStatus": "查看状态"
   },
   "domain": {
-    "title": "域名信息",
-    "description": "获取详细的域名 WHOIS 信息，包括注册详情、联系信息和域名状态",
-    "registrar": "注册商",
-    "status": "状态",
-    "created": "创建时间",
-    "updated": "更新时间",
-    "expires": "过期时间",
-    "nameservers": "域名服务器",
-    "contacts": "联系信息",
-    "registrant": "注册人",
-    "admin": "管理员",
-    "tech": "技术联系人",
-    "billing": "账单联系人",
-    "basicInfo": "基本信息",
-    "domainName": "域名",
-    "statusDescription": "状态说明",
-    "relatedTools": "相关工具",
-    "contactInfo": "联系信息",
-    "name": "姓名",
-    "organization": "组织",
-    "email": "邮箱",
-    "phone": "电话",
-    "address": "地址",
-    "searchPlaceholder": "输入域名获取详细的 WHOIS 信息、注册详情和联系信息",
-    "startQuery": "开始域名查询",
-    "tryDomain": "试试",
-    "copied": "已复制到剪贴板！",
-    "queryStats": "查询统计",
-    "queryTime": "查询时间",
-    "responseTime": "响应时间",
-    "dataSource": "数据来源",
-    "whoisDatabase": "WHOIS 数据库",
-    "statusInfo": {
-      "transferProhibited": {
-        "title": "禁止转移",
-        "description": "域名被注册商锁定，防止意外转移"
+    "title": "域名WHOIS查询",
+    "description": "获取全面的域名信息，包括注册详情、联系信息和名称服务器",
+    "search": {
+      "title": "搜索域名",
+      "description": "输入域名以获取WHOIS信息",
+      "placeholder": "请输入域名 (例如: example.com)",
+      "searching": "搜索中...",
+      "button": "搜索"
+    },
+    "results": {
+      "title": "域名信息",
+      "registrar": "注册商",
+      "registrationDate": "注册日期",
+      "expirationDate": "到期日期",
+      "nameServers": "名称服务器",
+      "status": "状态",
+      "contacts": "联系信息",
+      "noData": "未找到域名信息",
+      "basic": {
+        "title": "基础信息",
+        "domain": "域名",
+        "registrar": "注册商",
+        "status": "状态"
       },
-      "updateProhibited": {
-        "title": "禁止更新", 
-        "description": "域名信息被锁定，防止恶意修改"
+      "dates": {
+        "title": "日期",
+        "created": "创建时间",
+        "expires": "到期时间",
+        "updated": "更新时间"
       },
-      "deleteProhibited": {
-        "title": "禁止删除",
-        "description": "域名受保护，防止意外删除"
+      "contacts": {
+        "title": "联系人",
+        "name": "姓名",
+        "organization": "组织",
+        "email": "邮箱",
+        "phone": "电话",
+        "address": "地址"
       },
-      "serverHold": {
-        "title": "服务器保留",
-        "description": "域名被注册局暂停，可能涉及争议"
+      "nameservers": {
+        "title": "名称服务器"
+      },
+      "roles": {
+        "registrant": "注册联系人",
+        "admin": "管理联系人",
+        "tech": "技术联系人"
+      },
+      "raw": {
+        "title": "原始 WHOIS 数据",
+        "description": "来自注册局的完整 WHOIS 响应",
+        "show": "显示原始数据",
+        "hide": "隐藏原始数据"
+      },
+      "tools": {
+        "title": "相关工具",
+        "description": "探索与该域名相关的更多工具",
+        "dns": "DNS 查询",
+        "screenshot": "网站截图",
+        "health": "系统健康"
       }
     },
-    "tools": {
-      "dnsQuery": "DNS 查询",
-      "dnsQueryDesc": "查看域名的 DNS 记录",
-      "websiteScreenshot": "网站截图",
-      "websiteScreenshotDesc": "获取网站页面截图",
-      "sslCheck": "SSL 检查",
-      "sslCheckDesc": "检查 SSL 证书状态",
-      "websitePerformance": "网站性能",
-      "websitePerformanceDesc": "分析网站加载速度"
+    "history": {
+      "title": "搜索历史",
+      "empty": "暂无搜索历史",
+      "clear": "清除历史",
+      "description": "最近搜索的域名"
+    },
+    "error": {
+      "title": "请求错误"
+    },
+    "cache": {
+      "title": "缓存统计",
+      "size": "已缓存域名",
+      "clear": "清除缓存"
+    },
+    "info": {
+      "whatIs": "什么是 WHOIS？",
+      "subtitle": "了解域名注册信息",
+      "registration": {
+        "title": "注册信息",
+        "items": {
+          "created": "域名创建时间",
+          "expires": "到期时间",
+          "updated": "最后更新时间",
+          "registrar": "注册商信息"
+        }
+      },
+      "technical": {
+        "title": "技术信息",
+        "items": {
+          "nameservers": "名称服务器",
+          "dns": "DNS 配置",
+          "status": "域名状态",
+          "contacts": "联系信息"
+        }
+      },
+      "privacy": {
+        "title": "隐私说明",
+        "text": "部分域名注册可能使用隐私保护服务，隐藏个人联系信息并以通用信息替代，以保护域名所有者隐私。"
+      }
     }
   },
   "dns": {
-    "title": "DNS记录",
-    "description": "查询域名的所有 DNS 记录，包括 A、AAAA、MX、TXT、NS、CNAME 等记录类型",
-    "type": "类型",
-    "value": "值",
-    "ttl": "TTL",
-    "priority": "优先级",
-    "searchPlaceholder": "输入域名查看其所有 DNS 记录，包括 A、MX、TXT、CNAME 等记录类型",
-    "queryDomain": "查询域名",
-    "operation": "操作",
-    "copyRecordValue": "复制记录值",
-    "records": "条记录",
-    "recordTypes": "记录类型说明",
-    "relatedTools": "相关工具",
-    "queryInfo": "查询信息",
-    "totalRecords": "记录总数",
-    "queryTime": "查询时间",
-    "dnsServer": "DNS 服务器",
-    "systemDefault": "系统默认",
-    "startQuery": "开始 DNS 查询",
-    "quickQuery": "快速查询示例：",
-    "query": "查询",
-    "copied": "已复制到剪贴板！",
-    "dnsBasics": {
-      "whatIsDns": "什么是 DNS？",
-      "dnsDescription": "DNS（域名系统）将人类可读的域名转换为计算机可理解的 IP 地址，是互联网的重要基础设施。",
-      "whatIsTtl": "TTL 是什么？",
-      "ttlDescription": "TTL（生存时间）表示 DNS 记录可以被缓存的时间长度，较短的 TTL 意味着更快的更新传播。"
+    "title": "DNS记录查询",
+    "description": "从多个DNS服务器查询DNS记录并比较结果",
+    "search": {
+      "title": "DNS查询",
+      "description": "输入域名以查询DNS记录",
+      "placeholder": "请输入域名 (例如: example.com)",
+      "searching": "查询中...",
+      "button": "查询"
     },
-    "recordInfo": {
-      "a": {
-        "name": "A 记录",
-        "description": "指向 IPv4 地址"
-      },
-      "aaaa": {
-        "name": "AAAA 记录",
-        "description": "指向 IPv6 地址"
-      },
-      "mx": {
-        "name": "MX 记录",
-        "description": "邮件服务器"
-      },
-      "txt": {
-        "name": "TXT 记录",
-        "description": "文本验证记录"
-      },
-      "ns": {
-        "name": "NS 记录",
-        "description": "域名服务器"
-      },
-      "cname": {
-        "name": "CNAME 记录",
-        "description": "别名记录"
-      },
-      "soa": {
-        "name": "SOA 记录",
-        "description": "权威起始记录"
-      },
-      "ptr": {
-        "name": "PTR 记录",
-        "description": "反向解析记录"
-      }
+    "types": {
+      "title": "记录类型",
+      "all": "所有类型",
+      "A": "A记录",
+      "AAAA": "AAAA记录",
+      "MX": "MX记录",
+      "TXT": "TXT记录",
+      "NS": "NS记录",
+      "CNAME": "CNAME记录",
+      "SOA": "SOA记录"
     },
-    "tools": {
-      "domainInfo": "域名信息",
-      "domainInfoDesc": "查看 WHOIS 信息",
-      "websiteScreenshot": "网站截图",
-      "websiteScreenshotDesc": "获取网站页面截图",
-      "sslCheck": "SSL 检查",
-      "sslCheckDesc": "检查 SSL 证书",
-      "performanceTest": "性能测试",
-      "performanceTestDesc": "网站速度测试"
+    "error": {
+      "title": "请求错误"
+    },
+    "results": {
+      "title": "DNS记录",
+      "server": "DNS服务器",
+      "responseTime": "响应时间",
+      "records": "记录",
+      "noRecords": "未找到DNS记录",
+      "summary": {
+        "title": "汇总",
+        "totalRecords": "记录总数",
+        "recordTypes": "记录类型",
+        "status": "状态",
+        "responseTime": "响应时间"
+      },
+      "records": {
+        "name": "名称",
+        "value": "值",
+        "ttl": "TTL"
+      },
+      "noData": "没有DNS数据",
+      "noDataDescription": "未找到该域名与所选类型的记录"
     }
   },
-
   "screenshot": {
     "title": "网站截图",
-    "description": "获取网站在不同设备上的截图，支持桌面、手机和平板三种视图模式",
-    "desktop": "桌面版",
-    "mobile": "移动版",
-    "tablet": "平板版",
-    "captureTime": "截图时间",
-    "fileSize": "文件大小",
-    "selectDevice": "选择设备视图",
-    "ready": "已就绪",
-    "size": "大小",
-    "downloadScreenshot": "下载截图",
-    "screenshotPreview": "截图预览",
-    "desktopView": "桌面版视图",
-    "mobileView": "手机版视图",
-    "tabletView": "平板版视图",
-    "capturedAt": "拍摄于",
-    "screenshotInfo": "截图信息",
-    "format": "图片格式",
-    "quality": "压缩质量",
-    "highQuality": "高质量",
-    "deviceSpecs": "设备规格",
-    "resolution": "分辨率",
-    "userAgent": "用户代理",
-    "viewport": "视口大小",
-    "pixelRatio": "像素比",
-    "screenshotSettings": "截图设置",
-    "desktopDesc": "模拟 Chrome 浏览器在 1920×1080 分辨率下的显示效果",
-    "mobileDesc": "模拟 iPhone 设备在 375×667 分辨率下的显示效果",
-    "tabletDesc": "模拟 iPad 设备在 768×1024 分辨率下的显示效果",
-    "relatedTools": "相关工具",
-    "screenshotStats": "截图统计",
-    "targetDomain": "目标域名",
-    "screenshotCount": "截图数量",
-    "totalFileSize": "总文件大小",
-    "captureTime": "拍摄时间",
-    "startScreenshot": "开始网站截图",
-    "inputDomain": "输入网站域名，获取在不同设备上的显示截图",
-    "popularScreenshots": "热门网站截图：",
-    "screenshot": "截图",
-    "features": {
-      "multiDevice": "多设备支持",
-      "multiDeviceDesc": "支持桌面、手机、平板三种设备视图，全面了解网站在不同设备上的显示效果。",
-      "highQuality": "高质量截图",
-      "highQualityDesc": "使用先进的无头浏览器技术，确保截图的准确性和高质量，真实反映网站外观。",
-      "easyDownload": "便捷下载",
-      "easyDownloadDesc": "支持一键下载截图，方便保存和分享，适用于设计参考、竞品分析等场景。"
-    },
-    "deviceDescriptions": {
-      "desktop": "桌面版视图 (1920×1080)",
-      "mobile": "手机版视图 (375×667)",
-      "tablet": "平板版视图 (768×1024)"
-    },
-    "tools": {
-      "domainInfo": "域名信息",
-      "domainInfoDesc": "查看 WHOIS 信息",
-      "dnsQuery": "DNS 查询",
-      "dnsQueryDesc": "查看 DNS 记录",
-      "performanceAnalysis": "性能分析",
-      "performanceAnalysisDesc": "网站性能测试",
-      "websiteMonitoring": "网站监控",
-      "websiteMonitoringDesc": "持续监控网站"
-    }
-  },
-  "stats": {
-    "availability": "可用性",
-    "averageResponse": "平均响应", 
-    "totalQueries": "查询次数",
-    "continuousService": "不间断服务"
-  },
-  "highlights": {
-    "title": "为什么选择 Whosee？",
-    "subtitle": "专业、快速、安全的域名查询解决方案",
-    "secure": {
-      "title": "安全可靠",
-      "description": "企业级安全保障，数据传输加密"
-    },
-    "fast": {
-      "title": "快速响应",
-      "description": "毫秒级响应，实时数据查询"
-    },
-    "opensource": {
-      "title": "开源免费",
-      "description": "完全开源，支持自部署"
-    }
-  },
-  "techStack": {
-    "title": "技术架构",
-    "subtitle": "基于现代技术栈构建的高性能应用",
-    "frontend": {
-      "title": "前端技术",
-      "description": "采用最新的 Next.js 15 和 React 19，提供极致的用户体验和开发效率。"
-    },
-    "backend": {
-      "title": "后端技术",
-      "description": "高性能 Go 语言后端，支持高并发处理和微服务架构。"
-    }
-  },
-  "popularDomains": {
-    "title": "热门域名查询",
-    "subtitle": "点击下方域名快速查看详细信息"
-  },
-  "tutorial": {
-    "title": "如何使用",
-    "subtitle": "简单三步，快速获取域名详细信息",
-    "step1": {
-      "title": "输入域名",
-      "description": "在搜索框中输入您要查询的域名"
-    },
-    "step2": {
-      "title": "选择功能", 
-      "description": "选择 WHOIS、DNS 或截图功能"
-    },
-    "step3": {
-      "title": "查看结果",
-      "description": "获取详细的域名信息和分析报告"
-    }
-  },
-  "cta": {
-    "title": "准备开始域名查询了吗？",
-    "subtitle": "立即使用我们的专业域名查询工具，发现任何域名的详细信息",
-    "startDomainQuery": "开始域名查询",
-    "checkDNS": "检查 DNS 记录"
-  },
-  "metadata": {
-    "title": "Whosee - 专业域名查询工具",
-    "description": "快速、全面的域名信息查询服务，提供WHOIS信息、DNS记录、健康检查和网站截图。",
-    "keywords": "域名,whois,dns,查询,域名检查,网站健康,博客,技术见解"
-  },
-  "health": {
-    "title": "系统健康状态",
-    "description": "实时监控所有系统组件和服务的健康状况",
-    "lastUpdated": "最后更新：",
-    "serviceStatus": "服务状态",
-    "systemStats": "系统统计",
-    "responseTime": "响应时间",
-    "uptime": "可用性",
-    "details": "详细信息",
-    "totalQueries": "总查询数",
-    "avgResponseTime": "平均响应时间",
-    "systemUptime": "系统可用性",
-    "memoryUsage": "内存使用率",
-    "cpuUsage": "CPU使用率",
-    "diskUsage": "磁盘使用率",
-    "healthCheckInfo": "健康检查信息",
-    "healthCheckDetails": [
-      "• 健康检查每30秒执行一次",
-      "• 服务状态自动实时更新",
-      "• 响应时间为最近5分钟的平均值",
-      "• 可用性百分比基于最近30天计算"
-    ],
-    "services": {
-      "whoisService": "WHOIS 服务",
-      "dnsService": "DNS 服务",
-      "screenshotService": "截图服务",
-      "database": "数据库"
-    },
-    "serviceDetails": {
-      "whoisNormal": "所有 WHOIS 服务器响应正常",
-      "whoisError": "WHOIS 服务出现异常",
-      "dnsOperational": "所有 DNS 解析器运行正常",
-      "dnsError": "DNS 服务出现异常",
-      "screenshotNormal": "截图服务运行正常",
-      "screenshotSlow": "检测到响应时间较长",
-      "databaseStable": "所有数据库连接稳定",
-      "databaseError": "数据库连接异常"
-    },
-    "status": {
-      "healthy": "健康",
-      "degraded": "降级",
-      "unhealthy": "不健康"
-    }
-  },
-  "footer": {
-    "projectDescription": "专业域名查询工具，提供域名信息、DNS查询、网站截图等功能。",
-    "openSource": "开源项目",
-    "frontendRepo": "前端仓库",
-    "backendRepo": "后端仓库",
-    "techStack": "技术栈",
-    "frontend": "前端：Next.js 15 + React 19 + TypeScript",
-    "backend": "后端：Go + Gin + Redis",
-    "deployment": "部署：Vercel + Docker",
-    "copyright": "© 2025 Whosee. 保留所有权利。",
-    "madeWithLove": "开发",
-    "quickLinks": "快速链接",
-    "blog": "博客",
-    "latestPosts": "最新文章",
-    "allCategories": "所有分类"
-  },
-  "blog": {
-    "title": "技术博客",
-    "description": "域名技术见解、教程和行业趋势",
-    "meta": {
-      "title": "博客 - Whosee 技术见解",
-      "description": "域名技术见解、教程和行业趋势。了解DNS、WHOIS、网络技术等更多内容。"
-    },
+    "description": "在不同设备视图下捕获网站截图",
     "search": {
-      "placeholder": "搜索文章...",
-      "button": "搜索",
-      "resultsFor": "\"{query}\"的搜索结果",
-      "noResults": "没有找到匹配的文章。",
-      "tryDifferent": "尝试使用不同的关键词搜索。"
+      "title": "截图捕获",
+      "description": "输入域名以捕获网站截图",
+      "placeholder": "请输入域名 (例如: example.com)",
+      "domain": "域名",
+      "invalidDomain": "请输入有效的域名",
+      "capturing": "正在捕获...",
+      "capture": "开始截图"
     },
-    "filters": {
-      "all": "所有文章",
-      "featured": "精选",
-      "recent": "最新",
-      "category": "分类",
-      "tag": "标签",
-      "clearFilters": "清除筛选"
+    "options": {
+      "title": "捕获选项",
+      "device": "设备视图",
+      "desktop": "桌面",
+      "mobile": "移动",
+      "tablet": "平板",
+      "customSize": "自定义尺寸",
+      "width": "宽度",
+      "height": "高度",
+      "quality": "质量",
+      "fullPage": "整页",
+      "fullPageDesc": "捕获超出首屏范围的整个页面"
     },
-    "categories": {
-      "title": "所有分类",
-      "description": "浏览我们的所有文章分类，找到您感兴趣的主题",
-      "meta": {
-        "title": "博客分类 - Whosee",
-        "description": "浏览 Whosee 博客的所有分类，包含域名工具、DNS 分析、安全建议和教程指南等主题"
-      },
-      "empty": {
-        "title": "暂无分类",
-        "description": "目前还没有创建任何分类。"
-      },
-      "postCount": {
-        "none": "暂无文章",
-        "single": "1 篇文章",
-        "multiple": "{count} 篇文章"
-      },
-      "backToBlog": "返回博客首页",
-      "error": {
-        "title": "分类页面加载失败",
-        "description": "抱歉，无法加载分类列表。请稍后重试或返回博客主页。"
-      },
-      "allCategories": "所有分类",
-      "postsInCategory": "{category}分类下有{count}篇文章",
-      "noPostsInCategory": "此分类下暂无文章。"
+    "results": {
+      "title": "截图结果",
+      "description": "{domain} 的截图",
+      "domain": "域名",
+      "device": "设备",
+      "timestamp": "捕获时间",
+      "size": "图片尺寸",
+      "fileSize": "文件大小",
+      "captureTime": "捕获耗时",
+      "preview": "预览",
+      "metadata": "元数据",
+      "download": "下载",
+      "noImage": "无可用截图"
     },
-    "tags": {
-      "title": "标签",
-      "allTags": "所有标签",
-      "postsWithTag": "标记为{tag}的文章有{count}篇",
-      "noPostsWithTag": "此标签下暂无文章。"
-    },
-    "post": {
-      "meta": {
-        "author": "作者：{author}",
-        "publishedOn": "发布于{date}",
-        "updatedOn": "更新于{date}",
-        "readingTime": "{time}分钟阅读",
-        "views": "{count}次浏览",
-        "category": "分类：{category}",
-        "tags": "标签：{tags}"
-      },
-      "actions": {
-        "share": "分享文章",
-        "shareOn": "分享到{platform}",
-        "copyLink": "复制链接",
-        "linkCopied": "链接已复制到剪贴板！",
-        "print": "打印文章",
-        "bookmark": "收藏"
-      },
-      "navigation": {
-        "previous": "上一篇文章",
-        "next": "下一篇文章",
-        "backToBlog": "返回博客",
-        "tableOfContents": "目录"
-      },
-      "engagement": {
-        "wasHelpful": "这篇文章对您有帮助吗？",
-        "yes": "是",
-        "no": "否",
-        "thankYou": "感谢您的反馈！",
-        "improve": "我们如何改进这篇文章？"
-      }
-    },
-    "backToBlog": "返回博客",
-    "related": {
-      "title": "相关文章"
-    },
-    "sidebar": {
-      "recentPosts": "最新文章",
-      "popularPosts": "热门文章",
-      "categories": "分类",
-      "allCategories": "所有分类",
-      "tags": "热门标签",
-      "newsletter": "订阅邮件",
-      "newsletterDescription": "订阅以获取最新文章和见解，直接发送到您的邮箱。",
-      "emailPlaceholder": "输入您的邮箱",
-      "subscribe": "订阅",
-      "subscribeSuccess": "订阅成功！",
-      "subscribeError": "订阅失败，请重试。",
-      "noRecentPosts": "暂无最新文章"
-    },
-    "featured": {
-      "title": "精选文章",
-      "subtitle": "精心挑选的域名技术重要主题文章"
-    },
-    "relatedPosts": {
-      "title": "相关文章",
-      "subtitle": "您可能感兴趣的更多文章",
-      "basedOnCategory": "{category}分类下的更多文章",
-      "basedOnTags": "关于{tags}的更多文章"
-    },
-    "pagination": {
-      "previous": "上一页",
-      "next": "下一页",
-      "page": "第{current}页，共{total}页",
-      "goToPage": "跳转到第{page}页",
-      "firstPage": "首页",
-      "lastPage": "末页",
-      "showingResults": "显示第{start}-{end}条，共{total}条结果"
-    },
-    "errors": {
-      "postNotFound": "文章未找到",
-      "postNotFoundDescription": "您要查找的文章不存在或已被移动。",
-      "categoryNotFound": "分类未找到",
-      "categoryNotFoundDescription": "您要查找的分类不存在。",
-      "tagNotFound": "标签未找到",
-      "tagNotFoundDescription": "您要查找的标签不存在。",
-      "loadingError": "内容加载失败",
-      "loadingErrorDescription": "加载内容时出现错误，请重试。",
-      "networkError": "网络错误",
-      "networkErrorDescription": "无法连接到服务器，请检查网络连接后重试。",
-      "loadFailed": "文章加载失败",
-      "loadFailedDesc": "抱歉，无法加载所请求的文章。请稍后重试或返回博客主页。"
-    },
-    "language": {
-      "switchLanguage": "阅读{language}版本",
-      "availableIn": "可用语言：",
-      "translateTo": "翻译为{language}",
-      "originalLanguage": "原文语言：{language}",
-      "autoTranslated": "自动翻译",
-      "translationDisclaimer": "这是自动翻译版本，原文以{language}语言撰写。"
-    },
-    "seo": {
-      "breadcrumbs": {
-        "home": "首页",
-        "blog": "博客",
-        "category": "{category}",
-        "tag": "{tag}",
-        "search": "搜索结果"
-      }
-    },
-    "stats": {
-      "totalPosts": "共{count}篇文章",
-      "totalCategories": "{count}个分类",
-      "totalTags": "{count}个标签",
-      "publishedThisMonth": "本月发布{count}篇文章",
-      "averageReadingTime": "平均阅读时间{time}分钟"
-    },
-    "empty": {
-      "noPosts": "暂无文章",
-      "noPostsDescription": "我们正在努力创作优质内容，请稍后再来查看！",
-      "noFeaturedPosts": "暂无精选文章",
-      "noFeaturedPostsDescription": "还没有文章被设为精选。",
-      "noRecentPosts": "暂无最新文章",
-      "noPopularPosts": "暂无热门文章"
-    },
-    "archive": {
-      "title": "文章归档",
-      "byMonth": "按月份",
-      "byYear": "按年份",
-      "monthYear": "{year}年{month}月",
-      "postsInMonth": "{year}年{month}月的{count}篇文章",
-      "allTime": "全部时间"
-    },
-    "rss": {
-      "subscribe": "订阅RSS",
-      "description": "将最新文章推送到您的RSS阅读器"
+    "actions": {
+      "clear": "清除",
+      "copy": "复制",
+      "download": "下载",
+      "openNew": "新窗口打开"
     }
+  },
+  "actions": {},
+  "health": {
+    "title": "系统健康监控",
+    "description": "监控系统健康状态和服务状态，提供实时指标",
+    "actions": {
+      "refreshing": "刷新中...",
+      "refresh": "刷新",
+      "stopAuto": "停止自动刷新",
+      "startAuto": "开始自动刷新",
+      "export": "导出报告"
+    },
+    "lastUpdated": "最后更新时间",
+    "status": {
+      "title": "系统状态",
+      "healthy": "健康",
+      "unhealthy": "不健康",
+      "degraded": "降级",
+      "unknown": "未知"
+    },
+    "error": {
+      "title": "请求错误"
+    },
+    "overview": {
+      "systemStatus": "系统状态",
+      "healthScore": "健康评分",
+      "score": "评分",
+      "responseTime": "响应时间",
+      "services": "服务",
+      "healthy": "健康"
+    },
+    "services": {
+      "title": "服务",
+      "description": "服务状态详情",
+      "database": "数据库",
+      "redis": "Redis缓存",
+      "api": "API服务器",
+      "dns": "DNS服务",
+      "whois": "WHOIS服务",
+      "screenshot": "截图服务",
+      "responseTime": "响应时间",
+      "lastCheck": "最后检查"
+    },
+    "metrics": {
+      "title": "系统指标",
+      "description": "关键系统性能指标",
+      "responseTime": "响应时间",
+      "uptime": "运行时间",
+      "memoryUsage": "内存使用",
+      "cpuUsage": "CPU使用",
+      "lastCheck": "最后检查"
+    },
+    "critical": {
+      "title": "关键问题",
+      "description": "部分关键服务出现异常"
+    },
+    "noData": {
+      "title": "暂无数据",
+      "description": "没有可用的健康数据"
+    }
+  },
+  "errors": {
+    "invalidDomain": "请输入有效的域名",
+    "networkError": "网络错误，请重试",
+    "serverError": "服务器错误，请稍后重试",
+    "notFound": "页面未找到",
+    "notFoundDescription": "抱歉，您访问的页面不存在或已被移动。",
+    "backToHome": "返回首页",
+    "goToDomain": "前往域名查询",
+    "contactSupport": "如果您认为这是一个错误，请联系技术支持。",
+    "timeout": "请求超时，请重试",
+    "rateLimit": "请求过于频繁，请稍等",
+    "unauthorized": "未授权访问",
+    "forbidden": "访问被禁止",
+    "unknown": "发生未知错误"
   }
 }

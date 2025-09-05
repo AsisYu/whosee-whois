@@ -4,6 +4,9 @@
  */
 
 import { onCLS, onFCP, onINP, onLCP, onTTFB } from 'web-vitals';
+import { logger } from './logger';
+import { defaultConcurrencyManager } from './concurrency-manager';
+import { defaultRequestManager } from './request-deduplication';
 
 // 性能指标接口
 export interface PerformanceMetrics {
@@ -26,6 +29,29 @@ export interface PerformanceMetrics {
   renderTime?: number;
   componentCount?: number;
   
+  // 并发性能指标
+  concurrency?: {
+    totalTasks: number;
+    completedTasks: number;
+    failedTasks: number;
+    currentConcurrency: number;
+    queueSize: number;
+    throughput: number;
+    averageExecutionTime: number;
+    errorRate: number;
+  };
+  
+  // 缓存性能指标
+  cache?: {
+    hits: number;
+    misses: number;
+    hitRate: number;
+    totalRequests: number;
+    cacheSize: number;
+    memoryUsage: number;
+    evictions: number;
+  };
+  
   // 时间戳
   timestamp: number;
 }
@@ -39,7 +65,7 @@ export enum PerformanceLevel {
 
 // 性能警告接口
 export interface PerformanceAlert {
-  type: 'cpu' | 'memory' | 'render' | 'vitals';
+  type: 'cpu' | 'memory' | 'render' | 'vitals' | 'concurrency' | 'cache';
   level: PerformanceLevel;
   message: string;
   value: number;
@@ -76,18 +102,18 @@ export interface PerformanceConfig {
 
 // 默认配置
 const DEFAULT_CONFIG: PerformanceConfig = {
-  interval: 5000, // 5秒
+  interval: 15000, // 15秒 - 减少监控频率
   cpuThreshold: {
-    warning: 70,
-    critical: 90
+    warning: 80, // 提高警告阈值
+    critical: 95 // 提高严重阈值
   },
   memoryThreshold: {
-    warning: 70,
-    critical: 90
+    warning: 80, // 提高警告阈值
+    critical: 95 // 提高严重阈值
   },
-  enableConsoleLog: true,
+  enableConsoleLog: false, // 默认关闭控制台日志
   enableLocalStorage: true,
-  maxRecords: 100
+  maxRecords: 50 // 减少最大记录数
 };
 
 // 性能监控类
@@ -211,19 +237,15 @@ export class PerformanceMonitor {
 
   // 获取内存使用情况
   private getMemoryUsage(): PerformanceMetrics['memoryUsage'] {
-    if (typeof window === 'undefined' || !(performance as any).memory) {
+    if (typeof window === 'undefined' || !(performance as Performance & { memory?: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number } }).memory) {
       return undefined;
     }
 
-    const memory = (performance as any).memory;
-    const used = memory.usedJSHeapSize;
-    const total = memory.totalJSHeapSize;
-    const percentage = (used / total) * 100;
-
+    const memory = (performance as Performance & { memory?: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number } }).memory;
     return {
-      used,
-      total,
-      percentage
+      used: memory.usedJSHeapSize,
+      total: memory.totalJSHeapSize,
+      percentage: (memory.usedJSHeapSize / memory.totalJSHeapSize) * 100
     };
   }
 
@@ -233,35 +255,57 @@ export class PerformanceMonitor {
       const start = performance.now();
       const iterations = 100000;
       
-      // 执行一些计算密集型操作来测试CPU响应
-      let result = 0;
-      for (let i = 0; i < iterations; i++) {
-        result += Math.random();
-      }
-      
-      const end = performance.now();
-      const duration = end - start;
-      
-      // 基于执行时间估算CPU使用率（这是一个简化的估算）
-      const expectedDuration = 1; // 预期的执行时间（毫秒）
-      const cpuUsage = Math.min(100, (duration / expectedDuration) * 10);
-      
-      resolve(cpuUsage);
+      setTimeout(() => {
+        for (let i = 0; i < iterations; i++) {
+          Math.random();
+        }
+        const end = performance.now();
+        const duration = end - start;
+        const cpuUsage = Math.min(100, (duration / 16.67) * 100); // 基于60fps计算
+        resolve(cpuUsage);
+      }, 0);
     });
   }
 
   // 更新指标
   private updateMetric(key: keyof PerformanceMetrics, value: number) {
-    const currentMetrics = this.getCurrentMetrics();
-    currentMetrics[key] = value as any;
-    this.addMetrics(currentMetrics);
+    // 避免循环调用，直接创建基础指标对象
+    const basicMetrics: PerformanceMetrics = {
+      timestamp: Date.now(),
+      memoryUsage: this.getMemoryUsage()
+    };
+    (basicMetrics as Record<string, unknown>)[key] = value;
+    this.addMetrics(basicMetrics);
   }
 
   // 获取当前指标
   private getCurrentMetrics(): PerformanceMetrics {
+    // 获取并发管理器指标
+    const concurrencyMetrics = defaultConcurrencyManager.getMetrics();
+    const cacheMetrics = defaultRequestManager.getMetrics();
+    
     return {
       timestamp: Date.now(),
-      memoryUsage: this.getMemoryUsage()
+      memoryUsage: this.getMemoryUsage(),
+      concurrency: {
+        totalTasks: concurrencyMetrics.totalTasks,
+        completedTasks: concurrencyMetrics.completedTasks,
+        failedTasks: concurrencyMetrics.failedTasks,
+        currentConcurrency: concurrencyMetrics.currentConcurrency,
+        queueSize: concurrencyMetrics.queueSize,
+        throughput: concurrencyMetrics.throughput,
+        averageExecutionTime: concurrencyMetrics.averageExecutionTime,
+        errorRate: concurrencyMetrics.errorRate
+      },
+      cache: {
+        hits: cacheMetrics.hits,
+        misses: cacheMetrics.misses,
+        hitRate: cacheMetrics.hitRate,
+        totalRequests: cacheMetrics.totalRequests,
+        cacheSize: cacheMetrics.cacheSize,
+        memoryUsage: cacheMetrics.memoryUsage,
+        evictions: cacheMetrics.evictions
+      }
     };
   }
 
@@ -275,21 +319,41 @@ export class PerformanceMonitor {
     }
 
     // 保存到本地存储
-    if (this.config.enableLocalStorage) {
+    if (this.config.enableLocalStorage && typeof window !== 'undefined') {
       try {
         localStorage.setItem('performance-metrics', JSON.stringify(this.metrics.slice(-10)));
       } catch (error) {
-        console.warn('无法保存性能指标到本地存储:', error);
+        console.warn('Failed to save metrics to localStorage:', error);
       }
     }
 
+    // 记录性能数据
+    logger.logPerformance(
+      'performance-metrics-collection',
+      Date.now() - metrics.timestamp,
+      true,
+      {
+        webVitals: {
+          cls: metrics.cls,
+          fid: metrics.fid,
+          fcp: metrics.fcp,
+          lcp: metrics.lcp,
+          ttfb: metrics.ttfb
+        },
+        memoryUsage: metrics.memoryUsage,
+        cpuUsage: metrics.cpuUsage,
+        concurrencyMetrics: metrics.concurrency,
+        cacheMetrics: metrics.cache
+      }
+    );
+
+    // 检查阈值
+    this.checkThresholds(metrics);
+    
     // 触发回调
     if (this.onMetrics) {
       this.onMetrics(metrics);
     }
-
-    // 检查是否需要发出警告
-    this.checkThresholds(metrics);
   }
 
   // 添加警告
@@ -301,81 +365,182 @@ export class PerformanceMonitor {
       this.alerts = this.alerts.slice(-50);
     }
 
-    // 触发回调
     if (this.onAlert) {
       this.onAlert(alert);
     }
 
     if (this.config.enableConsoleLog) {
-      const emoji = alert.level === PerformanceLevel.POOR ? '🔴' : '🟡';
-      console.warn(`${emoji} 性能警告:`, alert.message, alert);
+      console.warn('⚠️ 性能警告:', alert);
     }
   }
 
   // 检查阈值
   private checkThresholds(metrics: PerformanceMetrics) {
-    // 检查内存使用
-    if (metrics.memoryUsage) {
-      const { percentage } = metrics.memoryUsage;
-      if (percentage > this.config.memoryThreshold.critical) {
-        this.addAlert({
-          type: 'memory',
-          level: PerformanceLevel.POOR,
-          message: `内存使用率过高: ${percentage.toFixed(1)}%`,
-          value: percentage,
-          threshold: this.config.memoryThreshold.critical,
-          timestamp: Date.now()
-        });
-      } else if (percentage > this.config.memoryThreshold.warning) {
-        this.addAlert({
-          type: 'memory',
-          level: PerformanceLevel.NEEDS_IMPROVEMENT,
-          message: `内存使用率较高: ${percentage.toFixed(1)}%`,
-          value: percentage,
-          threshold: this.config.memoryThreshold.warning,
-          timestamp: Date.now()
-        });
-      }
-    }
-
-    // 检查CPU使用
-    if (metrics.cpuUsage) {
+    // 检查CPU使用率
+    if (metrics.cpuUsage !== undefined) {
       if (metrics.cpuUsage > this.config.cpuThreshold.critical) {
-        this.addAlert({
-          type: 'cpu',
+        const alert = {
+          type: 'cpu' as const,
           level: PerformanceLevel.POOR,
-          message: `CPU使用率过高: ${metrics.cpuUsage.toFixed(1)}%`,
+          message: `CPU使用率过高: ${metrics.cpuUsage.toFixed(2)}%`,
           value: metrics.cpuUsage,
           threshold: this.config.cpuThreshold.critical,
           timestamp: Date.now()
-        });
+        };
+        this.addAlert(alert);
+        
+        logger.warn(
+          'High CPU usage detected',
+          'performance-monitor',
+          { cpuUsage: metrics.cpuUsage }
+        );
       } else if (metrics.cpuUsage > this.config.cpuThreshold.warning) {
         this.addAlert({
           type: 'cpu',
           level: PerformanceLevel.NEEDS_IMPROVEMENT,
-          message: `CPU使用率较高: ${metrics.cpuUsage.toFixed(1)}%`,
+          message: `CPU使用率较高: ${metrics.cpuUsage.toFixed(2)}%`,
           value: metrics.cpuUsage,
           threshold: this.config.cpuThreshold.warning,
           timestamp: Date.now()
         });
       }
     }
+
+    // 检查内存使用率
+    if (metrics.memoryUsage) {
+      const memoryPercentage = metrics.memoryUsage.percentage;
+      if (memoryPercentage > this.config.memoryThreshold.critical) {
+        const alert = {
+          type: 'memory' as const,
+          level: PerformanceLevel.POOR,
+          message: `内存使用率过高: ${memoryPercentage.toFixed(2)}%`,
+          value: memoryPercentage,
+          threshold: this.config.memoryThreshold.critical,
+          timestamp: Date.now()
+        };
+        this.addAlert(alert);
+        
+        logger.warn(
+          'High memory usage detected',
+          'performance-monitor',
+          {
+            memoryUsage: metrics.memoryUsage.used,
+            memoryTotal: metrics.memoryUsage.total,
+            usagePercentage: memoryPercentage
+          }
+        );
+      } else if (memoryPercentage > this.config.memoryThreshold.warning) {
+        this.addAlert({
+          type: 'memory',
+          level: PerformanceLevel.NEEDS_IMPROVEMENT,
+          message: `内存使用率较高: ${memoryPercentage.toFixed(2)}%`,
+          value: memoryPercentage,
+          threshold: this.config.memoryThreshold.warning,
+          timestamp: Date.now()
+        });
+      }
+    }
+    
+    // 检查并发性能
+    if (metrics.concurrency && metrics.concurrency.errorRate > 0.1) {
+      const alert = {
+        type: 'concurrency' as const,
+        level: PerformanceLevel.POOR,
+        message: `并发错误率过高: ${Math.round(metrics.concurrency.errorRate * 100)}%`,
+        value: metrics.concurrency.errorRate,
+        threshold: 0.1,
+        timestamp: Date.now()
+      };
+      this.addAlert(alert);
+      
+      logger.error(
+        'High concurrency error rate detected',
+        'performance-monitor',
+        {
+          errorRate: metrics.concurrency.errorRate,
+          totalTasks: metrics.concurrency.totalTasks,
+          failedTasks: metrics.concurrency.failedTasks
+        }
+      );
+    }
+    
+    // 检查缓存性能
+    if (metrics.cache && metrics.cache.hitRate < 0.5 && metrics.cache.totalRequests > 10) {
+      const alert = {
+        type: 'cache' as const,
+        level: PerformanceLevel.NEEDS_IMPROVEMENT,
+        message: `缓存命中率过低: ${Math.round(metrics.cache.hitRate * 100)}%`,
+        value: metrics.cache.hitRate,
+        threshold: 0.5,
+        timestamp: Date.now()
+      };
+      this.addAlert(alert);
+      
+      logger.warn(
+        'Low cache hit rate detected',
+        'performance-monitor',
+        {
+          hitRate: metrics.cache.hitRate,
+          totalRequests: metrics.cache.totalRequests,
+          hits: metrics.cache.hits,
+          misses: metrics.cache.misses
+        }
+      );
+    }
   }
 
   // 开始监控
   public start() {
     if (this.intervalId) {
-      this.stop();
+      console.warn('Performance monitor is already running');
+      return;
     }
 
     this.intervalId = setInterval(async () => {
-      const metrics: PerformanceMetrics = {
-        timestamp: Date.now(),
-        memoryUsage: this.getMemoryUsage(),
-        cpuUsage: await this.estimateCPUUsage()
-      };
+      try {
+        // 安全地获取指标数据，避免循环调用
+        const metrics: PerformanceMetrics = {
+          timestamp: Date.now(),
+          memoryUsage: this.getMemoryUsage(),
+          cpuUsage: await this.estimateCPUUsage()
+        };
 
-      this.addMetrics(metrics);
+        // 安全地获取并发和缓存指标
+        try {
+          const concurrencyMetrics = defaultConcurrencyManager.getMetrics();
+          metrics.concurrency = {
+            totalTasks: concurrencyMetrics.totalTasks,
+            completedTasks: concurrencyMetrics.completedTasks,
+            failedTasks: concurrencyMetrics.failedTasks,
+            currentConcurrency: concurrencyMetrics.currentConcurrency,
+            queueSize: concurrencyMetrics.queueSize,
+            throughput: concurrencyMetrics.throughput,
+            averageExecutionTime: concurrencyMetrics.averageExecutionTime,
+            errorRate: concurrencyMetrics.errorRate
+          };
+        } catch (error) {
+          console.warn('Failed to get concurrency metrics:', error);
+        }
+
+        try {
+          const cacheMetrics = defaultRequestManager.getMetrics();
+          metrics.cache = {
+            hits: cacheMetrics.hits,
+            misses: cacheMetrics.misses,
+            hitRate: cacheMetrics.hitRate,
+            totalRequests: cacheMetrics.totalRequests,
+            cacheSize: cacheMetrics.cacheSize,
+            memoryUsage: cacheMetrics.memoryUsage,
+            evictions: cacheMetrics.evictions
+          };
+        } catch (error) {
+          console.warn('Failed to get cache metrics:', error);
+        }
+
+        this.addMetrics(metrics);
+      } catch (error) {
+        console.error('Performance monitoring error:', error);
+      }
     }, this.config.interval);
 
     if (this.config.enableConsoleLog) {
@@ -392,7 +557,11 @@ export class PerformanceMonitor {
 
     // 清理观察器
     this.observers.forEach(observer => {
-      observer.disconnect();
+      try {
+        observer.disconnect();
+      } catch (error) {
+        console.warn('Failed to disconnect observer:', error);
+      }
     });
     this.observers = [];
 
@@ -401,7 +570,7 @@ export class PerformanceMonitor {
     }
   }
 
-  // 获取性能指标
+  // 获取所有指标
   public getMetrics(): PerformanceMetrics[] {
     return [...this.metrics];
   }
@@ -411,7 +580,7 @@ export class PerformanceMonitor {
     return this.metrics.length > 0 ? this.metrics[this.metrics.length - 1] : null;
   }
 
-  // 获取警告
+  // 获取所有警告
   public getAlerts(): PerformanceAlert[] {
     return [...this.alerts];
   }
@@ -442,35 +611,36 @@ export class PerformanceMonitor {
     };
     recommendations: string[];
   } {
-    const metrics = this.getMetrics();
-    const alerts = this.getAlerts();
-
-    const cpuValues = metrics.filter(m => m.cpuUsage).map(m => m.cpuUsage!);
-    const memoryValues = metrics.filter(m => m.memoryUsage).map(m => m.memoryUsage!.percentage);
+    const totalMetrics = this.metrics.length;
+    const totalAlerts = this.alerts.length;
+    const criticalAlerts = this.alerts.filter(alert => alert.level === PerformanceLevel.POOR).length;
     
-    const avgCpuUsage = cpuValues.length > 0 ? cpuValues.reduce((a, b) => a + b, 0) / cpuValues.length : 0;
-    const avgMemoryUsage = memoryValues.length > 0 ? memoryValues.reduce((a, b) => a + b, 0) / memoryValues.length : 0;
+    const avgCpuUsage = this.metrics
+      .filter(m => m.cpuUsage !== undefined)
+      .reduce((sum, m) => sum + (m.cpuUsage || 0), 0) / Math.max(1, this.metrics.filter(m => m.cpuUsage !== undefined).length);
     
-    const criticalAlerts = alerts.filter(a => a.level === PerformanceLevel.POOR).length;
+    const avgMemoryUsage = this.metrics
+      .filter(m => m.memoryUsage !== undefined)
+      .reduce((sum, m) => sum + (m.memoryUsage?.percentage || 0), 0) / Math.max(1, this.metrics.filter(m => m.memoryUsage !== undefined).length);
 
     const recommendations: string[] = [];
     
     if (avgCpuUsage > 70) {
-      recommendations.push('CPU使用率较高，建议优化计算密集型操作');
+      recommendations.push('考虑优化CPU密集型操作，使用Web Workers处理复杂计算');
     }
     
     if (avgMemoryUsage > 70) {
-      recommendations.push('内存使用率较高，建议检查内存泄漏');
+      recommendations.push('检查内存泄漏，及时清理不需要的对象引用');
     }
     
-    if (alerts.filter(a => a.type === 'cpu').length > 5) {
-      recommendations.push('频繁出现长任务，建议使用Web Workers或代码分割');
+    if (criticalAlerts > 5) {
+      recommendations.push('存在多个严重性能问题，建议进行全面的性能优化');
     }
 
     return {
       summary: {
-        totalMetrics: metrics.length,
-        totalAlerts: alerts.length,
+        totalMetrics,
+        totalAlerts,
         avgCpuUsage,
         avgMemoryUsage,
         criticalAlerts
@@ -480,7 +650,7 @@ export class PerformanceMonitor {
   }
 }
 
-// 创建全局监控实例
+// 全局监控实例
 let globalMonitor: PerformanceMonitor | null = null;
 
 // 获取全局监控实例
@@ -491,19 +661,17 @@ export function getPerformanceMonitor(config?: Partial<PerformanceConfig>): Perf
   return globalMonitor;
 }
 
-// 快速启动监控
+// 启动性能监控
 export function startPerformanceMonitoring(config?: Partial<PerformanceConfig>) {
   const monitor = getPerformanceMonitor(config);
   monitor.start();
-  return monitor;
 }
 
-// 停止监控
+// 停止性能监控
 export function stopPerformanceMonitoring() {
   if (globalMonitor) {
     globalMonitor.stop();
   }
 }
 
-// 导出类型
 export type { PerformanceMetrics, PerformanceAlert, PerformanceConfig };

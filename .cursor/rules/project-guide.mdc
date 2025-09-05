@@ -1,7 +1,7 @@
 ---
-description: 
-globs: 
-alwaysApply: false
+description: Comprehensive project overview and architecture guide
+globs: *
+alwaysApply: true
 ---
 # Project Guide - Whosee WHOIS Domain Lookup Tool
 

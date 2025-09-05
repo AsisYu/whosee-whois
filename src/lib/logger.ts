@@ -52,9 +52,20 @@ class Logger {
   private maxBufferSize = 1000;
   private flushInterval = 30000; // 30秒
   private isClient = typeof window !== 'undefined';
+  private isDev = process.env.NODE_ENV === 'development';
+  private enableConsoleLogs = (process.env.NEXT_PUBLIC_ENABLE_CONSOLE_LOGS || '0') === '1';
+  private debugSample = this.isDev ? 1 : Math.min(Math.max(parseFloat(process.env.NEXT_PUBLIC_LOG_SAMPLE || '0.1'), 0), 1);
+  private perfSample = this.isDev ? 1 : Math.min(Math.max(parseFloat(process.env.NEXT_PUBLIC_PERF_LOG_SAMPLE || '0.2'), 0), 1);
+  private userSample = this.isDev ? 1 : Math.min(Math.max(parseFloat(process.env.NEXT_PUBLIC_USER_LOG_SAMPLE || '0.2'), 0), 1);
 
   private constructor() {
     this.sessionId = this.generateSessionId();
+    // 读取日志级别环境变量
+    const level = (process.env.NEXT_PUBLIC_LOG_LEVEL || '').toUpperCase();
+    if (level in LogLevel) {
+      // @ts-expect-error runtime enum lookup
+      this.logLevel = LogLevel[level];
+    }
     
     if (this.isClient) {
       // 设置定期刷新缓冲区
@@ -134,8 +145,13 @@ class Logger {
   private log(entry: LogEntry): void {
     if (!this.shouldLog(entry.level)) return;
 
-    // 控制台输出
-    if (this.isClient || process.env.NODE_ENV === 'development') {
+    // 采样策略：生产环境对 DEBUG/INFO 进行抽样
+    if (!this.isDev && (entry.level === LogLevel.DEBUG || entry.level === LogLevel.INFO)) {
+      if (Math.random() > this.debugSample) return;
+    }
+
+    // 控制台输出（仅开发或强制开启）
+    if ((this.isClient && (this.isDev || this.enableConsoleLogs)) || (!this.isClient && this.isDev)) {
       const levelName = LogLevel[entry.level];
       const style = this.getConsoleStyle(entry.level);
       
@@ -207,6 +223,8 @@ class Logger {
     success: boolean = true,
     metadata?: Record<string, unknown>
   ): void {
+    // 采样性能日志（生产环境）
+    if (!this.isDev && Math.random() > this.perfSample) return;
     const entry: PerformanceLogEntry = {
       timestamp: new Date().toISOString(),
       operation,
@@ -239,6 +257,8 @@ class Logger {
     component: string,
     metadata?: Record<string, unknown>
   ): void {
+    // 采样用户行为日志（生产环境）
+    if (!this.isDev && Math.random() > this.userSample) return;
     const entry: UserActionLogEntry = {
       timestamp: new Date().toISOString(),
       action,
@@ -383,6 +403,22 @@ class Logger {
       localStorage.removeItem('app_user_action_logs');
     }
   }
+
+  // 兼容别名：userBehavior(action, componentOrMetadata?, maybeMetadata?)
+  // 允许以下用法：
+  // - logger.userBehavior('Action', 'Component', { ... })
+  // - logger.userBehavior('Action', { ... })  // component 省略
+  public userBehavior(
+    action: string,
+    componentOrMetadata?: string | Record<string, unknown>,
+    maybeMetadata?: Record<string, unknown>
+  ): void {
+    if (typeof componentOrMetadata === 'string') {
+      this.logUserAction(action, componentOrMetadata, maybeMetadata);
+    } else {
+      this.logUserAction(action, 'general', componentOrMetadata);
+    }
+  }
 }
 
 // 导出单例实例
@@ -404,6 +440,11 @@ export const log = {
     logger.logPerformance(operation, duration, success, metadata),
   userAction: (action: string, component: string, metadata?: Record<string, unknown>) => 
     logger.logUserAction(action, component, metadata),
+  userBehavior: (
+    action: string,
+    componentOrMetadata?: string | Record<string, unknown>,
+    maybeMetadata?: Record<string, unknown>
+  ) => logger.userBehavior(action, componentOrMetadata as any, maybeMetadata),
   timer: (operation: string) => logger.startTimer(operation),
   measureAsync: <T>(operation: string, asyncFn: () => Promise<T>, metadata?: Record<string, unknown>) => 
     logger.measureAsync(operation, asyncFn, metadata)

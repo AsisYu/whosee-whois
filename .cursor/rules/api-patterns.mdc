@@ -1,6 +1,6 @@
 ---
-description: 
-globs: 
+description: Go backend API development patterns and conventions
+globs: server/**/*.go,src/lib/api.ts
 alwaysApply: false
 ---
 # Go Backend API Patterns

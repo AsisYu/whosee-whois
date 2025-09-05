@@ -1,605 +1,651 @@
 /**
  * 性能警报系统
- * 当CPU、内存或其他性能指标超过阈值时发出警告
+ * 监控性能指标并触发警报
  */
 
-// 警报类型
-export type AlertType = 'cpu' | 'memory' | 'component' | 'webvitals' | 'longtask' | 'leak';
+import { logger } from './logger';
+import type { CPUUsageData } from './cpu-monitor';
+import type { MemoryMetrics } from './memory-monitor';
 
-// 警报级别
-export type AlertLevel = 'info' | 'warning' | 'error' | 'critical';
-
-// 警报数据接口
-export interface AlertData {
+export interface PerformanceAlert {
   id: string;
   type: AlertType;
-  level: AlertLevel;
-  title: string;
+  severity: AlertSeverity;
   message: string;
-  details?: Record<string, any>;
   timestamp: number;
-  acknowledged: boolean;
+  data: any;
   resolved: boolean;
   resolvedAt?: number;
-  source: string;
 }
 
-// 警报规则接口
-export interface AlertRule {
-  id: string;
-  type: AlertType;
-  name: string;
-  description: string;
-  enabled: boolean;
-  condition: (data: any) => boolean;
-  level: AlertLevel;
-  cooldown: number; // 冷却时间（毫秒）
-  lastTriggered?: number;
+export enum AlertType {
+  HIGH_CPU = 'high_cpu',
+  HIGH_MEMORY = 'high_memory',
+  MEMORY_LEAK = 'memory_leak',
+  LOW_FPS = 'low_fps',
+  LONG_TASK = 'long_task',
+  MAIN_THREAD_BLOCKED = 'main_thread_blocked',
+  NETWORK_SLOW = 'network_slow',
+  BUNDLE_SIZE_LARGE = 'bundle_size_large',
+  RENDER_SLOW = 'render_slow'
 }
 
-// 警报配置
-export interface AlertConfig {
-  // 是否启用警报
+export enum AlertSeverity {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical'
+}
+
+export interface AlertThresholds {
+  cpu: {
+    warning: number;
+    critical: number;
+  };
+  memory: {
+    warning: number;
+    critical: number;
+  };
+  fps: {
+    warning: number;
+    critical: number;
+  };
+  taskDuration: {
+    warning: number;
+    critical: number;
+  };
+  networkLatency: {
+    warning: number;
+    critical: number;
+  };
+}
+
+export interface PerformanceAlertConfig {
   enabled: boolean;
-  
-  // 是否启用浏览器通知
-  enableBrowserNotification: boolean;
-  
-  // 是否启用控制台日志
-  enableConsoleLog: boolean;
-  
-  // 是否启用声音警报
-  enableSoundAlert: boolean;
-  
-  // 最大警报数量
+  thresholds: AlertThresholds;
   maxAlerts: number;
-  
-  // 自动清理时间（毫秒）
-  autoCleanupTime: number;
-  
-  // 默认冷却时间（毫秒）
-  defaultCooldown: number;
+  alertCooldown: number; // 同类型警报的冷却时间（毫秒）
+  autoResolve: boolean;
+  autoResolveTimeout: number; // 自动解决警报的超时时间（毫秒）
+  enableNotifications: boolean;
+  enableConsoleLog: boolean;
 }
 
-// 默认配置
-const DEFAULT_CONFIG: AlertConfig = {
-  enabled: true,
-  enableBrowserNotification: true,
-  enableConsoleLog: true,
-  enableSoundAlert: false,
-  maxAlerts: 50,
-  autoCleanupTime: 24 * 60 * 60 * 1000, // 24小时
-  defaultCooldown: 30 * 1000 // 30秒
+const DEFAULT_THRESHOLDS: AlertThresholds = {
+  cpu: {
+    warning: 85,  // 提高CPU警告阈值到85%
+    critical: 95  // 提高CPU严重阈值到95%
+  },
+  memory: {
+    warning: 80,  // 提高内存警告阈值到80%
+    critical: 95  // 提高内存严重阈值到95%
+  },
+  fps: {
+    warning: 30,
+    critical: 15
+  },
+  taskDuration: {
+    warning: 200,  // 提高长任务警告阈值到200ms
+    critical: 1000 // 提高长任务严重阈值到1000ms
+  },
+  networkLatency: {
+    warning: 2000,  // 提高网络延迟警告阈值到2000ms
+    critical: 5000  // 提高网络延迟严重阈值到5000ms
+  }
 };
 
-// 默认警报规则
-const DEFAULT_RULES: AlertRule[] = [
-  {
-    id: 'cpu-high',
-    type: 'cpu',
-    name: 'CPU使用率过高',
-    description: 'CPU使用率超过80%',
-    enabled: true,
-    condition: (data) => data.usage > 80,
-    level: 'error',
-    cooldown: 60 * 1000 // 1分钟
-  },
-  {
-    id: 'cpu-critical',
-    type: 'cpu',
-    name: 'CPU使用率危险',
-    description: 'CPU使用率超过95%',
-    enabled: true,
-    condition: (data) => data.usage > 95,
-    level: 'critical',
-    cooldown: 30 * 1000 // 30秒
-  },
-  {
-    id: 'memory-high',
-    type: 'memory',
-    name: '内存使用率过高',
-    description: '内存使用率超过85%',
-    enabled: true,
-    condition: (data) => data.usagePercentage > 85,
-    level: 'error',
-    cooldown: 60 * 1000
-  },
-  {
-    id: 'memory-critical',
-    type: 'memory',
-    name: '内存使用率危险',
-    description: '内存使用率超过95%',
-    enabled: true,
-    condition: (data) => data.usagePercentage > 95,
-    level: 'critical',
-    cooldown: 30 * 1000
-  },
-  {
-    id: 'longtask-detected',
-    type: 'longtask',
-    name: '检测到长任务',
-    description: '发现执行时间超过50ms的任务',
-    enabled: true,
-    condition: (data) => data.longTasks && data.longTasks.length > 0,
-    level: 'warning',
-    cooldown: 10 * 1000 // 10秒
-  },
-  {
-    id: 'component-slow',
-    type: 'component',
-    name: '组件渲染缓慢',
-    description: '组件平均渲染时间超过100ms',
-    enabled: true,
-    condition: (data) => data.averageRenderTime > 100,
-    level: 'warning',
-    cooldown: 30 * 1000
-  },
-  {
-    id: 'memory-leak',
-    type: 'leak',
-    name: '内存泄漏检测',
-    description: '检测到可能的内存泄漏',
-    enabled: true,
-    condition: (data) => data.isLeaking === true,
-    level: 'error',
-    cooldown: 5 * 60 * 1000 // 5分钟
-  },
-  {
-    id: 'lcp-slow',
-    type: 'webvitals',
-    name: 'LCP过慢',
-    description: '最大内容绘制时间超过2.5秒',
-    enabled: true,
-    condition: (data) => data.lcp > 2500,
-    level: 'warning',
-    cooldown: 60 * 1000
-  },
-  {
-    id: 'cls-high',
-    type: 'webvitals',
-    name: 'CLS过高',
-    description: '累积布局偏移超过0.1',
-    enabled: true,
-    condition: (data) => data.cls > 0.1,
-    level: 'warning',
-    cooldown: 60 * 1000
-  }
-];
+const DEFAULT_CONFIG: PerformanceAlertConfig = {
+  enabled: true,
+  thresholds: DEFAULT_THRESHOLDS,
+  maxAlerts: 50,
+  alertCooldown: 60000, // 60秒 - 增加冷却时间
+  autoResolve: true,
+  autoResolveTimeout: 300000, // 5分钟
+  enableNotifications: true,
+  enableConsoleLog: true
+};
 
-// 性能警报系统类
 export class PerformanceAlertSystem {
-  private config: AlertConfig;
-  private rules: Map<string, AlertRule> = new Map();
-  private alerts: AlertData[] = [];
-  private listeners: Map<string, ((alert: AlertData) => void)[]> = new Map();
-  private cleanupInterval: NodeJS.Timeout | null = null;
+  private config: PerformanceAlertConfig;
+  private alerts: PerformanceAlert[] = [];
+  private lastAlertTime = new Map<AlertType, number>();
+  private alertListeners: Array<(alert: PerformanceAlert) => void> = [];
+  private resolveTimeouts = new Map<string, NodeJS.Timeout>();
 
-  constructor(config: Partial<AlertConfig> = {}) {
+  constructor(config: Partial<PerformanceAlertConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
-    
-    // 初始化默认规则
-    DEFAULT_RULES.forEach(rule => {
-      this.rules.set(rule.id, { ...rule });
-    });
-    
-    // 启动自动清理
-    this.startAutoCleanup();
-    
-    // 请求浏览器通知权限
-    this.requestNotificationPermission();
   }
 
-  // 请求浏览器通知权限
-  private async requestNotificationPermission() {
-    if (this.config.enableBrowserNotification && 
-        typeof window !== 'undefined' && 
-        'Notification' in window) {
-      try {
-        await Notification.requestPermission();
-      } catch (error) {
-        console.warn('无法请求通知权限:', error);
-      }
-    }
-  }
-
-  // 启动自动清理
-  private startAutoCleanup() {
-    this.cleanupInterval = setInterval(() => {
-      this.cleanupOldAlerts();
-    }, 60 * 60 * 1000); // 每小时清理一次
-  }
-
-  // 清理旧警报
-  private cleanupOldAlerts() {
-    const now = Date.now();
-    const cutoff = now - this.config.autoCleanupTime;
-    
-    this.alerts = this.alerts.filter(alert => 
-      alert.timestamp > cutoff || !alert.resolved
-    );
-  }
-
-  // 生成警报ID
-  private generateAlertId(): string {
-    return `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  // 检查规则条件
-  public checkRules(type: AlertType, data: any, source: string = 'unknown') {
+  public initialize(): void {
     if (!this.config.enabled) {
       return;
     }
 
-    const now = Date.now();
-    
-    for (const rule of this.rules.values()) {
-      if (rule.type !== type || !rule.enabled) {
-        continue;
-      }
-      
-      // 检查冷却时间
-      if (rule.lastTriggered && 
-          now - rule.lastTriggered < rule.cooldown) {
-        continue;
-      }
-      
-      try {
-        if (rule.condition(data)) {
-          this.triggerAlert(rule, data, source);
-          rule.lastTriggered = now;
-        }
-      } catch (error) {
-        console.error('警报规则检查失败:', rule.id, error);
-      }
+    // 请求通知权限
+    if (this.config.enableNotifications && typeof window !== 'undefined') {
+      requestNotificationPermission().catch(error => {
+        console.warn('Failed to request notification permission:', error);
+      });
     }
+
+    // 设置全局错误处理
+    if (typeof window !== 'undefined') {
+      window.addEventListener('error', (event) => {
+        this.createAlert(
+          AlertType.MAIN_THREAD_BLOCKED,
+          `JavaScript error: ${event.message}`,
+          {
+            filename: event.filename,
+            lineno: event.lineno,
+            colno: event.colno,
+            error: event.error
+          },
+          AlertSeverity.HIGH
+        );
+      });
+
+      window.addEventListener('unhandledrejection', (event) => {
+        this.createAlert(
+          AlertType.MAIN_THREAD_BLOCKED,
+          `Unhandled promise rejection: ${event.reason}`,
+          { reason: event.reason },
+          AlertSeverity.HIGH
+        );
+      });
+    }
+
+    logger.info('Performance alert system initialized', 'performance-alerts', this.config);
   }
 
-  // 触发警报
-  private triggerAlert(rule: AlertRule, data: any, source: string) {
-    const alert: AlertData = {
+  public createAlert(
+    type: AlertType,
+    message: string,
+    data: any,
+    severity?: AlertSeverity
+  ): PerformanceAlert | null {
+    if (!this.config.enabled) {
+      return null;
+    }
+
+    // 检查冷却时间
+    const lastAlert = this.lastAlertTime.get(type);
+    const now = Date.now();
+    if (lastAlert && (now - lastAlert) < this.config.alertCooldown) {
+      return null;
+    }
+
+    // 自动确定严重程度
+    if (!severity) {
+      severity = this.determineSeverity(type, data);
+    }
+
+    const alert: PerformanceAlert = {
       id: this.generateAlertId(),
-      type: rule.type,
-      level: rule.level,
-      title: rule.name,
-      message: rule.description,
-      details: data,
-      timestamp: Date.now(),
-      acknowledged: false,
-      resolved: false,
-      source
+      type,
+      severity,
+      message,
+      timestamp: now,
+      data,
+      resolved: false
     };
-    
-    this.addAlert(alert);
-  }
 
-  // 添加警报
-  public addAlert(alert: AlertData) {
-    this.alerts.unshift(alert);
-    
-    // 限制警报数量
+    // 添加警报
+    this.alerts.push(alert);
+    this.lastAlertTime.set(type, now);
+
+    // 保持警报数量在限制内
     if (this.alerts.length > this.config.maxAlerts) {
-      this.alerts = this.alerts.slice(0, this.config.maxAlerts);
+      const removedAlert = this.alerts.shift();
+      if (removedAlert && this.resolveTimeouts.has(removedAlert.id)) {
+        clearTimeout(this.resolveTimeouts.get(removedAlert.id)!);
+        this.resolveTimeouts.delete(removedAlert.id);
+      }
     }
-    
-    // 发送通知
-    this.sendNotifications(alert);
-    
-    // 触发监听器
-    this.notifyListeners('alert', alert);
+
+    // 设置自动解决
+    if (this.config.autoResolve) {
+      const timeout = setTimeout(() => {
+        this.resolveAlert(alert.id);
+      }, this.config.autoResolveTimeout);
+      this.resolveTimeouts.set(alert.id, timeout);
+    }
+
+    // 记录日志
+    this.logAlert(alert);
+
+    // 通知监听器
+    this.notifyListeners(alert);
+
+    // 显示通知
+    if (this.config.enableNotifications) {
+      this.showNotification(alert);
+    }
+
+    return alert;
   }
 
-  // 发送通知
-  private sendNotifications(alert: AlertData) {
-    // 控制台日志
+  private determineSeverity(type: AlertType, data: any): AlertSeverity {
+    const thresholds = this.config.thresholds;
+
+    switch (type) {
+      case AlertType.HIGH_CPU:
+        const cpuUsage = data.cpuUsage || data.usage || 0;
+        if (cpuUsage >= thresholds.cpu.critical) return AlertSeverity.CRITICAL;
+        if (cpuUsage >= thresholds.cpu.warning) return AlertSeverity.HIGH;
+        return AlertSeverity.MEDIUM;
+
+      case AlertType.HIGH_MEMORY:
+        const memoryUsage = data.memoryUsagePercentage || data.usage || 0;
+        if (memoryUsage >= thresholds.memory.critical) return AlertSeverity.CRITICAL;
+        if (memoryUsage >= thresholds.memory.warning) return AlertSeverity.HIGH;
+        return AlertSeverity.MEDIUM;
+
+      case AlertType.LOW_FPS:
+        const fps = data.frameRate || data.fps || 0;
+        if (fps <= thresholds.fps.critical) return AlertSeverity.CRITICAL;
+        if (fps <= thresholds.fps.warning) return AlertSeverity.HIGH;
+        return AlertSeverity.MEDIUM;
+
+      case AlertType.LONG_TASK:
+      case AlertType.MAIN_THREAD_BLOCKED:
+        const duration = data.duration || data.taskDuration || 0;
+        if (duration >= thresholds.taskDuration.critical) return AlertSeverity.CRITICAL;
+        if (duration >= thresholds.taskDuration.warning) return AlertSeverity.HIGH;
+        return AlertSeverity.MEDIUM;
+
+      case AlertType.MEMORY_LEAK:
+        return AlertSeverity.HIGH;
+
+      case AlertType.NETWORK_SLOW:
+        const latency = data.latency || data.duration || 0;
+        if (latency >= thresholds.networkLatency.critical) return AlertSeverity.CRITICAL;
+        if (latency >= thresholds.networkLatency.warning) return AlertSeverity.HIGH;
+        return AlertSeverity.MEDIUM;
+
+      default:
+        return AlertSeverity.MEDIUM;
+    }
+  }
+
+  private generateAlertId(): string {
+    return `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private logAlert(alert: PerformanceAlert): void {
+    const logLevel = this.getLogLevel(alert.severity);
+    const logMessage = `Performance Alert [${alert.type}]: ${alert.message}`;
+    
+    logger.log(logLevel, logMessage, 'performance-alerts', {
+      alertId: alert.id,
+      type: alert.type,
+      severity: alert.severity,
+      data: alert.data
+    });
+
     if (this.config.enableConsoleLog) {
-      const emoji = this.getAlertEmoji(alert.level);
-      const method = alert.level === 'error' || alert.level === 'critical' ? 'error' : 
-                    alert.level === 'warning' ? 'warn' : 'log';
-      
-      console[method](`${emoji} ${alert.title}:`, alert.message, alert.details);
+      const consoleMethod = this.getConsoleMethod(alert.severity);
+      console[consoleMethod](`🚨 ${logMessage}`, alert);
     }
-    
-    // 浏览器通知
-    if (this.config.enableBrowserNotification && 
-        typeof window !== 'undefined' && 
-        'Notification' in window && 
-        Notification.permission === 'granted') {
+  }
+
+  private getLogLevel(severity: AlertSeverity): string {
+    switch (severity) {
+      case AlertSeverity.LOW:
+        return 'info';
+      case AlertSeverity.MEDIUM:
+        return 'warn';
+      case AlertSeverity.HIGH:
+        return 'error';
+      case AlertSeverity.CRITICAL:
+        return 'error';
+      default:
+        return 'warn';
+    }
+  }
+
+  private getConsoleMethod(severity: AlertSeverity): 'log' | 'warn' | 'error' {
+    switch (severity) {
+      case AlertSeverity.LOW:
+        return 'log';
+      case AlertSeverity.MEDIUM:
+      case AlertSeverity.HIGH:
+        return 'warn';
+      case AlertSeverity.CRITICAL:
+        return 'error';
+      default:
+        return 'warn';
+    }
+  }
+
+  private notifyListeners(alert: PerformanceAlert): void {
+    this.alertListeners.forEach(listener => {
       try {
-        new Notification(alert.title, {
-          body: alert.message,
-          icon: this.getAlertIcon(alert.level),
-          tag: alert.type,
-          requireInteraction: alert.level === 'critical'
-        });
+        listener(alert);
       } catch (error) {
-        console.warn('发送浏览器通知失败:', error);
-      }
-    }
-    
-    // 声音警报
-    if (this.config.enableSoundAlert && 
-        (alert.level === 'error' || alert.level === 'critical')) {
-      this.playAlertSound();
-    }
-  }
-
-  // 播放警报声音
-  private playAlertSound() {
-    try {
-      // 创建简单的警报音
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-      oscillator.type = 'sine';
-      
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-      
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.5);
-    } catch (error) {
-      console.warn('播放警报声音失败:', error);
-    }
-  }
-
-  // 获取警报表情符号
-  private getAlertEmoji(level: AlertLevel): string {
-    switch (level) {
-      case 'critical': return '🚨';
-      case 'error': return '❌';
-      case 'warning': return '⚠️';
-      case 'info': return 'ℹ️';
-      default: return '📢';
-    }
-  }
-
-  // 获取警报图标
-  private getAlertIcon(level: AlertLevel): string {
-    // 这里可以返回实际的图标URL
-    return '/favicon.ico';
-  }
-
-  // 确认警报
-  public acknowledgeAlert(alertId: string) {
-    const alert = this.alerts.find(a => a.id === alertId);
-    if (alert) {
-      alert.acknowledged = true;
-      this.notifyListeners('acknowledge', alert);
-    }
-  }
-
-  // 解决警报
-  public resolveAlert(alertId: string) {
-    const alert = this.alerts.find(a => a.id === alertId);
-    if (alert) {
-      alert.resolved = true;
-      alert.resolvedAt = Date.now();
-      this.notifyListeners('resolve', alert);
-    }
-  }
-
-  // 批量确认警报
-  public acknowledgeAllAlerts() {
-    this.alerts.forEach(alert => {
-      if (!alert.acknowledged) {
-        alert.acknowledged = true;
+        console.error('Error in alert listener:', error);
       }
     });
-    this.notifyListeners('acknowledgeAll', null);
   }
 
-  // 批量解决警报
-  public resolveAllAlerts() {
-    const now = Date.now();
-    this.alerts.forEach(alert => {
-      if (!alert.resolved) {
-        alert.resolved = true;
-        alert.resolvedAt = now;
-      }
+  private showNotification(alert: PerformanceAlert): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    // 触发自定义事件
+    const event = new CustomEvent('performance-alert', {
+      detail: alert
     });
-    this.notifyListeners('resolveAll', null);
-  }
+    window.dispatchEvent(event);
 
-  // 清除所有警报
-  public clearAllAlerts() {
-    this.alerts = [];
-    this.notifyListeners('clear', null);
-  }
+    // 如果支持，显示浏览器通知
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const notification = new Notification(`Performance Alert: ${alert.type}`, {
+        body: alert.message,
+        icon: this.getAlertIcon(alert.severity),
+        tag: `performance-alert-${alert.type}`
+      });
 
-  // 添加规则
-  public addRule(rule: AlertRule) {
-    this.rules.set(rule.id, { ...rule });
-  }
-
-  // 更新规则
-  public updateRule(ruleId: string, updates: Partial<AlertRule>) {
-    const rule = this.rules.get(ruleId);
-    if (rule) {
-      Object.assign(rule, updates);
+      // 自动关闭通知
+      setTimeout(() => {
+        notification.close();
+      }, 5000);
     }
   }
 
-  // 删除规则
-  public removeRule(ruleId: string) {
-    this.rules.delete(ruleId);
-  }
-
-  // 启用/禁用规则
-  public toggleRule(ruleId: string, enabled?: boolean) {
-    const rule = this.rules.get(ruleId);
-    if (rule) {
-      rule.enabled = enabled !== undefined ? enabled : !rule.enabled;
+  private getAlertIcon(severity: AlertSeverity): string {
+    // 返回不同严重程度的图标URL或数据URI
+    switch (severity) {
+      case AlertSeverity.CRITICAL:
+        return '🔴';
+      case AlertSeverity.HIGH:
+        return '🟠';
+      case AlertSeverity.MEDIUM:
+        return '🟡';
+      case AlertSeverity.LOW:
+        return '🔵';
+      default:
+        return '⚠️';
     }
   }
 
-  // 获取所有警报
-  public getAllAlerts(): AlertData[] {
-    return [...this.alerts];
+  public resolveAlert(alertId: string): boolean {
+    const alert = this.alerts.find(a => a.id === alertId && !a.resolved);
+    if (!alert) {
+      return false;
+    }
+
+    alert.resolved = true;
+    alert.resolvedAt = Date.now();
+
+    // 清除自动解决定时器
+    if (this.resolveTimeouts.has(alertId)) {
+      clearTimeout(this.resolveTimeouts.get(alertId)!);
+      this.resolveTimeouts.delete(alertId);
+    }
+
+    logger.info(`Performance alert resolved: ${alert.type}`, 'performance-alerts', {
+      alertId,
+      resolutionTime: alert.resolvedAt - alert.timestamp
+    });
+
+    return true;
   }
 
-  // 获取未确认的警报
-  public getUnacknowledgedAlerts(): AlertData[] {
-    return this.alerts.filter(alert => !alert.acknowledged);
-  }
-
-  // 获取未解决的警报
-  public getUnresolvedAlerts(): AlertData[] {
+  public getActiveAlerts(): PerformanceAlert[] {
     return this.alerts.filter(alert => !alert.resolved);
   }
 
-  // 获取特定类型的警报
-  public getAlertsByType(type: AlertType): AlertData[] {
+  public getAllAlerts(): PerformanceAlert[] {
+    return [...this.alerts];
+  }
+
+  public getAlertsByType(type: AlertType): PerformanceAlert[] {
     return this.alerts.filter(alert => alert.type === type);
   }
 
-  // 获取特定级别的警报
-  public getAlertsByLevel(level: AlertLevel): AlertData[] {
-    return this.alerts.filter(alert => alert.level === level);
+  public getAlertsBySeverity(severity: AlertSeverity): PerformanceAlert[] {
+    return this.alerts.filter(alert => alert.severity === severity);
   }
 
-  // 获取所有规则
-  public getAllRules(): AlertRule[] {
-    return Array.from(this.rules.values());
-  }
-
-  // 获取启用的规则
-  public getEnabledRules(): AlertRule[] {
-    return Array.from(this.rules.values()).filter(rule => rule.enabled);
-  }
-
-  // 添加事件监听器
-  public addEventListener(event: string, listener: (alert: AlertData | null) => void) {
-    if (!this.listeners.has(event)) {
-      this.listeners.set(event, []);
-    }
-    this.listeners.get(event)!.push(listener);
-  }
-
-  // 移除事件监听器
-  public removeEventListener(event: string, listener: (alert: AlertData | null) => void) {
-    const eventListeners = this.listeners.get(event);
-    if (eventListeners) {
-      const index = eventListeners.indexOf(listener);
-      if (index > -1) {
-        eventListeners.splice(index, 1);
-      }
-    }
-  }
-
-  // 通知监听器
-  private notifyListeners(event: string, alert: AlertData | null) {
-    const eventListeners = this.listeners.get(event);
-    if (eventListeners) {
-      eventListeners.forEach(listener => {
-        try {
-          listener(alert);
-        } catch (error) {
-          console.error('警报监听器执行失败:', error);
-        }
-      });
-    }
-  }
-
-  // 获取警报统计
-  public getAlertStats(): {
-    total: number;
-    unacknowledged: number;
-    unresolved: number;
-    byLevel: Record<AlertLevel, number>;
-    byType: Record<AlertType, number>;
-  } {
-    const stats = {
-      total: this.alerts.length,
-      unacknowledged: 0,
-      unresolved: 0,
-      byLevel: { info: 0, warning: 0, error: 0, critical: 0 } as Record<AlertLevel, number>,
-      byType: { cpu: 0, memory: 0, component: 0, webvitals: 0, longtask: 0, leak: 0 } as Record<AlertType, number>
-    };
+  public clearResolvedAlerts(): void {
+    const resolvedCount = this.alerts.filter(alert => alert.resolved).length;
+    this.alerts = this.alerts.filter(alert => !alert.resolved);
     
-    this.alerts.forEach(alert => {
-      if (!alert.acknowledged) stats.unacknowledged++;
-      if (!alert.resolved) stats.unresolved++;
-      stats.byLevel[alert.level]++;
-      stats.byType[alert.type]++;
-    });
+    logger.info(`Cleared ${resolvedCount} resolved alerts`, 'performance-alerts');
+  }
+
+  public clearAllAlerts(): void {
+    // 清除所有定时器
+    this.resolveTimeouts.forEach(timeout => clearTimeout(timeout));
+    this.resolveTimeouts.clear();
     
-    return stats;
+    const alertCount = this.alerts.length;
+    this.alerts = [];
+    this.lastAlertTime.clear();
+    
+    logger.info(`Cleared all ${alertCount} alerts`, 'performance-alerts');
   }
 
-  // 更新配置
-  public updateConfig(updates: Partial<AlertConfig>) {
-    Object.assign(this.config, updates);
+  public addListener(listener: (alert: PerformanceAlert) => void): void {
+    this.alertListeners.push(listener);
   }
 
-  // 获取配置
-  public getConfig(): AlertConfig {
+  public removeListener(listener: (alert: PerformanceAlert) => void): void {
+    const index = this.alertListeners.indexOf(listener);
+    if (index > -1) {
+      this.alertListeners.splice(index, 1);
+    }
+  }
+
+  public updateConfig(updates: Partial<PerformanceAlertConfig>): void {
+    this.config = { ...this.config, ...updates };
+    logger.info('Performance alert config updated', 'performance-alerts', this.config);
+  }
+
+  public getConfig(): PerformanceAlertConfig {
     return { ...this.config };
   }
 
-  // 销毁
-  public destroy() {
-    if (this.cleanupInterval) {
-      clearInterval(this.cleanupInterval);
-      this.cleanupInterval = null;
-    }
+  public getStats(): {
+    totalAlerts: number;
+    activeAlerts: number;
+    resolvedAlerts: number;
+    alertsByType: Record<AlertType, number>;
+    alertsBySeverity: Record<AlertSeverity, number>;
+  } {
+    const activeAlerts = this.getActiveAlerts();
+    const resolvedAlerts = this.alerts.filter(alert => alert.resolved);
     
-    this.alerts = [];
-    this.rules.clear();
-    this.listeners.clear();
+    const alertsByType = {} as Record<AlertType, number>;
+    const alertsBySeverity = {} as Record<AlertSeverity, number>;
+    
+    // 初始化计数器
+    Object.values(AlertType).forEach(type => {
+      alertsByType[type] = 0;
+    });
+    Object.values(AlertSeverity).forEach(severity => {
+      alertsBySeverity[severity] = 0;
+    });
+    
+    // 统计
+    this.alerts.forEach(alert => {
+      alertsByType[alert.type]++;
+      alertsBySeverity[alert.severity]++;
+    });
+    
+    return {
+      totalAlerts: this.alerts.length,
+      activeAlerts: activeAlerts.length,
+      resolvedAlerts: resolvedAlerts.length,
+      alertsByType,
+      alertsBySeverity
+    };
   }
 }
 
-// 创建全局警报系统实例
+// 全局警报系统实例
 let globalAlertSystem: PerformanceAlertSystem | null = null;
 
-// 获取全局警报系统实例
-export function getAlertSystem(config?: Partial<AlertConfig>): PerformanceAlertSystem {
+export function getAlertSystem(config?: Partial<PerformanceAlertConfig>): PerformanceAlertSystem {
   if (!globalAlertSystem) {
     globalAlertSystem = new PerformanceAlertSystem(config);
   }
   return globalAlertSystem;
 }
 
-// 快速检查CPU警报
-export function checkCPUAlerts(cpuData: any, source: string = 'cpu-monitor') {
+// 便捷函数
+export function checkCPUAlerts(cpuData: CPUUsageData): void {
   const alertSystem = getAlertSystem();
-  alertSystem.checkRules('cpu', cpuData, source);
+  const thresholds = alertSystem.getConfig().thresholds;
+  
+  if (cpuData.usage >= thresholds.cpu.warning) {
+    alertSystem.createAlert(
+      AlertType.HIGH_CPU,
+      `CPU usage is ${cpuData.usage.toFixed(1)}%`,
+      cpuData
+    );
+  }
+  
+  // 检查长任务
+  cpuData.longTasks.forEach(task => {
+    if (task.duration >= thresholds.taskDuration.warning) {
+      alertSystem.createAlert(
+        AlertType.LONG_TASK,
+        `Long task detected: ${task.name} (${task.duration.toFixed(1)}ms)`,
+        task
+      );
+    }
+  });
 }
 
-// 快速检查内存警报
-export function checkMemoryAlerts(memoryData: any, source: string = 'memory-monitor') {
+export function checkMemoryAlerts(memoryData: MemoryMetrics): void {
   const alertSystem = getAlertSystem();
-  alertSystem.checkRules('memory', memoryData, source);
+  const thresholds = alertSystem.getConfig().thresholds;
+  
+  if (memoryData.memoryUsagePercentage >= thresholds.memory.warning) {
+    alertSystem.createAlert(
+      AlertType.HIGH_MEMORY,
+      `Memory usage is ${memoryData.memoryUsagePercentage.toFixed(1)}%`,
+      memoryData
+    );
+  }
 }
 
-// 快速检查组件警报
-export function checkComponentAlerts(componentData: any, source: string = 'component-profiler') {
+export function checkFPSAlerts(fps: number): void {
   const alertSystem = getAlertSystem();
-  alertSystem.checkRules('component', componentData, source);
+  const thresholds = alertSystem.getConfig().thresholds;
+  
+  if (fps <= thresholds.fps.warning) {
+    alertSystem.createAlert(
+      AlertType.LOW_FPS,
+      `Low frame rate detected: ${fps} FPS`,
+      { fps }
+    );
+  }
 }
 
-// 快速检查Web Vitals警报
-export function checkWebVitalsAlerts(webVitalsData: any, source: string = 'performance-monitor') {
-  const alertSystem = getAlertSystem();
-  alertSystem.checkRules('webvitals', webVitalsData, source);
+// 请求通知权限
+export async function requestNotificationPermission(): Promise<boolean> {
+  if (typeof window === 'undefined' || !('Notification' in window)) {
+    return false;
+  }
+  
+  if (Notification.permission === 'granted') {
+    return true;
+  }
+  
+  if (Notification.permission === 'denied') {
+    return false;
+  }
+  
+  const permission = await Notification.requestPermission();
+  return permission === 'granted';
 }
 
-// 快速检查长任务警报
-export function checkLongTaskAlerts(longTaskData: any, source: string = 'cpu-monitor') {
+// 检查组件性能警报
+export function checkComponentAlerts(componentData: any): void {
   const alertSystem = getAlertSystem();
-  alertSystem.checkRules('longtask', longTaskData, source);
+  const thresholds = alertSystem.getConfig().thresholds;
+  
+  if (componentData.renderTime >= thresholds.taskDuration.warning) {
+    alertSystem.createAlert(
+      AlertType.RENDER_SLOW,
+      `Component render time is ${componentData.renderTime}ms`,
+      componentData
+    );
+  }
 }
 
-// 快速检查内存泄漏警报
-export function checkMemoryLeakAlerts(leakData: any, source: string = 'memory-monitor') {
+// 检查Web Vitals警报
+export function checkWebVitalsAlerts(vitalsData: any): void {
   const alertSystem = getAlertSystem();
-  alertSystem.checkRules('leak', leakData, source);
+  
+  if (vitalsData.LCP && vitalsData.LCP > 2500) {
+    alertSystem.createAlert(
+      AlertType.RENDER_SLOW,
+      `Large Contentful Paint is ${vitalsData.LCP}ms`,
+      vitalsData
+    );
+  }
+  
+  if (vitalsData.FID && vitalsData.FID > 100) {
+    alertSystem.createAlert(
+      AlertType.MAIN_THREAD_BLOCKED,
+      `First Input Delay is ${vitalsData.FID}ms`,
+      vitalsData
+    );
+  }
+  
+  if (vitalsData.CLS && vitalsData.CLS > 0.1) {
+    alertSystem.createAlert(
+      AlertType.RENDER_SLOW,
+      `Cumulative Layout Shift is ${vitalsData.CLS}`,
+      vitalsData
+    );
+  }
+}
+
+// 检查长任务警报
+export function checkLongTaskAlerts(taskData: any): void {
+  const alertSystem = getAlertSystem();
+  const thresholds = alertSystem.getConfig().thresholds;
+  
+  if (taskData.duration >= thresholds.taskDuration.warning) {
+    alertSystem.createAlert(
+      AlertType.LONG_TASK,
+      `Long task detected: ${taskData.duration}ms`,
+      taskData
+    );
+  }
+}
+
+// 检查内存泄漏警报
+export function checkMemoryLeakAlerts(memoryData: any): void {
+  const alertSystem = getAlertSystem();
+  
+  // 检查内存增长趋势
+  if (memoryData.trend && memoryData.trend === 'increasing') {
+    alertSystem.createAlert(
+      AlertType.MEMORY_LEAK,
+      `Potential memory leak detected`,
+      memoryData
+    );
+  }
+  
+  // 检查DOM节点数量
+  if (memoryData.domNodes && memoryData.domNodes > 10000) {
+    alertSystem.createAlert(
+      AlertType.MEMORY_LEAK,
+      `High DOM node count: ${memoryData.domNodes}`,
+      memoryData
+    );
+  }
 }
 
 // 导出类型
-export type { AlertData, AlertRule, AlertConfig };
+export type {
+  PerformanceAlert,
+  AlertThresholds,
+  PerformanceAlertConfig
+};
