@@ -1,6 +1,6 @@
 ---
-description: Tailwind CSS styling patterns and conventions for whosee-whois
-globs: *.tsx,*.ts,*.css
+description: Tailwind CSS and shadcn/ui styling patterns
+globs: src/**/*.tsx,src/**/*.css
 alwaysApply: false
 ---
 

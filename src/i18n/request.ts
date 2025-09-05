@@ -1,14 +1,11 @@
 import { getRequestConfig } from 'next-intl/server';
-import { headers } from 'next/headers';
-import { defaultLocale } from './config';
+import { routing } from './routing';
 
-export default getRequestConfig(async () => {
-  // 从中间件头部获取语言信息
-  const headersList = await headers();
-  const locale = headersList.get('x-locale') || defaultLocale;
-  
+export default getRequestConfig(async ({ requestLocale }) => {
+  const candidate = await requestLocale;
+  const locale = routing.locales.includes(candidate as 'en' | 'zh') ? candidate : routing.defaultLocale;
   return {
     locale,
     messages: (await import(`../messages/${locale}.json`)).default
   };
-}); 
+});

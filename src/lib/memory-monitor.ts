@@ -1,547 +1,392 @@
 /**
- * 内存使用监控工具
- * 用于检测内存泄漏、高内存占用和垃圾回收性能
+ * 内存监控模块
+ * 监控应用的内存使用情况，检测内存泄漏
  */
 
-// 内存监控数据接口
-export interface MemoryMonitorData {
-  timestamp: number;
+import { logger } from './logger';
+
+export interface MemoryMetrics {
   usedJSHeapSize: number;
   totalJSHeapSize: number;
   jsHeapSizeLimit: number;
-  usagePercentage: number;
-  gcCount?: number;
-  gcDuration?: number;
-}
-
-// 内存泄漏检测数据
-export interface MemoryLeakData {
-  componentName: string;
-  instanceCount: number;
-  memoryUsage: number;
-  createdAt: number;
-  lastUpdated: number;
-  isLeaking: boolean;
-  growthRate: number;
-}
-
-// DOM节点监控数据
-export interface DOMNodeData {
-  nodeCount: number;
-  listenerCount: number;
   timestamp: number;
+  memoryUsagePercentage: number;
 }
 
-// 内存监控配置
 export interface MemoryMonitorConfig {
-  // 监控间隔（毫秒）
-  interval: number;
-  
-  // 内存使用警告阈值（百分比）
-  memoryWarningThreshold: number;
-  
-  // 内存使用危险阈值（百分比）
-  memoryDangerThreshold: number;
-  
-  // 内存泄漏检测阈值（MB）
-  leakDetectionThreshold: number;
-  
-  // 是否启用DOM节点监控
-  enableDOMMonitoring: boolean;
-  
-  // 是否启用垃圾回收监控
-  enableGCMonitoring: boolean;
-  
-  // 最大记录数
-  maxRecords: number;
-  
-  // 是否启用控制台日志
+  interval: number; // 监控间隔（毫秒）
   enableConsoleLog: boolean;
-  
-  // 是否启用自动垃圾回收
-  enableAutoGC: boolean;
+  memoryThreshold: number; // 内存使用阈值（百分比）
+  leakDetectionEnabled: boolean;
+  leakDetectionSamples: number; // 用于检测内存泄漏的样本数量
+  maxHistorySize: number;
 }
 
-// 默认配置
 const DEFAULT_CONFIG: MemoryMonitorConfig = {
-  interval: 2000,
-  memoryWarningThreshold: 70,
-  memoryDangerThreshold: 85,
-  leakDetectionThreshold: 50,
-  enableDOMMonitoring: true,
-  enableGCMonitoring: true,
-  maxRecords: 100,
-  enableConsoleLog: true,
-  enableAutoGC: false
+  interval: 20000, // 20秒 - 进一步减少监控频率
+  enableConsoleLog: false,
+  memoryThreshold: 95, // 95% - 进一步提高阈值
+  leakDetectionEnabled: true,
+  leakDetectionSamples: 12, // 增加样本数量，基于4分钟数据
+  maxHistorySize: 50 // 适当增加历史记录大小
 };
 
-// 内存监控类
 export class MemoryMonitor {
   private config: MemoryMonitorConfig;
-  private memoryHistory: MemoryMonitorData[] = [];
-  private domNodeHistory: DOMNodeData[] = [];
-  private componentInstances = new Map<string, MemoryLeakData>();
+  private isRunning = false;
   private intervalId: NodeJS.Timeout | null = null;
-  private observer: PerformanceObserver | null = null;
-  private isMonitoring = false;
-  private onAlert?: (data: MemoryMonitorData) => void;
-  private onLeakDetected?: (leak: MemoryLeakData) => void;
-  private lastGCTime = 0;
-  private gcCount = 0;
+  private memoryHistory: MemoryMetrics[] = [];
+  private lastMemoryCheck = 0;
 
   constructor(config: Partial<MemoryMonitorConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
-    this.initGCObserver();
   }
 
-  // 初始化垃圾回收观察器
-  private initGCObserver() {
-    if (!this.config.enableGCMonitoring || typeof window === 'undefined' || !window.PerformanceObserver) {
+  public start(): void {
+    if (this.isRunning || typeof window === 'undefined') {
       return;
     }
 
-    try {
-      this.observer = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          if (entry.entryType === 'measure' && entry.name.includes('gc')) {
-            this.gcCount++;
-            this.lastGCTime = entry.duration;
-            
-            if (this.config.enableConsoleLog) {
-              console.log('🗑️ 垃圾回收:', {
-                duration: `${entry.duration.toFixed(2)}ms`,
-                count: this.gcCount
-              });
-            }
-          }
-        }
-      });
-      
-      this.observer.observe({ entryTypes: ['measure'] });
-    } catch (error) {
-      console.warn('GC Observer not supported:', error);
-    }
-  }
-
-  // 获取内存使用信息
-  private getMemoryInfo(): MemoryMonitorData | null {
-    if (typeof window === 'undefined' || !(window.performance as any)?.memory) {
-      return null;
-    }
-
-    const memory = (window.performance as any).memory;
-    const usagePercentage = (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
-
-    return {
-      timestamp: Date.now(),
-      usedJSHeapSize: memory.usedJSHeapSize,
-      totalJSHeapSize: memory.totalJSHeapSize,
-      jsHeapSizeLimit: memory.jsHeapSizeLimit,
-      usagePercentage,
-      gcCount: this.gcCount,
-      gcDuration: this.lastGCTime
-    };
-  }
-
-  // 获取DOM节点信息
-  private getDOMNodeInfo(): DOMNodeData {
-    const nodeCount = document.querySelectorAll('*').length;
-    
-    // 估算事件监听器数量（简化版）
-    let listenerCount = 0;
-    try {
-      const elements = document.querySelectorAll('*');
-      elements.forEach(element => {
-        // 检查常见的事件属性
-        const events = ['onclick', 'onload', 'onchange', 'onsubmit', 'onmouseover'];
-        events.forEach(event => {
-          if ((element as any)[event]) {
-            listenerCount++;
-          }
-        });
-      });
-    } catch (error) {
-      // 忽略错误
-    }
-
-    return {
-      nodeCount,
-      listenerCount,
-      timestamp: Date.now()
-    };
-  }
-
-  // 注册组件实例
-  public registerComponent(componentName: string, memoryUsage: number = 0) {
-    const existing = this.componentInstances.get(componentName);
-    
-    if (existing) {
-      existing.instanceCount++;
-      existing.memoryUsage += memoryUsage;
-      existing.lastUpdated = Date.now();
-      
-      // 计算增长率
-      const timeDiff = existing.lastUpdated - existing.createdAt;
-      existing.growthRate = existing.memoryUsage / (timeDiff / 1000); // MB/秒
-      
-      // 检测内存泄漏
-      existing.isLeaking = existing.memoryUsage > this.config.leakDetectionThreshold && 
-                          existing.growthRate > 1; // 每秒增长超过1MB
-    } else {
-      this.componentInstances.set(componentName, {
-        componentName,
-        instanceCount: 1,
-        memoryUsage,
-        createdAt: Date.now(),
-        lastUpdated: Date.now(),
-        isLeaking: false,
-        growthRate: 0
-      });
-    }
-  }
-
-  // 注销组件实例
-  public unregisterComponent(componentName: string, memoryUsage: number = 0) {
-    const existing = this.componentInstances.get(componentName);
-    
-    if (existing) {
-      existing.instanceCount = Math.max(0, existing.instanceCount - 1);
-      existing.memoryUsage = Math.max(0, existing.memoryUsage - memoryUsage);
-      existing.lastUpdated = Date.now();
-      
-      // 如果实例数为0，删除记录
-      if (existing.instanceCount === 0) {
-        this.componentInstances.delete(componentName);
-      }
-    }
-  }
-
-  // 检测内存泄漏
-  private detectMemoryLeaks() {
-    for (const [componentName, data] of this.componentInstances) {
-      if (data.isLeaking && this.onLeakDetected) {
-        this.onLeakDetected(data);
-      }
-      
-      if (data.isLeaking && this.config.enableConsoleLog) {
-        console.warn('🚨 检测到内存泄漏:', {
-          component: componentName,
-          instances: data.instanceCount,
-          memoryUsage: `${(data.memoryUsage / 1024 / 1024).toFixed(2)}MB`,
-          growthRate: `${data.growthRate.toFixed(2)}MB/s`
-        });
-      }
-    }
-  }
-
-  // 强制垃圾回收（如果支持）
-  public forceGC() {
-    if (typeof window !== 'undefined' && (window as any).gc) {
-      try {
-        (window as any).gc();
-        if (this.config.enableConsoleLog) {
-          console.log('🗑️ 手动触发垃圾回收');
-        }
-      } catch (error) {
-        console.warn('无法手动触发垃圾回收:', error);
-      }
-    } else {
-      console.warn('垃圾回收API不可用');
-    }
-  }
-
-  // 开始监控
-  public start() {
-    if (this.isMonitoring) {
+    // 检查是否支持 performance.memory
+    if (!this.isMemoryAPISupported()) {
+      logger.warn('Memory monitoring not supported in this browser', 'memory-monitor');
       return;
     }
 
-    this.isMonitoring = true;
-    
+    this.isRunning = true;
     this.intervalId = setInterval(() => {
-      // 收集内存信息
-      const memoryData = this.getMemoryInfo();
-      if (memoryData) {
-        this.memoryHistory.push(memoryData);
-        
-        // 限制历史记录数量
-        if (this.memoryHistory.length > this.config.maxRecords) {
-          this.memoryHistory = this.memoryHistory.slice(-this.config.maxRecords);
-        }
-
-        // 检查内存使用警告
-        if (memoryData.usagePercentage > this.config.memoryDangerThreshold) {
-          if (this.onAlert) {
-            this.onAlert(memoryData);
-          }
-          
-          if (this.config.enableConsoleLog) {
-            console.error('🚨 内存使用率危险:', {
-              usage: `${memoryData.usagePercentage.toFixed(1)}%`,
-              used: `${(memoryData.usedJSHeapSize / 1024 / 1024).toFixed(2)}MB`,
-              limit: `${(memoryData.jsHeapSizeLimit / 1024 / 1024).toFixed(2)}MB`
-            });
-          }
-          
-          // 自动垃圾回收
-          if (this.config.enableAutoGC) {
-            this.forceGC();
-          }
-        } else if (memoryData.usagePercentage > this.config.memoryWarningThreshold) {
-          if (this.config.enableConsoleLog) {
-            console.warn('⚠️ 内存使用率较高:', {
-              usage: `${memoryData.usagePercentage.toFixed(1)}%`,
-              used: `${(memoryData.usedJSHeapSize / 1024 / 1024).toFixed(2)}MB`
-            });
-          }
-        }
-      }
-
-      // 收集DOM节点信息
-      if (this.config.enableDOMMonitoring && typeof document !== 'undefined') {
-        const domData = this.getDOMNodeInfo();
-        this.domNodeHistory.push(domData);
-        
-        // 限制历史记录数量
-        if (this.domNodeHistory.length > this.config.maxRecords) {
-          this.domNodeHistory = this.domNodeHistory.slice(-this.config.maxRecords);
-        }
-      }
-
-      // 检测内存泄漏
-      this.detectMemoryLeaks();
+      this.collectMemoryMetrics();
     }, this.config.interval);
 
-    if (this.config.enableConsoleLog) {
-      console.log('🧠 内存监控已启动');
-    }
+    logger.info('Memory monitor started', 'memory-monitor', {
+      interval: this.config.interval,
+      threshold: this.config.memoryThreshold
+    });
   }
 
-  // 停止监控
-  public stop() {
-    if (!this.isMonitoring) {
+  public stop(): void {
+    if (!this.isRunning) {
       return;
     }
 
-    this.isMonitoring = false;
-    
+    this.isRunning = false;
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
 
-    if (this.observer) {
-      this.observer.disconnect();
+    logger.info('Memory monitor stopped', 'memory-monitor');
+  }
+
+  private isMemoryAPISupported(): boolean {
+    return typeof window !== 'undefined' && 
+           'performance' in window && 
+           'memory' in (window.performance as any);
+  }
+
+  private collectMemoryMetrics(): void {
+    if (!this.isMemoryAPISupported()) {
+      return;
+    }
+
+    const memory = (window.performance as any).memory;
+    const timestamp = Date.now();
+    
+    const metrics: MemoryMetrics = {
+      usedJSHeapSize: memory.usedJSHeapSize,
+      totalJSHeapSize: memory.totalJSHeapSize,
+      jsHeapSizeLimit: memory.jsHeapSizeLimit,
+      timestamp,
+      memoryUsagePercentage: (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100
+    };
+
+    // 添加到历史记录
+    this.memoryHistory.push(metrics);
+    
+    // 清理过期的历史记录
+    this.cleanupMemoryHistory();
+
+    // 检查内存使用阈值
+    this.checkMemoryThreshold(metrics);
+
+    // 检测内存泄漏
+    if (this.config.leakDetectionEnabled) {
+      this.detectMemoryLeak();
+    }
+
+    // 记录性能数据（降低日志频率）
+    if (this.memoryHistory.length % 3 === 0) { // 每3次收集记录一次日志
+      logger.logPerformance(
+        'memory-usage',
+        metrics.memoryUsagePercentage,
+        metrics.memoryUsagePercentage < this.config.memoryThreshold,
+        {
+          usedJSHeapSize: this.formatBytes(metrics.usedJSHeapSize),
+          totalJSHeapSize: this.formatBytes(metrics.totalJSHeapSize),
+          jsHeapSizeLimit: this.formatBytes(metrics.jsHeapSizeLimit),
+          memoryUsagePercentage: metrics.memoryUsagePercentage.toFixed(2),
+          historySize: this.memoryHistory.length
+        }
+      );
     }
 
     if (this.config.enableConsoleLog) {
-      console.log('⏹️ 内存监控已停止');
+      console.log('Memory Metrics:', {
+        used: this.formatBytes(metrics.usedJSHeapSize),
+        total: this.formatBytes(metrics.totalJSHeapSize),
+        limit: this.formatBytes(metrics.jsHeapSizeLimit),
+        usage: `${metrics.memoryUsagePercentage.toFixed(2)}%`
+      });
     }
   }
 
-  // 获取内存历史
-  public getMemoryHistory(): MemoryMonitorData[] {
+  // 清理过期的内存历史记录
+  private cleanupMemoryHistory(): void {
+    // 保持历史记录在配置的最大大小内
+    if (this.memoryHistory.length > this.config.maxHistorySize) {
+      const excessCount = this.memoryHistory.length - this.config.maxHistorySize;
+      this.memoryHistory.splice(0, excessCount);
+    }
+    
+    // 清理超过1小时的旧记录
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
+    this.memoryHistory = this.memoryHistory.filter(metric => metric.timestamp > oneHourAgo);
+  }
+
+  private checkMemoryThreshold(metrics: MemoryMetrics): void {
+    if (metrics.memoryUsagePercentage > this.config.memoryThreshold) {
+      const warningMessage = `High memory usage detected: ${metrics.memoryUsagePercentage.toFixed(2)}%`;
+      
+      logger.warn(warningMessage, 'memory-monitor', {
+        usedJSHeapSize: this.formatBytes(metrics.usedJSHeapSize),
+        totalJSHeapSize: this.formatBytes(metrics.totalJSHeapSize),
+        jsHeapSizeLimit: this.formatBytes(metrics.jsHeapSizeLimit),
+        threshold: this.config.memoryThreshold
+      });
+
+      if (this.config.enableConsoleLog) {
+        console.warn(warningMessage, metrics);
+      }
+
+      // 触发自定义事件
+      this.dispatchMemoryEvent('high-memory-usage', metrics);
+    }
+  }
+
+  private detectMemoryLeak(): void {
+    if (this.memoryHistory.length < this.config.leakDetectionSamples) {
+      return;
+    }
+
+    const recentSamples = this.memoryHistory.slice(-this.config.leakDetectionSamples);
+    const firstSample = recentSamples[0];
+    const lastSample = recentSamples[recentSamples.length - 1];
+    
+    // 计算内存增长趋势
+    const memoryGrowth = lastSample.usedJSHeapSize - firstSample.usedJSHeapSize;
+    const timeSpan = lastSample.timestamp - firstSample.timestamp;
+    const growthRate = memoryGrowth / timeSpan; // bytes per ms
+
+    // 更严格的内存泄漏检测条件
+    const leakThreshold = 102400; // 100KB per second - 进一步提高阈值
+    const minGrowth = 10 * 1024 * 1024; // 至少10MB增长才考虑泄漏
+    const minTimeSpan = 120000; // 至少2分钟的观察时间
+    const maxGrowthRate = 2 * 1024 * 1024; // 最大2MB/s增长率，超过可能是正常的大数据加载
+    
+    // 检查是否所有样本都呈增长趋势
+    const isConsistentGrowth = this.checkConsistentGrowth(recentSamples);
+    
+    // 检查当前内存使用是否已经很高
+    const currentUsageHigh = lastSample.memoryUsagePercentage > 80;
+    
+    if (growthRate > leakThreshold / 1000 && 
+        growthRate < maxGrowthRate / 1000 && // 排除过快增长（可能是正常加载）
+        memoryGrowth > minGrowth && 
+        timeSpan > minTimeSpan &&
+        isConsistentGrowth &&
+        currentUsageHigh) { // 只有在内存使用率高时才报告泄漏
+      
+      const leakMessage = `Potential memory leak detected: ${this.formatBytes(memoryGrowth)} growth in ${(timeSpan / 1000).toFixed(1)}s`;
+      
+      logger.warn(leakMessage, 'memory-monitor', {
+        memoryGrowth: this.formatBytes(memoryGrowth),
+        timeSpan: `${(timeSpan / 1000).toFixed(1)}s`,
+        growthRate: `${this.formatBytes(growthRate * 1000)}/s`,
+        currentUsage: `${lastSample.memoryUsagePercentage.toFixed(1)}%`,
+        samples: this.config.leakDetectionSamples,
+        firstSample: {
+          usage: this.formatBytes(firstSample.usedJSHeapSize),
+          percentage: `${firstSample.memoryUsagePercentage.toFixed(1)}%`
+        },
+        lastSample: {
+          usage: this.formatBytes(lastSample.usedJSHeapSize),
+          percentage: `${lastSample.memoryUsagePercentage.toFixed(1)}%`
+        }
+      });
+
+      if (this.config.enableConsoleLog) {
+        console.warn(leakMessage, {
+          firstSample,
+          lastSample,
+          growthRate: `${this.formatBytes(growthRate * 1000)}/s`
+        });
+      }
+
+      // 触发内存泄漏事件
+      this.dispatchMemoryEvent('memory-leak-detected', {
+        memoryGrowth,
+        timeSpan,
+        growthRate,
+        samples: recentSamples
+      });
+    }
+  }
+
+  // 检查是否存在持续的内存增长趋势
+  private checkConsistentGrowth(samples: MemoryMetrics[]): boolean {
+    if (samples.length < 4) return false;
+    
+    let increasingCount = 0;
+    let significantIncreases = 0;
+    const minSignificantIncrease = 512 * 1024; // 512KB
+    
+    for (let i = 1; i < samples.length; i++) {
+      const growth = samples[i].usedJSHeapSize - samples[i - 1].usedJSHeapSize;
+      if (growth > 0) {
+        increasingCount++;
+        if (growth > minSignificantIncrease) {
+          significantIncreases++;
+        }
+      }
+    }
+    
+    // 至少70%的样本显示增长趋势，且至少有50%的显著增长
+    const growthRatio = increasingCount / (samples.length - 1);
+    const significantRatio = significantIncreases / (samples.length - 1);
+    
+    return growthRatio >= 0.7 && significantRatio >= 0.5;
+  }
+
+  private formatBytes(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  private dispatchMemoryEvent(eventName: string, data: any): void {
+    if (typeof window !== 'undefined') {
+      const event = new CustomEvent(`memory-monitor:${eventName}`, {
+        detail: data
+      });
+      window.dispatchEvent(event);
+    }
+  }
+
+  public getCurrentMetrics(): MemoryMetrics | null {
+    if (!this.isMemoryAPISupported()) {
+      return null;
+    }
+
+    const memory = (window.performance as any).memory;
+    return {
+      usedJSHeapSize: memory.usedJSHeapSize,
+      totalJSHeapSize: memory.totalJSHeapSize,
+      jsHeapSizeLimit: memory.jsHeapSizeLimit,
+      timestamp: Date.now(),
+      memoryUsagePercentage: (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100
+    };
+  }
+
+  public getMemoryHistory(): MemoryMetrics[] {
     return [...this.memoryHistory];
   }
 
-  // 获取最新内存数据
-  public getLatestMemoryData(): MemoryMonitorData | null {
-    return this.memoryHistory.length > 0 
-      ? this.memoryHistory[this.memoryHistory.length - 1] 
-      : null;
-  }
-
-  // 获取DOM节点历史
-  public getDOMNodeHistory(): DOMNodeData[] {
-    return [...this.domNodeHistory];
-  }
-
-  // 获取组件实例数据
-  public getComponentInstances(): MemoryLeakData[] {
-    return Array.from(this.componentInstances.values());
-  }
-
-  // 获取内存泄漏组件
-  public getLeakingComponents(): MemoryLeakData[] {
-    return Array.from(this.componentInstances.values())
-      .filter(component => component.isLeaking);
-  }
-
-  // 清除数据
-  public clear() {
-    this.memoryHistory = [];
-    this.domNodeHistory = [];
-    this.componentInstances.clear();
-    this.gcCount = 0;
-    this.lastGCTime = 0;
-  }
-
-  // 设置警告回调
-  public onAlertCallback(callback: (data: MemoryMonitorData) => void) {
-    this.onAlert = callback;
-  }
-
-  // 设置内存泄漏回调
-  public onLeakDetectedCallback(callback: (leak: MemoryLeakData) => void) {
-    this.onLeakDetected = callback;
-  }
-
-  // 生成内存报告
-  public generateReport(): {
-    summary: {
-      currentUsage: number;
-      maxUsage: number;
-      avgUsage: number;
-      totalLeaks: number;
-      domNodeCount: number;
-      gcCount: number;
-    };
-    memoryTrend: 'increasing' | 'decreasing' | 'stable';
-    leakingComponents: MemoryLeakData[];
-    recommendations: string[];
-  } {
-    const usageValues = this.memoryHistory.map(h => h.usagePercentage);
-    const currentUsage = usageValues.length > 0 ? usageValues[usageValues.length - 1] : 0;
-    const maxUsage = usageValues.length > 0 ? Math.max(...usageValues) : 0;
-    const avgUsage = usageValues.length > 0 
-      ? usageValues.reduce((a, b) => a + b, 0) / usageValues.length 
-      : 0;
-    
-    const leakingComponents = this.getLeakingComponents();
-    const latestDOMData = this.domNodeHistory.length > 0 
-      ? this.domNodeHistory[this.domNodeHistory.length - 1] 
-      : null;
-    
-    // 分析内存趋势
-    let memoryTrend: 'increasing' | 'decreasing' | 'stable' = 'stable';
-    if (usageValues.length >= 5) {
-      const recent = usageValues.slice(-5);
-      const trend = recent[recent.length - 1] - recent[0];
-      if (trend > 5) {
-        memoryTrend = 'increasing';
-      } else if (trend < -5) {
-        memoryTrend = 'decreasing';
-      }
-    }
-
-    const recommendations: string[] = [];
-    
-    if (currentUsage > 80) {
-      recommendations.push('当前内存使用率过高，建议释放不必要的对象引用');
-    }
-    
-    if (leakingComponents.length > 0) {
-      recommendations.push('检测到内存泄漏组件，建议检查事件监听器和定时器的清理');
-    }
-    
-    if (memoryTrend === 'increasing') {
-      recommendations.push('内存使用呈上升趋势，建议检查是否存在内存泄漏');
-    }
-    
-    if (latestDOMData && latestDOMData.nodeCount > 5000) {
-      recommendations.push('DOM节点数量过多，建议使用虚拟滚动或懒加载');
-    }
-    
-    if (this.gcCount > 50) {
-      recommendations.push('垃圾回收频繁，建议优化对象创建和销毁');
-    }
-
-    return {
-      summary: {
-        currentUsage,
-        maxUsage,
-        avgUsage,
-        totalLeaks: leakingComponents.length,
-        domNodeCount: latestDOMData?.nodeCount || 0,
-        gcCount: this.gcCount
-      },
-      memoryTrend,
-      leakingComponents,
-      recommendations
-    };
-  }
-
-  // 获取内存使用统计
   public getMemoryStats(): {
-    current: string;
-    peak: string;
-    average: string;
-    available: string;
+    averageUsage: number;
+    peakUsage: number;
+    currentUsage: number;
+    memoryGrowth: number;
+    isLeakDetected: boolean;
   } {
-    const latest = this.getLatestMemoryData();
-    const usageValues = this.memoryHistory.map(h => h.usedJSHeapSize);
-    
-    if (!latest || usageValues.length === 0) {
+    if (this.memoryHistory.length === 0) {
       return {
-        current: '0 MB',
-        peak: '0 MB',
-        average: '0 MB',
-        available: '0 MB'
+        averageUsage: 0,
+        peakUsage: 0,
+        currentUsage: 0,
+        memoryGrowth: 0,
+        isLeakDetected: false
       };
     }
+
+    const usagePercentages = this.memoryHistory.map(m => m.memoryUsagePercentage);
+    const averageUsage = usagePercentages.reduce((a, b) => a + b, 0) / usagePercentages.length;
+    const peakUsage = Math.max(...usagePercentages);
+    const currentUsage = usagePercentages[usagePercentages.length - 1];
     
-    const current = latest.usedJSHeapSize / 1024 / 1024;
-    const peak = Math.max(...usageValues) / 1024 / 1024;
-    const average = usageValues.reduce((a, b) => a + b, 0) / usageValues.length / 1024 / 1024;
-    const available = (latest.jsHeapSizeLimit - latest.usedJSHeapSize) / 1024 / 1024;
-    
+    const firstMemory = this.memoryHistory[0].usedJSHeapSize;
+    const lastMemory = this.memoryHistory[this.memoryHistory.length - 1].usedJSHeapSize;
+    const memoryGrowth = lastMemory - firstMemory;
+
+    // 简单的内存泄漏检测
+    const isLeakDetected = this.memoryHistory.length >= 5 && 
+                          memoryGrowth > 0 && 
+                          currentUsage > averageUsage * 1.2;
+
     return {
-      current: `${current.toFixed(2)} MB`,
-      peak: `${peak.toFixed(2)} MB`,
-      average: `${average.toFixed(2)} MB`,
-      available: `${available.toFixed(2)} MB`
+      averageUsage,
+      peakUsage,
+      currentUsage,
+      memoryGrowth,
+      isLeakDetected
     };
   }
-}
 
-// React Hook：内存监控
-export function useMemoryMonitor(componentName: string) {
-  const monitor = getMemoryMonitor();
-  
-  React.useEffect(() => {
-    // 组件挂载时注册
-    monitor.registerComponent(componentName);
+  public clearHistory(): void {
+    this.memoryHistory = [];
+    logger.info('Memory history cleared', 'memory-monitor');
+  }
+
+  public updateConfig(updates: Partial<MemoryMonitorConfig>): void {
+    const oldConfig = { ...this.config };
+    this.config = { ...this.config, ...updates };
     
-    return () => {
-      // 组件卸载时注销
-      monitor.unregisterComponent(componentName);
-    };
-  }, [componentName, monitor]);
-  
-  return {
-    forceGC: () => monitor.forceGC(),
-    getStats: () => monitor.getMemoryStats(),
-    getReport: () => monitor.generateReport()
-  };
-}
+    logger.info('Memory monitor config updated', 'memory-monitor', {
+      oldConfig,
+      newConfig: this.config
+    });
 
-// 创建全局内存监控实例
-let globalMemoryMonitor: MemoryMonitor | null = null;
-
-// 获取全局内存监控实例
-export function getMemoryMonitor(config?: Partial<MemoryMonitorConfig>): MemoryMonitor {
-  if (!globalMemoryMonitor) {
-    globalMemoryMonitor = new MemoryMonitor(config);
+    // 如果间隔时间改变且正在运行，重启监控
+    if (this.isRunning && oldConfig.interval !== this.config.interval) {
+      this.stop();
+      this.start();
+    }
   }
-  return globalMemoryMonitor;
-}
 
-// 快速启动内存监控
-export function startMemoryMonitoring(config?: Partial<MemoryMonitorConfig>) {
-  const monitor = getMemoryMonitor(config);
-  monitor.start();
-  return monitor;
-}
+  public isSupported(): boolean {
+    return this.isMemoryAPISupported();
+  }
 
-// 停止内存监控
-export function stopMemoryMonitoring() {
-  if (globalMemoryMonitor) {
-    globalMemoryMonitor.stop();
+  public getStatus(): {
+    isRunning: boolean;
+    isSupported: boolean;
+    historySize: number;
+    config: MemoryMonitorConfig;
+  } {
+    return {
+      isRunning: this.isRunning,
+      isSupported: this.isMemoryAPISupported(),
+      historySize: this.memoryHistory.length,
+      config: { ...this.config }
+    };
   }
 }
 
 // 导出类型
-export type { MemoryMonitorData, MemoryLeakData, DOMNodeData, MemoryMonitorConfig };
+export type { MemoryMonitorConfig };
 
-// 添加React导入（如果在React环境中使用）
-declare const React: any;
+// 默认导出
+export default MemoryMonitor;

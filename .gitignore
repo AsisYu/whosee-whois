@@ -12,6 +12,9 @@
 
 # testing
 /coverage
+.eslintcache
+.turbo
+.vscode/
 
 # next.js
 /.next/
@@ -30,11 +33,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# 排除后端服务器相关文件
-server/
-
 # env files (can opt-in for committing if needed)
-.env
+.env*
 
 # vercel
 .vercel
@@ -42,19 +42,3 @@ server/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# IDEs and editors
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# 本地环境变量
-.env
-.env.local
-
-# Strapi 相关（保留用于本地开发）
-.strapi-updater.json
-.tmp/
-dist/

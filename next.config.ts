@@ -1,118 +1,127 @@
-/**
- * ===================================
- * 📋 Next.js 配置文件（精简版）
- * ===================================
- * 
- * 只保留必需的配置，其他交给 Next.js 自动处理
- * 环境变量会自动从 .env.local 读取，无需手动配置
- */
-
-import type { NextConfig } from "next";
+import { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
-// 🌍 多语言支持插件
-const withNextIntl = createNextIntlPlugin();
+// 可选加载 bundle analyzer，未安装时不影响开发
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const createBundleAnalyzer = (() => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    return require('@next/bundle-analyzer');
+  } catch {
+    return null;
+  }
+})();
 
-// 环境检测
-const isDevelopment = process.env.NODE_ENV !== 'production';
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+
+const isDev = process.env.NODE_ENV === 'development';
+
+const withBundleAnalyzer = createBundleAnalyzer
+  ? createBundleAnalyzer({ enabled: process.env.ANALYZE === 'true' })
+  : ((config: NextConfig) => config);
 
 const nextConfig: NextConfig = {
+  // 开发启用严格模式以尽早发现问题
+  reactStrictMode: isDev,
+  // 生产浏览器 SourceMap 策略（默认关闭，可用环境变量开启）
+  productionBrowserSourceMaps: process.env.ENABLE_PROD_SOURCEMAPS === 'true',
   
-  // 🚫 禁用 ESLint 和 TypeScript 检查以避免部署时的代码质量警告
+  // 禁用构建时的ESLint和TypeScript检查
+  // CI/生产可改为严格（可通过 CI 环境变量切换）
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: isDev,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: isDev,
   },
   
-  // 📁 生产环境优化
+  // 图片配置
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+    ],
+    // 生产尽量使用优化
+    unoptimized: isDev,
+  },
+  
+  // Webpack配置
   webpack: (config, { isServer }) => {
-    // 生产环境排除不必要的模块
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-      };
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push({
+        'utf-8-validate': 'commonjs utf-8-validate',
+        'bufferutil': 'commonjs bufferutil',
+      });
     }
+    
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+      crypto: false,
+    };
     
     return config;
   },
-
-  // 🚀 API 重写配置（如果有外部API）
+  
+  // API重写配置（开发环境）
   async rewrites() {
-    if (isDevelopment && process.env.NEXT_PUBLIC_API_URL) {
-      const backendApiUrl = process.env.NEXT_PUBLIC_API_URL;
-      
+    if (process.env.NODE_ENV === 'development') {
       return [
         {
-          source: '/api/external/:path*',
-          destination: `${backendApiUrl}/api/:path*`,
+          source: '/api/:path*',
+          destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/:path*`,
         },
       ];
     }
     return [];
   },
 
-  // 🖼️ 图片域名配置 - 允许外部图片加载（从环境变量读取）
-  images: {
-    remotePatterns: (() => {
-      const patterns = [];
-      
-      // 从环境变量读取图片域名模式
-      const imagePatterns = process.env.NEXT_PUBLIC_IMAGE_PATTERNS;
-      if (imagePatterns) {
-        const patternList = imagePatterns.split(',');
-        patternList.forEach(pattern => {
-          const [protocol, hostname, port] = pattern.trim().split(':');
-          if (protocol && hostname) {
-            const config: any = { protocol, hostname };
-            if (port) {
-              config.port = port;
-            }
-            patterns.push(config);
-          }
-        });
-      }
-      
-      // 如果没有配置环境变量，使用默认配置
-      if (patterns.length === 0) {
-        patterns.push(
-          { protocol: 'http', hostname: 'localhost', port: '3000' },
-          { protocol: 'http', hostname: 'localhost', port: '1337' },
-          { protocol: 'https', hostname: 'api.whosee.me' }
-        );
-      }
-      
-      return patterns;
-    })(),
-  },
-
-  // 🛡️ 安全头部配置
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: '/:path*',
         headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          // CSP：开发放宽以支持 HMR/React Refresh，生产保持收紧
           {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
+            key: 'Content-Security-Policy',
+            value: isDev
+              ? "default-src 'self'; img-src 'self' data: blob: https: http:; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; connect-src 'self' http: https: ws: wss:; font-src 'self' data:; worker-src 'self' blob:; base-uri 'self'; frame-ancestors 'self'"
+              : "default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; font-src 'self' data:; worker-src 'self' blob:; base-uri 'self'; frame-ancestors 'self'",
           },
         ],
       },
     ];
   },
+  
+  // 环境变量配置
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
+    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || '/api',
+    NEXT_PUBLIC_API_KEY: process.env.NEXT_PUBLIC_API_KEY || '',
+    NEXT_PUBLIC_API_SECRET: process.env.NEXT_PUBLIC_API_SECRET || '',
+  },
+  
+  // 实验性功能
+  experimental: {
+    optimizePackageImports: ['@radix-ui/react-icons'],
+  },
 
+  // Turbopack配置
+  turbopack: {
+    root: process.cwd(),
+  },
 };
 
-export default withNextIntl(nextConfig);
+export default withNextIntl(withBundleAnalyzer(nextConfig));

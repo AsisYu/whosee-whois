@@ -1,6 +1,6 @@
 ---
-description: TypeScript type definitions and patterns for whosee-whois
-globs: *.ts,*.tsx
+description: TypeScript type definitions and patterns
+globs: src/types/**/*.ts,src/**/*.d.ts
 alwaysApply: false
 ---
 
