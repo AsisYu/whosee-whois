@@ -1,5 +1,5 @@
 ---
-description: Development workflow, testing patterns and deployment guidelines
+description: Development workflow, testing, and deployment patterns for whosee-whois
 globs: *
 alwaysApply: false
 ---

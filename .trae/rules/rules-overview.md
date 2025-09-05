@@ -81,7 +81,7 @@ This document provides an overview of all Cursor rules configured for the whosee
 - Type guards and validators
 - Advanced TypeScript patterns
 
-### 9. MVC Patterns ([mvc-patterns.mdc](mdc:.cursor/rules/mvc-patterns.mdc))
+### 9. MVC Patterns ([mvc-patterns.md](md:.trae/rules/mvc-patterns.md))
 **Always Applied**: Yes | **Globs**: `*.ts,*.tsx`
 - MVC 架构模式指导和严格分层要求
 - Model 层数据模型和状态管理
@@ -97,7 +97,7 @@ This document provides an overview of all Cursor rules configured for the whosee
 
 ### Architecture & Structure
 - [project-guide.mdc](mdc:.cursor/rules/project-guide.mdc) - Overall project structure
-- [mvc-patterns.mdc](mdc:.cursor/rules/mvc-patterns.mdc) - MVC 架构模式指导
+- [mvc-patterns.md](md:.trae/rules/mvc-patterns.md) - MVC 架构模式指导
 - [development-workflow.mdc](mdc:.cursor/rules/development-workflow.mdc) - Development processes
 
 ### Frontend Development

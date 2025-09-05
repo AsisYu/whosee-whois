@@ -1,9 +1,3 @@
----
-description: Blog and CMS content management patterns
-globs: src/app/blog/**/*.tsx,src/components/blog/**/*.tsx
-alwaysApply: false
----
-
 # Blog CMS Integration Patterns
 
 ## 问题识别与解决方案
@@ -345,3 +339,7 @@ async function getBlogPostsPaginated(page: number = 1, locale: string = 'en') {
 2. ✅ 访问 `/zh/blog` - 应该显示博客列表
 3. ✅ 访问 `/en/blog` - 应该显示英文博客列表
 4. ✅ 检查控制台无CMS错误
+description:
+globs:
+alwaysApply: false
+---

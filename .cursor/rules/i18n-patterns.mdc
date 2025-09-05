@@ -1,6 +1,6 @@
 ---
-description: Internationalization patterns with next-intl
-globs: src/i18n/**/*.ts,src/messages/**/*.json
+description: Internationalization (i18n) patterns and conventions for whosee-whois
+globs: *.tsx,*.ts,*.json
 alwaysApply: false
 ---
 

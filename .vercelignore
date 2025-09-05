@@ -1,0 +1,45 @@
+# Vercel 部署已经不再支持
+# 此项目不再支持 Vercel 部署，请使用其他部署方式
+# 排除所有文件以阻止任何 Vercel 部署尝试
+*
+**/*
+
+# 注意：此项目已移除所有 Vercel 相关配置和检查
+# 如需部署，请参考 docs/SIMPLE_DEPLOYMENT.md 中的其他部署选项
+
+# 如果需要重新启用部署，请删除上面的规则并使用下面的配置：
+
+# CMS 文件夹和相关文件 (完全排除)
+# cms/
+# cms/**
+# **/cms/**
+
+# 其他不需要部署的文件夹
+# docs/
+# static/screenshots/
+# server/
+
+# 开发和测试相关
+# *.test.*
+# **/test/**
+# **/__tests__/**
+
+# 开发相关文件
+# *.log
+# .env
+# .env.*
+# !.env.example
+# .DS_Store
+# .vscode/
+# .idea/
+
+# 测试文件
+# **/*.test.ts
+# **/*.test.tsx
+# **/*.spec.ts
+# **/*.spec.tsx
+# coverage/
+
+# 备份文件
+# **/*-backup.*
+# layout-backup.tsx

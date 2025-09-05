@@ -1,0 +1,138 @@
+name: 🔒 手动安全依赖修复
+
+on:
+  workflow_dispatch:
+    inputs:
+      fix_type:
+        description: '修复类型'
+        required: true
+        default: 'non-breaking'
+        type: choice
+        options:
+        - 'non-breaking'
+        - 'force-fix'
+        - 'audit-only'
+
+jobs:
+  security-audit:
+    name: 安全审计和修复
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📋 检出代码
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+
+    - name: 📦 设置 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: 📊 前端依赖审计
+      run: |
+        echo "🔍 检查前端依赖安全状况..."
+        npm audit --audit-level=moderate || true
+        echo "📋 生成审计报告..."
+        npm audit --json > frontend-audit.json || true
+
+    - name: 📊 CMS 依赖审计
+      run: |
+        echo "🔍 检查 CMS 依赖安全状况..."
+        cd cms
+        npm audit --audit-level=moderate || true
+        echo "📋 生成 CMS 审计报告..."
+        npm audit --json > cms-audit.json || true
+
+    - name: 🔧 安全修复 (非破坏性)
+      if: github.event.inputs.fix_type == 'non-breaking'
+      run: |
+        echo "🔧 尝试非破坏性安全修复..."
+        npm audit fix --audit-level=moderate --force=false || true
+        cd cms
+        npm audit fix --audit-level=moderate --force=false || true
+
+    - name: ⚡ 强制安全修复
+      if: github.event.inputs.fix_type == 'force-fix'
+      run: |
+        echo "⚡ 执行强制安全修复（可能包含破坏性变更）..."
+        echo "⚠️ 警告：这可能导致破坏性变更！"
+        npm audit fix --force || true
+        cd cms
+        npm audit fix --force || true
+
+    - name: 📝 创建安全报告
+      run: |
+        echo "📝 生成安全报告..."
+        cat > security-report.md << 'EOF'
+        # 🔒 安全依赖审计报告
+        
+        ## 📊 审计时间
+        $(date)
+        
+        ## 🎯 修复类型
+        ${{ github.event.inputs.fix_type }}
+        
+        ## 📋 前端依赖状况
+        ```
+        $(npm audit --audit-level=moderate 2>&1 || echo "审计完成")
+        ```
+        
+        ## 📋 CMS 依赖状况
+        ```
+        $(cd cms && npm audit --audit-level=moderate 2>&1 || echo "审计完成")
+        ```
+        
+        ## 🔧 建议操作
+        
+        ### 对于 esbuild 漏洞：
+        - 当前版本受限于 Strapi 5.18.0 的依赖要求
+        - 建议等待 Strapi 更新支持 esbuild@0.25.0+
+        - 临时缓解：开发环境中限制网络访问
+        
+        ### 对于 koa 漏洞：
+        - 影响：开放重定向（中等严重性）
+        - 建议：升级到 koa@2.17.0+
+        
+        ### 对于 tmp 漏洞：
+        - 影响：符号链接写入（中等严重性）
+        - 建议：升级相关依赖
+        
+        ## 📈 后续跟踪
+        - [ ] 监控 Strapi 5.19+ 版本发布
+        - [ ] 定期检查安全更新
+        - [ ] 考虑使用 npm overrides 临时解决版本冲突
+        EOF
+
+    - name: 📤 上传安全报告
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-audit-report
+        path: |
+          security-report.md
+          frontend-audit.json
+          cms-audit.json
+        retention-days: 30
+
+    - name: 💬 评论 PR (如果有变更)
+      if: github.event.inputs.fix_type != 'audit-only'
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "📝 检测到文件变更，准备创建 PR..."
+          echo "变更的文件："
+          git status --short
+        else
+          echo "✅ 没有检测到文件变更"
+        fi
+
+    - name: 🔒 设置安全分支保护
+      if: github.event.inputs.fix_type == 'force-fix'
+      run: |
+        echo "⚠️ 强制修复可能引入破坏性变更"
+        echo "🔍 建议在合并前进行完整测试"
+        echo "📋 测试清单："
+        echo "- [ ] CMS 启动测试"
+        echo "- [ ] 前端构建测试"
+        echo "- [ ] 功能集成测试"
