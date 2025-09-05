@@ -1,420 +1,583 @@
 {
+  "nav": {
+    "domain": "Domain",
+    "dns": "DNS",
+    "screenshot": "Screenshot",
+    "health": "Health",
+    "blog": "Blog"
+  },
   "common": {
     "search": "Search",
     "loading": "Loading...",
     "error": "Error",
+    "success": "Success",
     "copy": "Copy",
     "copied": "Copied!",
-    "clear": "Clear",
-    "retry": "Retry",
-    "back": "Back",
-    "next": "Next",
-    "previous": "Previous",
-    "close": "Close",
-    "save": "Save",
-    "cancel": "Cancel",
-    "confirm": "Confirm",
-    "delete": "Delete",
-    "edit": "Edit",
-    "view": "View",
-    "download": "Download",
-    "upload": "Upload",
-    "refresh": "Refresh",
-    "settings": "Settings",
-    "help": "Help",
-    "about": "About",
-    "contact": "Contact",
-    "privacy": "Privacy",
-    "terms": "Terms",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
     "language": "Language",
-    "theme": "Theme",
-    "light": "Light",
-    "dark": "Dark",
-    "system": "System",
-    "tryNow": "Try Now",
-    "logTestButton": "Test log collection",
-    "log": {
-      "title": "Log Collection Test",
-      "subtitle": "Test logging, performance monitoring and user behavior tracking",
-      "statsTitle": "Log Statistics",
-      "statsDesc": "Statistics for the current session",
-      "total": "Total",
-      "errors": "Errors",
-      "warnings": "Warnings",
-      "performanceIssues": "Performance Issues",
-      "refreshStats": "Refresh Stats",
-      "viewStored": "View Stored Logs",
-      "clearLogs": "Clear Logs",
-      "levelTest": {
-        "title": "Log Levels Test",
-        "desc": "Test different log levels",
-        "debug": "Debug Log",
-        "info": "Info Log",
-        "warn": "Warning Log",
-        "error": "Error Log"
-      },
-      "special": {
-        "title": "Special Tests",
-        "desc": "Performance monitoring and user actions",
-        "executing": "Executing...",
-        "performanceTest": "Performance Test",
-        "userAction": "User Action Log",
-        "generating": "Generating...",
-        "batchTest": "Batch Logs Test"
-      },
-      "instructions": {
-        "title": "Instructions",
-        "view": {
-          "title": "How to view logs:",
-          "item1": "Press F12 to open DevTools and view console logs",
-          "item2": "Click 'View Stored Logs' to see localStorage logs",
-          "item3": "Logs are automatically saved to localStorage"
-        },
-        "features": {
-          "title": "Features:",
-          "item1": "Supports DEBUG, INFO, WARN, ERROR",
-          "item2": "Automatically records performance metrics",
-          "item3": "Tracks user behavior and interactions",
-          "item4": "Supports error stack traces",
-          "item5": "Buffered and batch flush to storage",
-          "item6": "Provides statistics and monitoring panel"
-        }
-      }
-    },
-    "allRightsReserved": "All rights reserved",
-    "switchLanguage": "Switch Language",
-    "toggleTheme": "Toggle Theme",
-    "lightTheme": "Light Theme",
-    "darkTheme": "Dark Theme",
-    "systemTheme": "System Theme",
-    "yes": "Yes",
-    "no": "No",
-    "ok": "OK",
-    "placeholder": "Enter domain name (e.g., example.com)"
-  },
-  "navigation": {
+    "retry": "Retry",
+    "networkError": "Network Error",
+    "networkErrorMessage": "Unable to connect to the server. Please check your internet connection and try again.",
+    "notFound": "Not Found",
+    "notFoundMessage": "The requested resource could not be found.",
+    "resourceNotFound": "{resource} not found",
+    "readMore": "Read More",
+    "viewAll": "View All",
+    "backToTop": "Back to Top",
+    "share": "Share",
+    "categories": "Categories",
+    "tags": "Tags",
+    "author": "Author",
+    "publishedAt": "Published",
+    "updatedAt": "Updated",
+    "minute": "minute",
+    "minutes": "minutes",
+    "minRead": "min read",
+    "relatedPosts": "Related Posts",
+    "noResults": "No results found",
+    "searchResults": "Search Results",
     "home": "Home",
-    "domain": "Domain Query",
-    "dns": "DNS Query",
-    "screenshot": "Website Screenshot",
-    "health": "System Health",
-    "blog": "Blog",
-    "tools": "Tools",
-    "api": "API",
-    "docs": "Documentation"
-  },
-  "nav": {
-    "domain": "Domain",
-    "dns": "DNS",
-    "health": "Health",
-    "screenshot": "Screenshot",
-    "description": "Professional domain analysis tool",
-    "domainDesc": "WHOIS domain information lookup",
-    "dnsDesc": "DNS records query and analysis",
-    "healthDesc": "System health monitoring",
-    "screenshotDesc": "Website screenshot capture",
-    "switchLanguage": "Switch Language"
+    "blog": "Blog"
   },
   "home": {
-    "title": "Whosee - Domain Information Lookup Tool",
-    "subtitle": "Get comprehensive domain information including WHOIS data, DNS records, and website screenshots",
-    "description": "Professional domain analysis tool providing WHOIS queries, DNS record lookups, health monitoring, and website screenshots.",
+    "title": "Whosee - Professional Domain Lookup Tool",
+    "subtitle": "Fast and comprehensive domain information lookup service",
+    "description": "Fast and comprehensive domain information lookup service, providing domain queries, DNS resolution, website screenshots, and health checks",
     "placeholder": "Enter domain name (e.g., example.com)",
     "search": "Search",
-    "features": "Core Features",
-    "featuresDesc": "Professional domain analysis tool providing comprehensive services",
-    "domainQuery": "Domain Query",
-    "domainQueryDesc": "Get detailed WHOIS information including registration details, contact information and domain status",
-    "dnsQuery": "DNS Query",
-    "dnsQueryDesc": "Query DNS records (A, AAAA, MX, TXT, NS, CNAME, SOA) from multiple DNS servers",
-    "websiteScreenshot": "Website Screenshot",
-    "websiteScreenshotDesc": "Capture website screenshots in desktop, mobile and tablet views",
-    "systemMonitoring": "System Monitoring",
-    "systemMonitoringDesc": "Monitor system and service status with real-time metrics",
-    "whyChoose": "Why Choose Us",
-    "whyChooseDesc": "Professional, fast and reliable domain analysis services",
-    "fastResponse": "Fast Response",
-    "fastResponseDesc": "Optimized query algorithms with sub-second response time",
-    "secureReliable": "Secure & Reliable",
-    "secureReliableDesc": "Latest security protocols to protect data transmission",
-    "responsiveDesign": "Responsive Design",
-    "responsiveDesignDesc": "Perfectly adapts to all devices for on-the-go queries",
-    "realTimeData": "Real-time Data",
-    "realTimeDataDesc": "Data sourced directly from authoritative providers",
-    "getStarted": "Get Started",
-    "getStartedDesc": "Start querying domain information now and experience professional analysis",
-    "startQuery": "Start Query",
-    "viewStatus": "View Status"
+    "features": {
+      "title": "Powerful Features",
+      "subtitle": "Comprehensive domain information lookup services to help you understand any domain in detail",
+      "domain": {
+        "title": "Domain Information",
+        "description": "Get detailed WHOIS information, registration details, and domain status"
+      },
+      "whois": {
+        "title": "Domain Lookup",
+        "description": "Get detailed WHOIS information, registration details, and domain status"
+      },
+      "dns": {
+        "title": "DNS Records",
+        "description": "Lookup DNS records including A, AAAA, MX, TXT, NS, and more"
+      },
+      "screenshot": {
+        "title": "Website Screenshot",
+        "description": "Capture and preview website screenshots"
+      },
+      "health": {
+        "title": "Health Check",
+        "description": "Monitor website availability and response time"
+      },
+      "blog": {
+        "title": "Technical Blog",
+        "description": "Domain technology insights, tutorials, and industry trends"
+      }
+    },
+    "latestPosts": {
+      "title": "Latest Blog Posts",
+      "subtitle": "Stay updated with the latest domain technology insights and tutorials",
+      "viewAllPosts": "View All Posts"
+    }
   },
   "domain": {
-    "title": "Domain WHOIS Lookup",
-    "description": "Get comprehensive domain information including registration details, contact information, and name servers",
-    "search": {
-      "title": "Search Domain",
-      "description": "Enter a domain name to retrieve WHOIS information",
-      "placeholder": "Enter domain name (e.g., example.com)",
-      "searching": "Searching...",
-      "button": "Search"
-    },
-    "results": {
-      "title": "Domain Information",
-      "registrar": "Registrar",
-      "registrationDate": "Registration Date",
-      "expirationDate": "Expiration Date",
-      "nameServers": "Name Servers",
-      "status": "Status",
-      "contacts": "Contact Information",
-      "noData": "No domain information found",
-      "basic": {
-        "title": "Basic Information",
-        "domain": "Domain",
-        "registrar": "Registrar",
-        "status": "Status"
+    "title": "Domain Information",
+    "description": "Get detailed domain WHOIS information, including registration details, contact information and domain status",
+    "registrar": "Registrar",
+    "status": "Status",
+    "created": "Created",
+    "updated": "Updated",
+    "expires": "Expires",
+    "nameservers": "Name Servers",
+    "contacts": "Contacts",
+    "registrant": "Registrant",
+    "admin": "Admin",
+    "tech": "Technical",
+    "billing": "Billing",
+    "basicInfo": "Basic Information",
+    "domainName": "Domain",
+    "statusDescription": "Status Description",
+    "relatedTools": "Related Tools",
+    "contactInfo": "Contact Information",
+    "name": "Name",
+    "organization": "Organization",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "searchPlaceholder": "Enter domain to get detailed WHOIS information, registration details and contact information",
+    "startQuery": "Start Domain Query",
+    "tryDomain": "Try",
+    "copied": "Copied to clipboard!",
+    "queryStats": "Query Statistics", 
+    "queryTime": "Query Time",
+    "responseTime": "Response Time",
+    "dataSource": "Data Source",
+    "whoisDatabase": "WHOIS Database",
+    "statusInfo": {
+      "transferProhibited": {
+        "title": "Transfer Prohibited",
+        "description": "Domain is locked by registrar to prevent accidental transfer"
       },
-      "dates": {
-        "title": "Dates",
-        "created": "Created",
-        "expires": "Expires",
-        "updated": "Updated"
+      "updateProhibited": {
+        "title": "Update Prohibited",
+        "description": "Domain information is locked to prevent malicious modifications"
       },
-      "contacts": {
-        "title": "Contacts",
-        "name": "Name",
-        "organization": "Organization",
-        "email": "Email",
-        "phone": "Phone",
-        "address": "Address"
+      "deleteProhibited": {
+        "title": "Delete Prohibited",
+        "description": "Domain is protected against accidental deletion"
       },
-      "nameservers": {
-        "title": "Name Servers"
-      },
-      "roles": {
-        "registrant": "Registrant",
-        "admin": "Admin Contact",
-        "tech": "Tech Contact"
-      },
-      "raw": {
-        "title": "Raw WHOIS Data",
-        "description": "Complete WHOIS response from the registry",
-        "show": "Show Raw Data",
-        "hide": "Hide Raw Data"
-      },
-      "tools": {
-        "title": "Related Tools",
-        "description": "Explore more tools related to this domain",
-        "dns": "DNS Lookup",
-        "screenshot": "Website Screenshot",
-        "health": "System Health"
+      "serverHold": {
+        "title": "Server Hold",
+        "description": "Domain is suspended by registry, possibly due to disputes"
       }
     },
-    "history": {
-      "title": "Search History",
-      "empty": "No search history",
-      "clear": "Clear History",
-      "description": "Recently searched domains"
-    },
-    "error": {
-      "title": "Request Error"
-    },
-    "cache": {
-      "title": "Cache Statistics",
-      "size": "Cached Domains",
-      "clear": "Clear Cache"
-    },
-    "info": {
-      "whatIs": "What is WHOIS?",
-      "subtitle": "Learn about domain registration information",
-      "registration": {
-        "title": "Registration Details",
-        "items": {
-          "created": "Domain creation date",
-          "expires": "Expiration date",
-          "updated": "Last update date",
-          "registrar": "Registrar information"
-        }
-      },
-      "technical": {
-        "title": "Technical Information",
-        "items": {
-          "nameservers": "Name servers",
-          "dns": "DNS configuration",
-          "status": "Domain status",
-          "contacts": "Contact information"
-        }
-      },
-      "privacy": {
-        "title": "Privacy Notice",
-        "text": "Some domain registrations may use privacy protection services, which replace personal contact information with generic contact details to protect the domain owner's privacy."
-      }
+    "tools": {
+      "dnsQuery": "DNS Query",
+      "dnsQueryDesc": "View domain DNS records",
+      "websiteScreenshot": "Website Screenshot",
+      "websiteScreenshotDesc": "Capture website page screenshots",
+      "sslCheck": "SSL Check",
+      "sslCheckDesc": "Check SSL certificate status",
+      "websitePerformance": "Website Performance",
+      "websitePerformanceDesc": "Analyze website loading speed"
     }
   },
   "dns": {
-    "title": "DNS Records Lookup",
-    "description": "Query DNS records from multiple DNS servers and compare results",
-    "search": {
-      "title": "DNS Query",
-      "description": "Enter a domain name to query DNS records",
-      "placeholder": "Enter domain name (e.g., example.com)",
-      "searching": "Searching...",
-      "button": "Search"
+    "title": "DNS Records",
+    "description": "Query all DNS records for the domain, including A, AAAA, MX, TXT, NS, CNAME and other record types",
+    "type": "Type",
+    "value": "Value",
+    "ttl": "TTL",
+    "priority": "Priority",
+    "searchPlaceholder": "Enter domain to view all its DNS records, including A, MX, TXT, CNAME and other types",
+    "queryDomain": "Query Domain",
+    "operation": "Operation",
+    "copyRecordValue": "Copy record value",
+    "records": "records",
+    "recordTypes": "Record Type Description",
+    "relatedTools": "Related Tools",
+    "queryInfo": "Query Information",
+    "totalRecords": "Total Records",
+    "queryTime": "Query Time",
+    "dnsServer": "DNS Server",
+    "systemDefault": "System Default",
+    "startQuery": "Start DNS Query",
+    "quickQuery": "Quick query examples:",
+    "query": "Query",
+    "copied": "Copied to clipboard!",
+    "dnsBasics": {
+      "whatIsDns": "What is DNS?",
+      "dnsDescription": "DNS (Domain Name System) translates human-readable domain names to computer-understandable IP addresses, a crucial internet infrastructure.",
+      "whatIsTtl": "What is TTL?",
+      "ttlDescription": "TTL (Time To Live) indicates how long DNS records can be cached, shorter TTL means faster update propagation."
     },
-    "types": {
-      "title": "Record Types",
-      "all": "All Types",
-      "A": "A Records",
-      "AAAA": "AAAA Records",
-      "MX": "MX Records",
-      "TXT": "TXT Records",
-      "NS": "NS Records",
-      "CNAME": "CNAME Records",
-      "SOA": "SOA Records"
-    },
-    "error": {
-      "title": "Request Error"
-    },
-    "results": {
-      "title": "DNS Records",
-      "server": "DNS Server",
-      "responseTime": "Response Time",
-      "records": "Records",
-      "noRecords": "No DNS records found",
-      "summary": {
-        "title": "Summary",
-        "totalRecords": "Total Records",
-        "recordTypes": "Record Types",
-        "status": "Status",
-        "responseTime": "Response Time"
+    "recordInfo": {
+      "a": {
+        "name": "A Record",
+        "description": "Points to IPv4 address"
       },
-      "records": {
-        "name": "Name",
-        "value": "Value",
-        "ttl": "TTL"
+      "aaaa": {
+        "name": "AAAA Record",
+        "description": "Points to IPv6 address"
       },
-      "noData": "No DNS data",
-      "noDataDescription": "No records were found for the specified domain and types"
+      "mx": {
+        "name": "MX Record",
+        "description": "Mail server"
+      },
+      "txt": {
+        "name": "TXT Record",
+        "description": "Text verification record"
+      },
+      "ns": {
+        "name": "NS Record",
+        "description": "Name server"
+      },
+      "cname": {
+        "name": "CNAME Record",
+        "description": "Alias record"
+      },
+      "soa": {
+        "name": "SOA Record",
+        "description": "Start of authority record"
+      },
+      "ptr": {
+        "name": "PTR Record",
+        "description": "Reverse lookup record"
+      }
+    },
+    "tools": {
+      "domainInfo": "Domain Information",
+      "domainInfoDesc": "View WHOIS information",
+      "websiteScreenshot": "Website Screenshot",
+      "websiteScreenshotDesc": "Capture website page screenshots",
+      "sslCheck": "SSL Check",
+      "sslCheckDesc": "Check SSL certificate",
+      "performanceTest": "Performance Test",
+      "performanceTestDesc": "Website speed test"
     }
   },
+
   "screenshot": {
     "title": "Website Screenshot",
-    "description": "Capture website screenshots in different device views",
-    "search": {
-      "title": "Screenshot Capture",
-      "description": "Enter a domain name to capture website screenshot",
-      "placeholder": "Enter domain name (e.g., example.com)",
-      "domain": "Domain",
-      "invalidDomain": "Please enter a valid domain",
-      "capturing": "Capturing...",
-      "capture": "Capture"
+    "description": "Capture website screenshots on different devices, supporting desktop, mobile and tablet views",
+    "desktop": "Desktop",
+    "mobile": "Mobile",
+    "tablet": "Tablet",
+    "captureTime": "Capture Time",
+    "fileSize": "File Size",
+    "selectDevice": "Select Device View",
+    "ready": "Ready",
+    "size": "Size",
+    "downloadScreenshot": "Download Screenshot",
+    "screenshotPreview": "Screenshot Preview",
+    "desktopView": "Desktop View",
+    "mobileView": "Mobile View",
+    "tabletView": "Tablet View",
+    "capturedAt": "Captured at",
+    "screenshotInfo": "Screenshot Information",
+    "format": "Image Format",
+    "quality": "Compression Quality",
+    "highQuality": "High Quality",
+    "deviceSpecs": "Device Specifications",
+    "resolution": "Resolution",
+    "userAgent": "User Agent",
+    "viewport": "Viewport Size",
+    "pixelRatio": "Pixel Ratio",
+    "screenshotSettings": "Screenshot Settings",
+    "desktopDesc": "Simulates Chrome browser display at 1920×1080 resolution",
+    "mobileDesc": "Simulates iPhone device display at 375×667 resolution",
+    "tabletDesc": "Simulates iPad device display at 768×1024 resolution",
+    "relatedTools": "Related Tools",
+    "screenshotStats": "Screenshot Statistics",
+    "targetDomain": "Target Domain",
+    "screenshotCount": "Screenshot Count",
+    "totalFileSize": "Total File Size",
+    "captureTime": "Capture Time",
+    "startScreenshot": "Start Website Screenshot",
+    "inputDomain": "Enter website domain to capture screenshots on different devices",
+    "popularScreenshots": "Popular website screenshots:",
+    "screenshot": "Screenshot",
+    "features": {
+      "multiDevice": "Multi-Device Support",
+      "multiDeviceDesc": "Supports desktop, mobile, and tablet views to comprehensively understand website display across different devices.",
+      "highQuality": "High Quality Screenshots",
+      "highQualityDesc": "Uses advanced headless browser technology to ensure screenshot accuracy and quality, truly reflecting website appearance.",
+      "easyDownload": "Easy Download",
+      "easyDownloadDesc": "Supports one-click screenshot downloads, convenient for saving and sharing, suitable for design reference and competitive analysis."
     },
-    "options": {
-      "title": "Capture Options",
-      "device": "Device View",
-      "desktop": "Desktop",
-      "mobile": "Mobile",
-      "tablet": "Tablet",
-      "customSize": "Custom Size",
-      "width": "Width",
-      "height": "Height",
-      "quality": "Quality",
-      "fullPage": "Full Page",
-      "fullPageDesc": "Capture the entire page beyond the initial viewport"
+    "deviceDescriptions": {
+      "desktop": "Desktop View (1920×1080)",
+      "mobile": "Mobile View (375×667)",
+      "tablet": "Tablet View (768×1024)"
     },
-    "results": {
-      "title": "Screenshot Result",
-      "description": "Screenshot for {domain}",
-      "domain": "Domain",
-      "device": "Device",
-      "timestamp": "Captured At",
-      "size": "Image Size",
-      "fileSize": "File Size",
-      "captureTime": "Capture Time",
-      "preview": "Preview",
-      "metadata": "Metadata",
-      "download": "Download",
-      "noImage": "No screenshot available"
-    },
-    "actions": {
-      "clear": "Clear",
-      "copy": "Copy",
-      "download": "Download",
-      "openNew": "Open in New Tab"
+    "tools": {
+      "domainInfo": "Domain Information",
+      "domainInfoDesc": "View WHOIS information",
+      "dnsQuery": "DNS Query",
+      "dnsQueryDesc": "View DNS records",
+      "performanceAnalysis": "Performance Analysis",
+      "performanceAnalysisDesc": "Website performance testing",
+      "websiteMonitoring": "Website Monitoring",
+      "websiteMonitoringDesc": "Continuous website monitoring"
     }
   },
-  "actions": {},
-  
-  
+  "stats": {
+    "availability": "Availability",
+    "averageResponse": "Avg Response", 
+    "totalQueries": "Total Queries",
+    "continuousService": "24/7 Service"
+  },
+  "highlights": {
+    "title": "Why Choose Whosee?",
+    "subtitle": "Professional, fast, and secure domain lookup solution",
+    "secure": {
+      "title": "Secure & Reliable",
+      "description": "Enterprise-grade security with encrypted data transmission"
+    },
+    "fast": {
+      "title": "Lightning Fast",
+      "description": "Millisecond response time with real-time data queries"
+    },
+    "opensource": {
+      "title": "Open Source",
+      "description": "Completely open source with self-deployment support"
+    }
+  },
+  "techStack": {
+    "title": "Technology Stack",
+    "subtitle": "High-performance application built on modern technology stack",
+    "frontend": {
+      "title": "Frontend Technology",
+      "description": "Built with the latest Next.js 15 and React 19, providing ultimate user experience and development efficiency."
+    },
+    "backend": {
+      "title": "Backend Technology",
+      "description": "High-performance Go backend supporting high concurrency and microservice architecture."
+    }
+  },
+  "popularDomains": {
+    "title": "Popular Domain Queries",
+    "subtitle": "Click on any domain below to view detailed information"
+  },
+  "tutorial": {
+    "title": "How to Use",
+    "subtitle": "Get detailed domain information in three simple steps",
+    "step1": {
+      "title": "Enter Domain",
+      "description": "Type the domain name you want to query in the search box"
+    },
+    "step2": {
+      "title": "Choose Feature", 
+      "description": "Select WHOIS, DNS, or screenshot functionality"
+    },
+    "step3": {
+      "title": "View Results",
+      "description": "Get detailed domain information and analysis reports"
+    }
+  },
+  "cta": {
+    "title": "Ready to Start Domain Lookup?",
+    "subtitle": "Use our professional domain lookup tool now to discover detailed information about any domain",
+    "startDomainQuery": "Start Domain Query",
+    "checkDNS": "Check DNS Records"
+  },
   "health": {
-    "title": "System Health Monitor",
-    "description": "Monitor system health and service status with real-time metrics",
-    "actions": {
-      "refreshing": "Refreshing...",
-      "refresh": "Refresh",
-      "stopAuto": "Stop Auto Refresh",
-      "startAuto": "Start Auto Refresh",
-      "export": "Export Report"
-    },
-    "lastUpdated": "Last Updated",
-    "status": {
-      "title": "System Status",
-      "healthy": "Healthy",
-      "unhealthy": "Unhealthy",
-      "degraded": "Degraded",
-      "unknown": "Unknown"
-    },
-    "error": {
-      "title": "Request Error"
-    },
-    "overview": {
-      "systemStatus": "System Status",
-      "healthScore": "Health Score",
-      "score": "Score",
-      "responseTime": "Response Time",
-      "services": "Services",
-      "healthy": "healthy"
-    },
+    "title": "System Health Status",
+    "description": "Real-time monitoring of all system components and services",
+    "lastUpdated": "Last updated:",
+    "serviceStatus": "Service Status",
+    "systemStats": "System Statistics",
+    "responseTime": "Response Time",
+    "uptime": "Uptime",
+    "details": "Details",
+    "totalQueries": "Total Queries",
+    "avgResponseTime": "Average Response Time",
+    "systemUptime": "System Uptime",
+    "memoryUsage": "Memory Usage",
+    "cpuUsage": "CPU Usage",
+    "diskUsage": "Disk Usage",
+    "healthCheckInfo": "Health Check Information",
+    "healthCheckDetails": [
+      "• Health checks are performed every 30 seconds",
+      "• Service status automatically updates in real-time",
+      "• Response times are averaged over the last 5 minutes",
+      "• Uptime percentages calculated over the last 30 days"
+    ],
     "services": {
-      "title": "Services",
-      "description": "Service status details",
-      "database": "Database",
-      "redis": "Redis Cache",
-      "api": "API Server",
-      "dns": "DNS Service",
-      "whois": "WHOIS Service",
-      "screenshot": "Screenshot Service",
-      "responseTime": "Response Time",
-      "lastCheck": "Last Check"
+      "whoisService": "WHOIS Service",
+      "dnsService": "DNS Service",
+      "screenshotService": "Screenshot Service",
+      "database": "Database"
     },
-    "metrics": {
-      "title": "System Metrics",
-      "description": "Key system performance metrics",
-      "responseTime": "Response Time",
-      "uptime": "Uptime",
-      "memoryUsage": "Memory Usage",
-      "cpuUsage": "CPU Usage",
-      "lastCheck": "Last Check"
+    "serviceDetails": {
+      "whoisNormal": "All WHOIS servers responding normally",
+      "whoisError": "WHOIS service experiencing issues",
+      "dnsOperational": "All DNS resolvers operational",
+      "dnsError": "DNS service experiencing issues",
+      "screenshotNormal": "Screenshot service operating normally",
+      "screenshotSlow": "High response times detected",
+      "databaseStable": "All database connections stable",
+      "databaseError": "Database connection issues detected"
     },
-    "critical": {
-      "title": "Critical Issues",
-      "description": "Some critical services are experiencing issues"
-    },
-    "noData": {
-      "title": "No Data",
-      "description": "No health data available"
+    "status": {
+      "healthy": "Healthy",
+      "degraded": "Degraded",
+      "unhealthy": "Unhealthy"
     }
   },
-  "errors": {
-    "invalidDomain": "Please enter a valid domain name",
-    "networkError": "Network error, please try again",
-    "serverError": "Server error, please try again later",
-    "notFound": "Page not found",
-    "notFoundDescription": "Sorry, the page you are looking for doesn't exist or has been moved.",
-    "backToHome": "Back to Home",
-    "goToDomain": "Go to Domain Lookup",
-    "contactSupport": "If you believe this is an error, please contact support.",
-    "timeout": "Request timeout, please try again",
-    "rateLimit": "Too many requests, please wait",
-    "unauthorized": "Unauthorized access",
-    "forbidden": "Access forbidden",
-    "unknown": "Unknown error occurred"
+  "blog": {
+    "title": "Technical Blog",
+    "description": "Domain technology insights, tutorials, and industry trends",
+    "meta": {
+      "title": "Blog - Whosee Technical Insights",
+      "description": "Domain technology insights, tutorials, and industry trends. Learn about DNS, WHOIS, web technology and more."
+    },
+    "search": {
+      "placeholder": "Search articles...",
+      "button": "Search",
+      "resultsFor": "Search results for \"{query}\"",
+      "noResults": "No articles found matching your search.",
+      "tryDifferent": "Try searching with different keywords."
+    },
+    "filters": {
+      "all": "All Posts",
+      "featured": "Featured",
+      "recent": "Recent",
+      "category": "Category",
+      "tag": "Tag",
+      "clearFilters": "Clear Filters"
+    },
+    "categories": {
+      "title": "All Categories",
+      "description": "Browse all our article categories to find topics that interest you",
+      "meta": {
+        "title": "Blog Categories - Whosee",
+        "description": "Browse all Whosee blog categories including domain tools, DNS analysis, security tips, and tutorials"
+      },
+      "empty": {
+        "title": "No Categories",
+        "description": "No categories have been created yet."
+      },
+      "postCount": {
+        "none": "No articles",
+        "single": "1 article",
+        "multiple": "{count} articles"
+      },
+      "backToBlog": "Back to Blog",
+      "error": {
+        "title": "Failed to Load Categories",
+        "description": "Sorry, we couldn't load the category list. Please try again later or return to the blog homepage."
+      },
+      "allCategories": "All Categories",
+      "postsInCategory": "{count} posts in {category}",
+      "noPostsInCategory": "No posts in this category yet."
+    },
+    "tags": {
+      "title": "Tags",
+      "allTags": "All Tags",
+      "postsWithTag": "{count} posts tagged with {tag}",
+      "noPostsWithTag": "No posts with this tag yet."
+    },
+    "post": {
+      "meta": {
+        "author": "By {author}",
+        "publishedOn": "Published on {date}",
+        "updatedOn": "Updated on {date}",
+        "readingTime": "{time} min read",
+        "views": "{count} views",
+        "category": "in {category}",
+        "tags": "Tagged with: {tags}"
+      },
+      "actions": {
+        "share": "Share Article",
+        "shareOn": "Share on {platform}",
+        "copyLink": "Copy Link",
+        "linkCopied": "Link copied to clipboard!",
+        "print": "Print Article",
+        "bookmark": "Bookmark"
+      },
+      "navigation": {
+        "previous": "Previous Article",
+        "next": "Next Article",
+        "backToBlog": "Back to Blog",
+        "tableOfContents": "Table of Contents"
+      },
+      "engagement": {
+        "wasHelpful": "Was this article helpful?",
+        "yes": "Yes",
+        "no": "No",
+        "thankYou": "Thank you for your feedback!",
+        "improve": "How can we improve this article?"
+      }
+    },
+    "sidebar": {
+      "recentPosts": "Recent Posts",
+      "popularPosts": "Popular Posts",
+      "categories": "Categories",
+      "tags": "Popular Tags",
+      "allCategories": "All Categories",
+      "newsletter": "Newsletter",
+      "newsletterDescription": "Subscribe to get the latest articles and insights delivered to your inbox.",
+      "emailPlaceholder": "Enter your email",
+      "subscribe": "Subscribe",
+      "subscribeSuccess": "Successfully subscribed!",
+      "subscribeError": "Subscription failed. Please try again."
+    },
+    "featured": {
+      "title": "Featured Articles",
+      "subtitle": "Handpicked articles covering the most important topics in domain technology"
+    },
+    "relatedPosts": {
+      "title": "Related Articles",
+      "subtitle": "More articles you might find interesting",
+      "basedOnCategory": "More articles in {category}",
+      "basedOnTags": "More articles about {tags}"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {current} of {total}",
+      "goToPage": "Go to page {page}",
+      "firstPage": "First page",
+      "lastPage": "Last page",
+      "showingResults": "Showing {start}-{end} of {total} results"
+    },
+    "errors": {
+      "postNotFound": "Article not found",
+      "postNotFoundDescription": "The article you're looking for doesn't exist or has been moved.",
+      "categoryNotFound": "Category not found",
+      "categoryNotFoundDescription": "The category you're looking for doesn't exist.",
+      "tagNotFound": "Tag not found", 
+      "tagNotFoundDescription": "The tag you're looking for doesn't exist.",
+      "loadingError": "Failed to load content",
+      "loadingErrorDescription": "There was an error loading the content. Please try again.",
+      "networkError": "Network error",
+      "networkErrorDescription": "Unable to connect to the server. Please check your connection and try again."
+    },
+    "language": {
+      "switchLanguage": "Read in {language}",
+      "availableIn": "Available in:",
+      "translateTo": "Translate to {language}",
+      "originalLanguage": "Original language: {language}",
+      "autoTranslated": "Automatically translated",
+      "translationDisclaimer": "This is an automatic translation. The original article was written in {language}."
+    },
+    "seo": {
+      "breadcrumbs": {
+        "home": "Home",
+        "blog": "Blog",
+        "category": "{category}",
+        "tag": "{tag}",
+        "search": "Search Results"
+      }
+    },
+    "stats": {
+      "totalPosts": "{count} total articles",
+      "totalCategories": "{count} categories",
+      "totalTags": "{count} tags",
+      "publishedThisMonth": "{count} articles this month",
+      "averageReadingTime": "{time} min average reading time"
+    },
+    "empty": {
+      "noPosts": "No articles yet",
+      "noPostsDescription": "We're working on creating great content. Check back soon!",
+      "noFeaturedPosts": "No featured articles",
+      "noFeaturedPostsDescription": "No articles have been featured yet.",
+      "noRecentPosts": "No recent articles",
+      "noPopularPosts": "No popular articles"
+    },
+    "archive": {
+      "title": "Article Archive",
+      "byMonth": "By Month",
+      "byYear": "By Year",
+      "monthYear": "{month} {year}",
+      "postsInMonth": "{count} articles in {month} {year}",
+      "allTime": "All Time"
+    },
+    "rss": {
+      "subscribe": "Subscribe to RSS",
+      "description": "Get the latest articles delivered to your RSS reader"
+    }
+  },
+  "metadata": {
+    "title": "Whosee - Professional Domain Lookup Tool",
+    "description": "Fast and comprehensive domain information lookup service. Get WHOIS info, DNS records, health checks and website screenshots.",
+    "keywords": "domain,whois,dns,lookup,domain check,website health,blog,technical insights"
+  },
+  "footer": {
+    "projectDescription": "Professional domain lookup tool providing domain information, DNS queries, website screenshots and more.",
+    "openSource": "Open Source",
+    "frontendRepo": "Frontend Repo",
+    "backendRepo": "Backend Repo",
+    "techStack": "Tech Stack",
+    "frontend": "Frontend: Next.js 15 + React 19 + TypeScript",
+    "backend": "Backend: Go + Gin + Redis",
+    "deployment": "Deployment: Vercel + Docker",
+    "copyright": "© 2024 Whosee. All rights reserved.",
+    "madeWithLove": "Made with ❤️",
+    "quickLinks": "Quick Links",
+    "blog": "Blog",
+    "latestPosts": "Latest Posts",
+    "allCategories": "All Categories"
   }
 }
