@@ -1,0 +1,96 @@
+{
+  "common": {
+    "appName": "Whosee.me",
+    "search": "搜索域名...",
+    "submit": "查询",
+    "loading": "加载中...",
+    "error": "发生错误",
+    "noData": "暂无数据"
+  },
+  "nav": {
+    "home": "首页",
+    "whois": "WHOIS查询",
+    "rdap": "RDAP查询",
+    "dns": "DNS查询",
+    "screenshot": "网站截图",
+    "itdog": "速度测试",
+    "health": "健康监控",
+    "about": "关于"
+  },
+  "theme": {
+    "light": "浅色模式",
+    "dark": "深色模式",
+    "system": "跟随系统"
+  },
+  "home": {
+    "title": "域名信息查询服务",
+    "subtitle": "快速、可靠的域名WHOIS信息查询、DNS记录查询、网站截图和性能测试",
+    "quickStart": "快速开始",
+    "placeholder": "example.com",
+    "query": "查询",
+    "features": {
+      "whois": {
+        "title": "WHOIS查询",
+        "description": "查询域名注册信息、注册商、到期时间等"
+      },
+      "dns": {
+        "title": "DNS查询",
+        "description": "查询域名的DNS记录，包括A、MX、NS等"
+      },
+      "screenshot": {
+        "title": "网站截图",
+        "description": "获取网站的实时截图预览"
+      },
+      "itdog": {
+        "title": "速度测试",
+        "description": "全国多节点测速，了解网站访问速度"
+      }
+    }
+  },
+  "whois": {
+    "page": {
+      "title": "WHOIS域名查询",
+      "description": "查询域名注册信息、注册商、到期时间、DNS服务器等详细信息"
+    },
+    "form": {
+      "label": "域名",
+      "placeholder": "example.com",
+      "helper": "请输入要查询的域名,例如: example.com",
+      "submit": "查询",
+      "submitting": "查询中...",
+      "errors": {
+        "required": "请输入域名",
+        "invalid": "域名格式不正确"
+      }
+    },
+    "result": {
+      "loading": "正在查询域名信息...",
+      "empty": "请输入域名并点击查询按钮",
+      "available": "该域名可注册",
+      "registered": "该域名已注册",
+      "cached": "缓存",
+      "error": {
+        "title": "查询失败",
+        "generic": "无法查询WHOIS数据,请稍后重试",
+        "INVALID_DOMAIN": "域名格式不正确",
+        "WHOIS_LOOKUP_FAILED": "WHOIS查询失败",
+        "REQUEST_TIMEOUT": "请求超时,请稍后重试",
+        "REQUEST_FAILED": "请求失败,请稍后重试",
+        "UNKNOWN_ERROR": "发生未知错误,请稍后重试"
+      },
+      "fields": {
+        "registrar": "注册商",
+        "creationDate": "注册时间",
+        "expiryDate": "到期时间",
+        "updatedDate": "更新时间",
+        "status": "域名状态",
+        "nameServers": "DNS服务器"
+      },
+      "meta": {
+        "source": "数据源",
+        "timestamp": "查询时间",
+        "processing": "处理耗时"
+      }
+    }
+  }
+}

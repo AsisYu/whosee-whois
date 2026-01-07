@@ -1,0 +1,2 @@
+// Screenshot components
+export {}

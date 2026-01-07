@@ -1,0 +1,96 @@
+{
+  "common": {
+    "appName": "Whosee.me",
+    "search": "Search domain...",
+    "submit": "Query",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "noData": "No data available"
+  },
+  "nav": {
+    "home": "Home",
+    "whois": "WHOIS Query",
+    "rdap": "RDAP Query",
+    "dns": "DNS Query",
+    "screenshot": "Screenshot",
+    "itdog": "Speed Test",
+    "health": "Health Monitor",
+    "about": "About"
+  },
+  "theme": {
+    "light": "Light Mode",
+    "dark": "Dark Mode",
+    "system": "System"
+  },
+  "home": {
+    "title": "Domain Information Query Service",
+    "subtitle": "Fast and reliable domain WHOIS lookup, DNS queries, website screenshots, and performance testing",
+    "quickStart": "Quick Start",
+    "placeholder": "example.com",
+    "query": "Query",
+    "features": {
+      "whois": {
+        "title": "WHOIS Query",
+        "description": "Query domain registration info, registrar, expiry date, etc."
+      },
+      "dns": {
+        "title": "DNS Query",
+        "description": "Query DNS records including A, MX, NS, and more"
+      },
+      "screenshot": {
+        "title": "Website Screenshot",
+        "description": "Get real-time website preview screenshots"
+      },
+      "itdog": {
+        "title": "Speed Test",
+        "description": "Multi-node speed testing across the country"
+      }
+    }
+  },
+  "whois": {
+    "page": {
+      "title": "WHOIS Domain Lookup",
+      "description": "Query domain registration information, registrar, expiry date, DNS servers, and more"
+    },
+    "form": {
+      "label": "Domain Name",
+      "placeholder": "example.com",
+      "helper": "Enter the domain name to query, e.g., example.com",
+      "submit": "Query",
+      "submitting": "Querying...",
+      "errors": {
+        "required": "Please enter a domain name",
+        "invalid": "Invalid domain format"
+      }
+    },
+    "result": {
+      "loading": "Querying domain information...",
+      "empty": "Enter a domain name and click the query button",
+      "available": "This domain is available for registration",
+      "registered": "This domain is registered",
+      "cached": "Cached",
+      "error": {
+        "title": "Query Failed",
+        "generic": "Unable to query WHOIS data, please try again later",
+        "INVALID_DOMAIN": "Invalid domain format",
+        "WHOIS_LOOKUP_FAILED": "WHOIS lookup failed",
+        "REQUEST_TIMEOUT": "Request timed out, please try again later",
+        "REQUEST_FAILED": "Request failed, please try again later",
+        "UNKNOWN_ERROR": "An unknown error occurred, please try again later"
+      },
+      "fields": {
+        "registrar": "Registrar",
+        "creationDate": "Creation Date",
+        "expiryDate": "Expiry Date",
+        "updatedDate": "Updated Date",
+        "status": "Domain Status",
+        "nameServers": "Name Servers"
+      },
+      "meta": {
+        "source": "Data Source",
+        "timestamp": "Query Time",
+        "processing": "Processing Time"
+      }
+    }
+  }
+}
