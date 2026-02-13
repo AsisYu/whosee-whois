@@ -2,7 +2,7 @@ name: Security Scan
 
 on:
   pull_request:
-    branches: [main]
+    branches: [v2-rewrite]
   schedule:
     # 每周一早上 2 点运行安全扫描
     - cron: '0 2 * * 1'
