@@ -1,0 +1,82 @@
+name: Security Scan
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    # 每周一早上 2 点运行安全扫描
+    - cron: '0 2 * * 1'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  codeql-analysis:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['javascript', 'typescript']
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          languages: ${{ matrix.language }}
+          category: "/language:${{matrix.language}}"
+
+      - name: Upload SARIF to GitHub Security
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ matrix.language }}-results.sarif
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const results = require('${{ matrix.language }}-results.sarif');
+            const critical = results.runs[0].results.filter(r => r.rule.level === 'error');
+            const high = results.runs[0].results.filter(r => r.rule.level === 'warning');
+
+            let comment = '## 🔒 安全扫描结果\n\n';
+
+            if (critical.length > 0 || high.length > 0) {
+              comment += `❌ 发现 ${critical.length} 个 Critical 和 ${high.length} 个 High 级别漏洞\n\n`;
+              comment += '必须修复这些安全问题后才能合并。\n';
+            } else {
+              comment += '✅ 未发现高危安全漏洞\n\n';
+            }
+
+            if (results.runs[0].results.length > 0) {
+              comment += '### 发现的问题:\n\n';
+              results.runs[0].results.forEach((r, i) => {
+                comment += `${i + 1}. **${r.rule.id}** (${r.rule.level})\n`;
+                comment += `   - 文件: ${r.locations[0].physicalLocation.artifactLocation.uri}\n`;
+                comment += `   - 描述: ${r.message.text}\n\n`;
+              });
+            }
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          github-token: ${{ secrets.GITHUB_TOKEN }}

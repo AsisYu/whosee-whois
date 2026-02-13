@@ -1,0 +1,71 @@
+version: 2
+
+updates:
+  # 启用依赖包版本更新
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      # 每周一、周三检查更新
+      interval: "weekly"
+      day: "monday, wednesday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "AsisYu"
+    labels:
+      - "dependencies"
+      - "automated"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+      include: "scope"
+
+  # 分组更新相关依赖
+  groups:
+    # Radix UI 相关依赖分组
+    radix-ui:
+      patterns:
+        - "@radix-ui/*"
+      exclude-patterns:
+        - "*-test"
+
+    # 测试相关依赖分组
+    testing:
+      patterns:
+        - "@testing-library/*"
+        - "vitest"
+        - "playwright"
+
+  # 优先处理安全更新
+  - package-ecosystem: "npm"
+    directory: "/"
+    versioning-strategy: increase
+    allow:
+      # 仅允许自动合并补丁版本和次版本更新
+      - dependency-type: "direct"
+      - update-type: "semver:patch"
+      - update-type: "semver:minor"
+
+  # 主版本更新需要人工审查
+  - package-ecosystem: "npm"
+    directory: "/"
+    versioning-strategy: increase
+    allow:
+      - dependency-type: "direct"
+      - update-type: "semver:major"
+    reviewers:
+      - "AsisYu"
+    labels:
+      - "dependencies"
+      - "major-version"
+      - "review-required"
+
+# 忽略依赖的更新
+ignore:
+  # 常见的不需要更新的包
+  - dependency-name: "next"
+    update-types: ["version-update:semver-major"]
+  - dependency-name: "react"
+    update-types: ["version-update:semver-major"]
+  - dependency-name: "typescript"
+    update-types: ["version-update:semver-major"]
