@@ -92,5 +92,11 @@
         "processing": "处理耗时"
       }
     }
+  },
+  "dns": {
+    "page": {
+      "title": "DNS查询",
+      "description": "查询权威DNS服务器的域名记录，包括A、AAAA、CNAME、MX、NS、TXT、SOA和PTR记录。"
+    }
   }
 }

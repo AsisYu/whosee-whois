@@ -92,5 +92,11 @@
         "processing": "Processing Time"
       }
     }
+  },
+  "dns": {
+    "page": {
+      "title": "DNS Lookup",
+      "description": "Query authoritative DNS servers for domain records including A, AAAA, CNAME, MX, NS, TXT, SOA, and PTR records."
+    }
   }
 }

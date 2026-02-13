@@ -31,7 +31,34 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+### Core Principles Compliance
+
+- [ ] **I. Feature-First Architecture**: Feature organized in `features/[feature-name]/` with components/, hooks/, types.ts?
+- [ ] **II. MVVM Layer Separation**: Clear View/ViewModel/Model layer boundaries maintained?
+- [ ] **III. Test-Driven Quality**: Test strategy defined (unit/integration/E2E) with 80%+ coverage target?
+- [ ] **IV. Single Responsibility**: Components <300 lines, hooks <150 lines, services <400 lines planned?
+- [ ] **V. Type Safety**: TypeScript strict mode, types defined in lib/types/ or feature types.ts?
+- [ ] **VI. Performance First**: Optimization strategy (memo, code splitting, caching) defined?
+- [ ] **VII. Observability**: Four-layer error handling (API/Service/Hook/Component) planned?
+
+### Architectural Constraints
+
+- [ ] **Next.js App Router**: Using route groups (app)/(content)/ appropriately?
+- [ ] **API Proxy Pattern**: All backend calls through Next.js API Routes (no direct client calls)?
+- [ ] **Token Management**: Server-side only token handling with 25-second cache TTL?
+- [ ] **State Management**: Correct strategy (TanStack Query/Zustand/useState/useSearchParams)?
+- [ ] **Import Boundaries**: No cross-feature imports, lib doesn't import upper layers?
+
+### Performance & Quality Standards
+
+- [ ] **Performance Targets**: FCP <1.5s, LCP <2.5s, TTI <3.5s achievable?
+- [ ] **Bundle Size**: Initial bundle <250KB, route chunks <100KB gzipped feasible?
+- [ ] **Accessibility**: WCAG 2.1 Level AA compliance planned (semantic HTML, keyboard nav, ARIA)?
+- [ ] **Security**: Input validation at boundaries, no client-side token exposure?
+
+### Violations Requiring Justification
+
+*Document any planned violations in "Complexity Tracking" section below with rationale and alternatives rejected.*
 
 ## Project Structure
 

@@ -8,7 +8,7 @@ description: "Task list template for feature implementation"
 **Input**: Design documents from `/specs/[###-feature-name]/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
+**Tests**: Tests are RECOMMENDED per Constitution Principle III (Test-Driven Quality). Include tests for critical paths with 80%+ coverage target. Structure: write tests first, ensure they fail, then implement.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -79,9 +79,15 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 1 (RECOMMENDED per Constitution) ⚠️
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
+>
+> Constitution Principle III (Test-Driven Quality):
+> - Unit tests for utilities/hooks: `lib/utils/*`, `features/*/hooks/*`
+> - Integration tests for API routes: `app/api/*/route.ts`
+> - E2E tests for critical user journeys
+> - Coverage target: **80%+ for critical paths**
 
 - [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
 - [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
@@ -105,7 +111,7 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 2 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 2 (RECOMMENDED per Constitution) ⚠️
 
 - [ ] T018 [P] [US2] Contract test for [endpoint] in tests/contract/test_[name].py
 - [ ] T019 [P] [US2] Integration test for [user journey] in tests/integration/test_[name].py
@@ -127,7 +133,7 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 3 (OPTIONAL - only if tests requested) ⚠️
+### Tests for User Story 3 (RECOMMENDED per Constitution) ⚠️
 
 - [ ] T024 [P] [US3] Contract test for [endpoint] in tests/contract/test_[name].py
 - [ ] T025 [P] [US3] Integration test for [user journey] in tests/integration/test_[name].py
@@ -153,9 +159,55 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX [P] Documentation updates in docs/
 - [ ] TXXX Code cleanup and refactoring
 - [ ] TXXX Performance optimization across all stories
-- [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
+- [ ] TXXX [P] Additional unit tests (if needed) in tests/unit/
 - [ ] TXXX Security hardening
 - [ ] TXXX Run quickstart.md validation
+
+### Constitution Compliance Final Check
+
+**Pre-merge Quality Gates (Constitution §Performance & Quality Standards):**
+
+- [ ] TypeScript compilation passes with `strict: true` (zero errors)
+- [ ] ESLint passes with zero errors (warnings justified)
+- [ ] Prettier formatting enforced
+- [ ] All tests pass (unit + integration + E2E)
+- [ ] Test coverage ≥80% for modified files
+- [ ] Bundle size increase ≤10% or justified
+- [ ] Lighthouse CI: ≥90 (desktop), ≥80 (mobile)
+- [ ] No new `any` types (exceptions documented)
+- [ ] npm audit: zero high/critical vulnerabilities
+
+**Architecture Compliance (Constitution Core Principles):**
+
+- [ ] Feature-First: Code in `features/[feature-name]/` with proper structure
+- [ ] MVVM Separation: Clear View/ViewModel/Model boundaries maintained
+- [ ] Single Responsibility: Components <300, hooks <150, services <400 lines
+- [ ] Type Safety: Types in `lib/types/` or feature `types.ts`, strict mode enforced
+- [ ] Performance: memo/useMemo/useCallback used, dynamic imports for heavy components
+- [ ] Error Handling: Four layers (API/Service/Hook/Component) implemented
+- [ ] Import Boundaries: No cross-feature imports, lib doesn't import upper layers
+- [ ] API Proxy: All backend calls through Next.js API routes
+- [ ] Token Management: Server-side only, 25-second cache TTL
+
+**Performance Metrics (Constitution §Performance Targets):**
+
+- [ ] First Contentful Paint (FCP): <1.5s
+- [ ] Largest Contentful Paint (LCP): <2.5s
+- [ ] Time to Interactive (TTI): <3.5s
+- [ ] Cumulative Layout Shift (CLS): <0.1
+- [ ] API response time (p95): <500ms
+- [ ] Client interaction response: <100ms
+- [ ] Initial bundle: <250KB (gzipped)
+- [ ] Route chunks: <100KB each (gzipped)
+
+**Accessibility (WCAG 2.1 Level AA):**
+
+- [ ] Semantic HTML elements used appropriately
+- [ ] All interactive elements keyboard accessible
+- [ ] Form inputs have associated labels
+- [ ] Color contrast meets 4.5:1 (normal), 3:1 (large text)
+- [ ] Focus indicators visible and clear
+- [ ] ARIA labels provided where needed
 
 ---
 

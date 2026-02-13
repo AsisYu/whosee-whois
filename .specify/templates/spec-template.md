@@ -105,11 +105,29 @@
 <!--
   ACTION REQUIRED: Define measurable success criteria.
   These must be technology-agnostic and measurable.
+  Align with constitution performance & quality standards.
 -->
 
-### Measurable Outcomes
+### Functional Outcomes
 
-- **SC-001**: [Measurable metric, e.g., "Users can complete account creation in under 2 minutes"]
-- **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
-- **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
-- **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+- **SC-001**: [Functional metric, e.g., "Users can complete account creation in under 2 minutes"]
+- **SC-002**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
+- **SC-003**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+
+### Performance Criteria (from Constitution)
+
+- **SC-P01**: First Contentful Paint (FCP) **< 1.5 seconds**
+- **SC-P02**: Largest Contentful Paint (LCP) **< 2.5 seconds**
+- **SC-P03**: Time to Interactive (TTI) **< 3.5 seconds**
+- **SC-P04**: Cumulative Layout Shift (CLS) **< 0.1**
+- **SC-P05**: API response time (95th percentile) **< 500ms**
+- **SC-P06**: Client-side interaction response **< 100ms**
+
+### Quality Criteria (from Constitution)
+
+- **SC-Q01**: Test coverage **≥80%** for critical paths
+- **SC-Q02**: TypeScript compilation passes with `strict: true` (zero errors)
+- **SC-Q03**: ESLint passes with zero errors
+- **SC-Q04**: Lighthouse performance score **≥90 (desktop)**, **≥80 (mobile)**
+- **SC-Q05**: WCAG 2.1 Level AA compliance (semantic HTML, keyboard nav, contrast ratios)
+- **SC-Q06**: Zero high/critical npm audit vulnerabilities

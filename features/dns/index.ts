@@ -1,8 +1,10 @@
-// WHOIS Feature Module
-// Export all components and hooks from this feature
-
-// Components
-export * from './components'
+/**
+ * DNS Feature
+ * Public API for DNS feature module
+ */
 
 // Hooks
-export * from './hooks'
+export * from "./hooks"
+
+// Types
+export * from "./types"

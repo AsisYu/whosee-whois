@@ -2,6 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Constitution Reference
+
+**CRITICAL**: All development MUST comply with the project constitution at `.specify/memory/constitution.md` (v1.0.0).
+
+Key principles:
+- **Feature-First Architecture** - Organize by business feature (WHOIS, DNS, etc.)
+- **MVVM Layer Separation** - Clear View/ViewModel/Model boundaries
+- **Test-Driven Quality** - 80%+ coverage target for critical paths
+- **Single Responsibility** - Components <300 lines, hooks <150 lines
+- **Type Safety** - TypeScript strict mode, validation at boundaries
+- **Performance First** - FCP <1.5s, LCP <2.5s, bundle <250KB
+- **Observability** - Four-layer error handling
+
+See constitution for complete governance rules, performance targets, and quality gates.
+
 ## Project Overview
 
 Whosee.me is a domain information query and analysis service frontend built with Next.js 14 (App Router), TypeScript, and React. It provides a web interface for WHOIS lookups, DNS queries, website screenshots, and performance testing by integrating with the Whosee.me backend service (Go/Gin).

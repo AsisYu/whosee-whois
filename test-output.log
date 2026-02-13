@@ -1,0 +1,181 @@
+
+> whois-web@0.1.0 test
+> vitest run
+
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90m/home/biaogeai002/desktop/whosee-whois/whois-web[39m
+
+ [32m✓[39m tests/unit/services/whois-service.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 42[2mms[22m[39m
+ [31m❯[39m tests/unit/services/dns-service.test.ts [2m([22m[2m11 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 47[2mms[22m[39m
+     [32m✓[39m normalizes domains and returns parsed payload[32m 8[2mms[22m[39m
+     [32m✓[39m queries all types when types array is empty or omitted[32m 1[2mms[22m[39m
+     [32m✓[39m deduplicates requested types[32m 1[2mms[22m[39m
+[31m     [31m×[31m filters out invalid record types[39m[32m 4[2mms[22m[39m
+     [32m✓[39m throws when domain is missing[32m 2[2mms[22m[39m
+[31m     [31m×[31m wraps network failures[39m[32m 8[2mms[22m[39m
+     [32m✓[39m maps non-OK responses to structured errors[32m 4[2mms[22m[39m
+     [32m✓[39m rejects invalid response structure[32m 4[2mms[22m[39m
+[31m     [31m×[31m supports AbortSignal for request cancellation[39m[32m 3[2mms[22m[39m
+     [32m✓[39m handles non-JSON error responses[32m 1[2mms[22m[39m
+     [32m✓[39m constructs URL correctly when all types are requested[32m 4[2mms[22m[39m
+ [31m❯[39m tests/integration/api/dns-route.test.ts [2m([22m[2m16 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 48[2mms[22m[39m
+     [32m✓[39m returns DNS data when backend succeeds[32m 10[2mms[22m[39m
+     [32m✓[39m queries all types when no type parameter provided[32m 1[2mms[22m[39m
+[31m     [31m×[31m normalizes type parameter to uppercase[39m[32m 8[2mms[22m[39m
+     [32m✓[39m deduplicates type parameter[32m 2[2mms[22m[39m
+     [32m✓[39m rejects invalid record types[32m 2[2mms[22m[39m
+     [32m✓[39m treats empty type parameter as all types[32m 1[2mms[22m[39m
+     [32m✓[39m decodes URL-encoded domains[32m 1[2mms[22m[39m
+     [32m✓[39m rejects invalid domain format[32m 1[2mms[22m[39m
+     [32m✓[39m rejects domains with spaces[32m 1[2mms[22m[39m
+     [32m✓[39m rejects domains without TLD[32m 5[2mms[22m[39m
+     [32m✓[39m handles malformed URL encoding[32m 1[2mms[22m[39m
+     [32m✓[39m maps ApiError to structured response[32m 3[2mms[22m[39m
+[31m     [31m×[31m handles token acquisition failure[39m[32m 3[2mms[22m[39m
+[31m     [31m×[31m handles generic errors[39m[32m 2[2mms[22m[39m
+     [32m✓[39m handles missing domain parameter[32m 1[2mms[22m[39m
+     [32m✓[39m omits type parameter when all types are requested[32m 1[2mms[22m[39m
+ [32m✓[39m tests/integration/api/whois-route.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 6 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/integration/api/dns-route.test.ts[2m > [22mGET /api/v1/dns/[domain][2m > [22mnormalizes type parameter to uppercase
+[31m[1mAssertionError[22m: expected "vi.fn()" to be called with arguments: [ ObjectContaining{…} ][90m
+
+Received: 
+
+[1m  1st vi.fn() call:
+
+[22m[2m  [[22m
+[32m-   ObjectContaining {[90m
+[32m-     "url": "https://backend.example/api/v1/dns/example.com?type=A%2CMX%2CCNAME",[90m
+[31m+   {[90m
+[31m+     "authToken": "token-123",[90m
+[31m+     "headers": {[90m
+[31m+       "Accept": "application/json",[90m
+[31m+       "X-API-KEY": "api-key",[90m
+[31m+     },[90m
+[31m+     "method": "GET",[90m
+[31m+     "timeoutMs": 15000,[90m
+[31m+     "url": "https://backend.example/api/v1/dns/example.com?type=A%2CCNAME%2CMX",[90m
+[2m    },[22m
+[2m  ][22m
+[31m[90m
+
+Number of calls: [1m1[22m
+[31m[39m
+[36m [2m❯[22m tests/integration/api/dns-route.test.ts:[2m99:29[22m[39m
+    [90m 97| [39m    [34mexpect[39m(res[33m.[39mstatus)[33m.[39m[34mtoBe[39m([34m200[39m)
+    [90m 98| [39m
+    [90m 99| [39m    [34mexpect[39m(httpRequestMock)[33m.[39m[34mtoHaveBeenCalledWith[39m(
+    [90m   | [39m                            [31m^[39m
+    [90m100| [39m      expect[33m.[39m[34mobjectContaining[39m({
+    [90m101| [39m        url: 'https://backend.example/api/v1/dns/example.com?type=A%2C…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/integration/api/dns-route.test.ts[2m > [22mGET /api/v1/dns/[domain][2m > [22mhandles token acquisition failure
+[31m[1mAssertionError[22m: expected { error: 'DNS_LOOKUP_FAILED', …(2) } to match object { error: 'UNKNOWN_ERROR', …(1) }
+(1 matching property omitted from actual)[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "error": "UNKNOWN_ERROR",[39m
+[31m+   "error": "DNS_LOOKUP_FAILED",[39m
+[2m    "message": "Token service unavailable",[22m
+[2m  }[22m
+
+[36m [2m❯[22m tests/integration/api/dns-route.test.ts:[2m230:18[22m[39m
+    [90m228| [39m
+    [90m229| [39m    [35mconst[39m json [33m=[39m [35mawait[39m res[33m.[39m[34mjson[39m()
+    [90m230| [39m    [34mexpect[39m(json)[33m.[39m[34mtoMatchObject[39m({
+    [90m   | [39m                 [31m^[39m
+    [90m231| [39m      error[33m:[39m [32m'UNKNOWN_ERROR'[39m[33m,[39m
+    [90m232| [39m      message[33m:[39m [32m'Token service unavailable'[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/integration/api/dns-route.test.ts[2m > [22mGET /api/v1/dns/[domain][2m > [22mhandles generic errors
+[31m[1mAssertionError[22m: expected { error: 'DNS_LOOKUP_FAILED', …(2) } to match object { error: 'UNKNOWN_ERROR', …(1) }
+(1 matching property omitted from actual)[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  {[22m
+[32m-   "error": "UNKNOWN_ERROR",[39m
+[31m+   "error": "DNS_LOOKUP_FAILED",[39m
+[2m    "message": "Unexpected error",[22m
+[2m  }[22m
+
+[36m [2m❯[22m tests/integration/api/dns-route.test.ts:[2m244:18[22m[39m
+    [90m242| [39m
+    [90m243| [39m    [35mconst[39m json [33m=[39m [35mawait[39m res[33m.[39m[34mjson[39m()
+    [90m244| [39m    [34mexpect[39m(json)[33m.[39m[34mtoMatchObject[39m({
+    [90m   | [39m                 [31m^[39m
+    [90m245| [39m      error[33m:[39m [32m'UNKNOWN_ERROR'[39m[33m,[39m
+    [90m246| [39m      message[33m:[39m [32m'Unexpected error'[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/unit/services/dns-service.test.ts[2m > [22mdnsService[2m > [22mfilters out invalid record types
+[31m[1mDnsServiceError[22m: Unsupported DNS record type(s): INVALID[39m
+[36m [2m❯[22m DnsService.normalizeTypes lib/services/dns-service.ts:[2m153:13[22m[39m
+    [90m151| [39m    [90m// Reject if any invalid types were provided[39m
+    [90m152| [39m    [35mif[39m (invalid[33m.[39mlength) {
+    [90m153| [39m      throw new DnsServiceError('INVALID_TYPE', `Unsupported DNS recor…
+    [90m   | [39m            [31m^[39m
+    [90m154| [39m        status[33m:[39m [34m400[39m[33m,[39m
+    [90m155| [39m      })
+[90m [2m❯[22m DnsService.query lib/services/dns-service.ts:[2m103:50[22m[39m
+[90m [2m❯[22m tests/unit/services/dns-service.test.ts:[2m90:22[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/unit/services/dns-service.test.ts[2m > [22mdnsService[2m > [22mwraps network failures
+[31m[1mAssertionError[22m: expected DnsServiceError: Network error: boom { …(2) } to match object { Object (message, code) }
+(3 matching properties omitted from actual)[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- {[39m
+[32m-   "code": "REQUEST_FAILED",[39m
+[32m-   "message": "Network error: boom",[39m
+[31m+ DnsServiceError {[39m
+[31m+   "code": "NETWORK_ERROR",[39m
+[2m  }[22m
+
+[36m [2m❯[22m tests/unit/services/dns-service.test.ts:[2m106:5[22m[39m
+    [90m104| [39m  [34mit[39m([32m'wraps network failures'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+    [90m105| [39m    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('boom')…
+    [90m106| [39m    await expect(dnsService.query('example.com', ['A'])).rejects.toMat…
+    [90m   | [39m    [31m^[39m
+    [90m107| [39m      message[33m:[39m [32m'Network error: boom'[39m[33m,[39m
+    [90m108| [39m      code[33m:[39m [32m'REQUEST_FAILED'[39m[33m,[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/unit/services/dns-service.test.ts[2m > [22mdnsService[2m > [22msupports AbortSignal for request cancellation
+[31m[1mAssertionError[22m: expected DnsServiceError: Failed to execute DNS re… { …(2) } to match object { code: 'REQUEST_FAILED' }
+(2 matching properties omitted from actual)[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- {[39m
+[32m-   "code": "REQUEST_FAILED",[39m
+[31m+ DnsServiceError {[39m
+[31m+   "code": "NETWORK_ERROR",[39m
+[2m  }[22m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[31m6 failed[39m[22m[2m | [22m[1m[32m38 passed[39m[22m[90m (44)[39m
+[2m   Start at [22m 23:27:33
+[2m   Duration [22m 3.51s[2m (transform 667ms, setup 1.94s, import 645ms, tests 164ms, environment 4.69s)[22m
+

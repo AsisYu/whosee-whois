@@ -4,7 +4,7 @@
  * Calls Next.js API Route (not backend directly)
  */
 
-import type { WhoisResponse } from '@/features/whois/types'
+import type { WhoisResponse } from '@/lib/types/api'
 
 /** Base path for WHOIS API routes */
 const WHOIS_API_BASE_PATH = '/api/v1/whois'

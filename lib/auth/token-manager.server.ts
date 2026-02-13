@@ -280,8 +280,10 @@ class TokenManager {
  * Persists across hot reloads and serverless reuses
  */
 declare global {
+  // Using var in global declarations is required for Next.js module persistence
   // eslint-disable-next-line no-var
   var __TOKEN_MANAGER__: TokenManager | undefined
+  // eslint-disable-next-line no-var
   var __TOKEN_MANAGER_INIT_TIME__: number | undefined
 }
 
