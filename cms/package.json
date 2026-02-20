@@ -17,7 +17,7 @@
   "dependencies": {
     "@strapi/plugin-cloud": "5.18.0",
     "@strapi/plugin-users-permissions": "5.18.0",
-    "@strapi/strapi": "5.18.0",
+    "@strapi/strapi": "5.36.1",
     "better-sqlite3": "11.3.0",
     "react": "^19.1.1",
     "react-dom": "^18.0.0",
